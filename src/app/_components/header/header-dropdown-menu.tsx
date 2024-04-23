@@ -7,6 +7,7 @@ import { storeNavigations } from "~/lib/utils/constants/navigations"
 import SearchTrigger from "./search-trigger"
 import WishlistIcon from "./wishlist-icon"
 import { useAuthSession } from "~/vertex/components/auth/auth-session-context"
+import { CartCount } from "~/vertex/components/cart/cart-count"
 
 export default function HeaderDropDownMenu() {
   const session = useAuthSession()
@@ -42,7 +43,7 @@ export default function HeaderDropDownMenu() {
         >
           <ShoppingCart className="w-[22px] md:w-5" />
 
-          {/* <CartCount
+          <CartCount
             loader={
               <span className="absolute -right-2 top-3 flex h-4 w-4 items-center justify-center rounded-full bg-secondary text-xs font-medium text-white"></span>
             }
@@ -57,7 +58,7 @@ export default function HeaderDropDownMenu() {
                 {count}
               </span>
             )}
-          </CartCount> */}
+          </CartCount>
         </Link>
       </div>
     </div>

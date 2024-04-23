@@ -9,7 +9,7 @@ import { $Login } from "~/vertex/modules/auth/auth-models"
 import { refreshAuthToken } from "~/vertex/modules/auth/auth-server-utils"
 import { createTokenExpiry, isTokenExpired } from "~/vertex/modules/auth/auth-client-utils"
 import { safeAsync } from "~/vertex/utils/safe-async"
-import { nextAuthGoogleSignInController, nextAuthSignInController } from "~/vertex/modules/auth/auth-controllers"
+import { nextAuthGoogleSignIn, nextAuthSignIn } from "~/vertex/modules/auth/auth-controllers"
 
 // Todo - The authentication flow and error handling needs more work...
 
@@ -38,7 +38,7 @@ const providers = [
 
       if (!input.success) return null
 
-      return await safeAsync(nextAuthSignInController, input.data)
+      return await safeAsync(nextAuthSignIn, input.data)
     },
   }),
 ] satisfies Provider[]
@@ -56,7 +56,7 @@ const callbacks: NextAuthConfig["callbacks"] = {
   jwt: async ({ token, user, account }) => {
     switch (account?.provider) {
       case "google": {
-        return nextAuthGoogleSignInController(token).catch(() => null)
+        return nextAuthGoogleSignIn(token).catch(() => null)
       }
 
       case "credentials": {

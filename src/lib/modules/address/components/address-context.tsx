@@ -6,29 +6,17 @@ import { api } from "~/lib/trpc/trpc-client"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "../../app/components/navigate"
 import { useActionHandler } from "~/vertex/lib/action/hook"
-import {
-  addAddress,
-  updateAddress,
-} from "~/vertex/modules/address/address-actions"
-import { $Address, type Address } from "~/vertex/modules/address/address-schema"
+import { addAddress, updateAddress } from "~/vertex/modules/address/address-actions"
+import { $Address, type Address } from "~/vertex/modules/address/address-models"
 
-const AddressContext = createContext<ReturnType<
-  typeof useAddressContextLogic
-> | null>(null)
+const AddressContext = createContext<ReturnType<typeof useAddressContextLogic> | null>(null)
 
-interface AddressContextProviderProps
-  extends React.HTMLAttributes<HTMLElement> {}
+interface AddressContextProviderProps extends React.HTMLAttributes<HTMLElement> {}
 
-export function AddressContextProvider({
-  ...props
-}: AddressContextProviderProps) {
+export function AddressContextProvider({ ...props }: AddressContextProviderProps) {
   const {} = props
 
-  return (
-    <AddressContext.Provider value={useAddressContextLogic()}>
-      {props.children}
-    </AddressContext.Provider>
-  )
+  return <AddressContext.Provider value={useAddressContextLogic()}>{props.children}</AddressContext.Provider>
 }
 
 function useAddressContextLogic() {
@@ -73,9 +61,7 @@ function useAddressContextLogic() {
 
   console.log(addressForm.formState.errors)
 
-  const addressFormHandler = addressForm.handleSubmit((input) =>
-    addAddressAction.mutate(input),
-  )
+  const addressFormHandler = addressForm.handleSubmit((input) => addAddressAction.mutate(input))
 
   const addAddressAction = useActionHandler(addAddress, {
     onSuccess: (response) => {

@@ -1,34 +1,4 @@
-export type PaymentMethod = "COD" | "ONLINE" | "WALLET"
-
-export type PhonePePayPagePayload = {
-  merchantTransactionId: string
-  merchantUserId: string
-  amount: number
-  redirectUrl: string
-  redirectMode: "REDIRECT" | "POST"
-  callbackUrl: string
-  merchantId: string
-  paymentInstrument: {
-    type: "PAY_PAGE"
-  }
-}
-
-export type PhonePePayPageType = {
-  success: boolean
-  code: string
-  message: string
-  data: {
-    merchantId: string
-    merchantTransactionId: string
-    instrumentResponse: {
-      type: string
-      redirectInfo: {
-        url: string
-        method: string
-      }
-    }
-  }
-}
+import { type PhonePePayPagePayload } from "~/vertex/modules/payment/payment-types"
 
 export type PhonePeCallbackResponse = {
   success: boolean
@@ -54,16 +24,9 @@ export type PhonePePaymentStatus = {
   }
 }
 
-export type PhonePePaymentStatusEnum =
-  | "PAYMENT_SUCCESS"
-  | "PAYMENT_ERROR"
-  | "PAYMENT_PENDING"
-  | "PAYMENT_DECLINED"
+export type PhonePePaymentStatusEnum = "PAYMENT_SUCCESS" | "PAYMENT_ERROR" | "PAYMENT_PENDING" | "PAYMENT_DECLINED"
 
-export type WalletTransaction = Pick<
-  WalletData,
-  "amount" | "balance" | "date" | "details" | "transaction_id" | "type"
->
+export type WalletTransaction = Pick<WalletData, "amount" | "balance" | "date" | "details" | "transaction_id" | "type">
 
 export type WalletData = {
   transaction_id: string

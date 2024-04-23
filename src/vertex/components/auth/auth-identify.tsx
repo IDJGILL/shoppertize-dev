@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuthContext } from "./auth-context"
-import { identify } from "~/vertex/modules/auth/auth-actions"
+import { identify } from "~/vertex/lib/action/actions"
 import { useActionHandler } from "~/vertex/lib/action/hook"
 
 export type AuthIdentifyProps = ReturnType<typeof useAuthIdentify>

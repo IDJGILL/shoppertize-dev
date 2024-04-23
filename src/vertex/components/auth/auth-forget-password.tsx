@@ -2,7 +2,7 @@
 
 import { useAuthContext } from "./auth-context"
 import { useActionHandler } from "~/vertex/lib/action/hook"
-import { forget } from "~/vertex/modules/auth/auth-actions"
+import { forget } from "~/vertex/lib/action/actions"
 
 export type AuthForgetPasswordProps = ReturnType<typeof useAuthForgetPassword>
 

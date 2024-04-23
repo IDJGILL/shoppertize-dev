@@ -4,7 +4,7 @@ import useCountDown from "~/vertex/hooks/useCountdown"
 import { useAuthContext } from "./auth-context"
 import { useUpdateEffect } from "react-use"
 import { useActionHandler } from "~/vertex/lib/action/hook"
-import { resend } from "~/vertex/modules/auth/auth-actions"
+import { resend } from "~/vertex/lib/action/actions"
 
 export type AuthResendProps = ReturnType<typeof useAuthResend>
 

@@ -8,35 +8,31 @@ import {
 } from "~/lib/modules/auth/auth-gql"
 import type { AddressDataItem } from "./address-types"
 
-export const getAddressOptions = async (customerId: number) => {
-  const data = await client<
-    GetUserMetaDataGqlResponse,
-    GetUserMetaDataGqlInput
-  >({
+export const getAddressOptions = async (authToken: string) => {
+  const data = await client<GetUserMetaDataGqlResponse, Omit<GetUserMetaDataGqlInput, "customerId">>({
     query: GetUserMetaDataGql,
-    access: "admin",
+    access: "user",
     inputs: {
       keysIn: ["address-options"],
-      customerId,
     },
+    authToken,
   })
 
-  const metaData = data.customer.metaData?.find(
-    (a) => a.key === "address-options",
-  )
+  const metaData = data.customer.metaData?.find((a) => a.key === "address-options")
 
-  if (!metaData) return []
+  if (!metaData) return { email: data.customer.email!, id: data.customer.databaseId, addresses: [] }
 
   const addresses = JSON.parse(metaData.value) as AddressDataItem[]
 
-  return addresses
+  return {
+    addresses,
+    email: data.customer.email!,
+    id: data.customer.databaseId,
+  }
 }
 
-export const getCurrentAddress = async (customerId: number) => {
-  const data = await client<
-    GetUserMetaDataGqlResponse,
-    GetUserMetaDataGqlInput
-  >({
+export const getCurrentAddressFromDb = async (customerId: number) => {
+  const data = await client<GetUserMetaDataGqlResponse, GetUserMetaDataGqlInput>({
     query: GetUserMetaDataGql,
     access: "admin",
     inputs: {
@@ -45,13 +41,9 @@ export const getCurrentAddress = async (customerId: number) => {
     },
   })
 
-  const defaultAddress = data.customer.metaData?.find(
-    (a) => a.key === "address-default",
-  )
+  const defaultAddress = data.customer.metaData?.find((a) => a.key === "address-default")
 
-  const selectedAddress = data.customer.metaData?.find(
-    (a) => a.key === "address-selected",
-  )
+  const selectedAddress = data.customer.metaData?.find((a) => a.key === "address-selected")
 
   if (selectedAddress) {
     return JSON.parse(selectedAddress.value) as AddressDataItem | null

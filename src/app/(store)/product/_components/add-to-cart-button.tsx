@@ -6,11 +6,11 @@ import { useAddToCart } from "~/vertex/components/cart/AddToCart/adtc-context"
 interface AddToCartButtonProps extends React.HTMLAttributes<HTMLElement> {}
 
 export default function AddToCartButton({ ...props }: AddToCartButtonProps) {
-  const { mutate, isLoading } = useAddToCart()
+  const { mutate, isLoading, isOutOfStock } = useAddToCart()
 
   return (
-    <Button onClick={() => mutate()} loading={isLoading ? "true" : "false"}>
-      Add To Cart
+    <Button onClick={() => mutate()} disabled={isOutOfStock} loading={isLoading ? "true" : "false"}>
+      {isOutOfStock ? "Out of Stock" : "Add To Cart"}
     </Button>
   )
 }

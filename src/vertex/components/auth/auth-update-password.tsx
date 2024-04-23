@@ -2,7 +2,7 @@
 
 import { useAuthContext } from "./auth-context"
 import { useActionHandler } from "~/vertex/lib/action/hook"
-import { update } from "~/vertex/modules/auth/auth-actions"
+import { update } from "~/vertex/lib/action/actions"
 
 export type AuthUpdatePasswordProps = ReturnType<typeof useAuthUpdatePassword>
 
@@ -17,20 +17,13 @@ export function AuthUpdatePassword({ ...props }: Props) {
 }
 
 export function useAuthUpdatePassword() {
-  const { updatePasswordForm, redirect, actionSet, identifyForm } =
-    useAuthContext()
+  const { updatePasswordForm, redirect, actionSet } = useAuthContext()
 
   const updateAction = useActionHandler(update, {
     onSuccess: () => redirect(),
 
     onError: (error) => {
-      if (error.code === "UNAUTHORIZED") {
-        actionSet("none")
-
-        identifyForm.setError("username", { message: error.message })
-
-        return
-      }
+      if (error.code === "UNAUTHORIZED") actionSet("none")
 
       updatePasswordForm.setError("password", { message: error.message })
     },

@@ -1,17 +1,14 @@
 "use client"
 
 import { type HookActionStatus } from "next-safe-action/hooks"
+import { removeItem } from "~/vertex/lib/action/actions"
 import { useActionHandler } from "~/vertex/lib/action/hook"
-import { removeItem } from "~/vertex/modules/cart/cart-actions"
+import { api } from "~/vertex/lib/trpc/trpc-context-provider"
 import { type CartItemRecord } from "~/vertex/modules/cart/cart-types"
 
 interface RemoveItemProps {
   cartItem: Omit<CartItemRecord, "quantity">
-  children: (props: {
-    mutate: () => void
-    status: HookActionStatus
-    isLoading: boolean
-  }) => React.ReactNode
+  children: (props: { mutate: () => void; status: HookActionStatus; isLoading: boolean }) => React.ReactNode
 }
 
 /**
@@ -29,7 +26,13 @@ interface RemoveItemProps {
 export function RemoveItem({ ...props }: RemoveItemProps) {
   const {} = props
 
-  const action = useActionHandler(removeItem)
+  const utils = api.useUtils()
+
+  const action = useActionHandler(removeItem, {
+    onSuccess: async () => {
+      await utils.cart.count.prefetch()
+    },
+  })
 
   const mutate = () => action.mutate({ id: props.cartItem.id, quantity: 0 })
 

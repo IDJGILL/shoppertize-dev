@@ -1,42 +1,56 @@
-import { graphql } from "gql.tada"
+"use client"
+
 import React from "react"
-import { client } from "~/lib/graphql/client"
+import { Button } from "~/app/_components/ui/button"
+import { cn } from "~/lib/utils/functions/ui"
+import { api } from "~/vertex/lib/trpc/trpc-context-provider"
 
-const GetProducts = graphql(`
-  query MyQuery1 {
-    product(id: "1635", idType: DATABASE_ID) {
-      date
-      image {
-        sourceUrl
-      }
-      galleryImages {
-        nodes {
-          sourceUrl
-        }
-      }
-      reviews {
-        averageRating
-      }
-    }
-  }
-`)
+export default function Test() {
+  const publicApi = api.test.public.useMutation()
 
-export default async function Test() {
-  type GenericProperties = {
-    date: string
-    image: Image | null
-    galleryImages: { nodes: Image[] }
-  }
+  const protectedApi = api.test.protected.useMutation()
 
-  type Image = { sourceUrl: string }
+  return (
+    <div className="w-full bg-gray-900 text-white">
+      <div className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-10">
+        <Button onClick={() => publicApi.mutate()} loading={publicApi.isPending ? "true" : "false"}>
+          Test Public Api
+        </Button>
 
-  type Product = Pick<GenericProperties, "date" | "galleryImages" | "image">
+        <div
+          className={cn("min-h-[100px] w-full border p-4", {
+            "border-red-600": publicApi.isError,
+            "opacity-55": publicApi.isPending,
+          })}
+        >
+          <h2 className="mb-2">Public Test Results:</h2>
 
-  const data = await client({
-    access: "public",
-    query: GetProducts,
-    cacheTags: [],
-  })
+          {publicApi.isError ? (
+            <pre>Error: {publicApi.error?.message}</pre>
+          ) : (
+            <pre>Data: {JSON.stringify(publicApi.data ?? null)}</pre>
+          )}
+        </div>
 
-  return <div>Test</div>
+        <Button onClick={() => protectedApi.mutate()} loading={protectedApi.isPending ? "true" : "false"}>
+          Test Protected Api
+        </Button>
+
+        <div
+          className={cn("min-h-[100px] w-full border p-4", {
+            "border-red-600": protectedApi.isError,
+            "opacity-55": protectedApi.isPending,
+          })}
+        >
+          <h2 className="mb-2">Protected Test Results:</h2>
+
+          {protectedApi.isError ? (
+            <pre>Error: {protectedApi.error?.message}</pre>
+          ) : (
+            <pre>Data: {JSON.stringify(protectedApi.data ?? null)}</pre>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }

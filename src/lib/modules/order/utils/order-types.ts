@@ -1,19 +1,5 @@
-import type {
-  CartLineItem,
-  SessionCartTotals,
-} from "../../checkout/checkout-types"
+import type { CartLineItem, SessionCartTotals } from "../../checkout/checkout-types"
 import type { NimbusTrackingHistory } from "../../courier/courier-types"
-
-export type FeeLine = {
-  name: string
-  total: string
-  tax_status: "taxable" | "none"
-}
-
-export type LineItem = {
-  product_id: number
-  quantity: number
-}
 
 //
 //

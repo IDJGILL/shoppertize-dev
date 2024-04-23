@@ -41,20 +41,20 @@ export type CreateUserProps = {
   name?: string | null
 }
 
-export type IdentifyUserControllerOutput = Pick<Authentication, "id" | "action" | "verification">
+export type IdentifyUserOutput = Pick<Authentication, "id" | "action" | "verification">
 
-export type VerifyUserControllerOutput = Pick<Authentication, "id" | "action" | "verification"> & {
+export type VerifyUserOutput = Pick<Authentication, "id" | "action" | "verification"> & {
   sameDevice: boolean
   message: string
 }
 
-export type ResendVerifyControllerOutput = Pick<Authentication, "id" | "action" | "verification">
+export type ResendVerifyOutput = Pick<Authentication, "id" | "action" | "verification">
 
-export type ForgetPasswordControllerOutput = Pick<Authentication, "id" | "action" | "verification">
+export type ForgetPasswordOutput = Pick<Authentication, "id" | "action" | "verification">
 
-export type CheckVerificationControllerOutput = Pick<Authentication, "id" | "action" | "verification" | "isVerified">
+export type CheckVerificationOutput = Pick<Authentication, "id" | "action" | "verification" | "isVerified">
 
-export type NextAuthSignInControllerOutput = {
+export type NextAuthSignInOutput = {
   id: string
   email: string | null
   name: string

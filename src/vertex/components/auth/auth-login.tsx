@@ -2,7 +2,7 @@
 
 import { useAuthContext } from "./auth-context"
 import { useActionHandler } from "~/vertex/lib/action/hook"
-import { login } from "~/vertex/modules/auth/auth-actions"
+import { login } from "~/vertex/lib/action/actions"
 
 export type AuthLoginProps = ReturnType<typeof useAuthLogin>
 

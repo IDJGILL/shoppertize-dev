@@ -1,16 +1,8 @@
 "use client"
 
 import FixedBar from "~/app/_components/fixed-bar"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/app/_components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/app/_components/ui/form"
 import { Input, PhoneInput } from "~/app/_components/ui/input"
-import { useAddressContext } from "./address-context"
 import { Button } from "~/app/_components/ui/button"
 import OtpInput from "react-otp-input"
 import CountDown from "~/lib/ui/_shared/countdown"
@@ -19,6 +11,7 @@ import { Switch } from "~/app/_components/ui/switch"
 import LoaderFallBack from "~/app/_components/loader-fallback"
 import Box from "~/app/_components/box"
 import { nanoid } from "nanoid"
+import { useAddress } from "~/vertex/components/address/address-context"
 
 interface AddressFormProps extends React.HTMLAttributes<HTMLElement> {}
 
@@ -35,7 +28,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
     isAddressLoading,
     isAddressUpdating,
     isOtpResending,
-  } = useAddressContext()
+  } = useAddress()
 
   if (isAddressLoading) return <LoaderFallBack className="w-full" />
 
@@ -51,12 +44,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
               render={({ field }) => (
                 <FormItem className="hidden">
                   <FormControl>
-                    <Input
-                      placeholder=" "
-                      {...field}
-                      type="hidden"
-                      className="hidden"
-                    />
+                    <Input placeholder=" " {...field} type="hidden" className="hidden" />
                   </FormControl>
                 </FormItem>
               )}
@@ -64,16 +52,11 @@ export default function AddressForm({ ...props }: AddressFormProps) {
 
             <FormField
               control={addressForm.control}
-              name="shipping_otp"
+              name="otp"
               render={({ field }) => (
                 <FormItem className="hidden">
                   <FormControl>
-                    <Input
-                      placeholder=" "
-                      {...field}
-                      type="hidden"
-                      className="hidden"
-                    />
+                    <Input placeholder=" " {...field} type="hidden" className="hidden" />
                   </FormControl>
                 </FormItem>
               )}
@@ -81,16 +64,11 @@ export default function AddressForm({ ...props }: AddressFormProps) {
 
             <FormField
               control={addressForm.control}
-              name="shipping_token"
+              name="token"
               render={({ field }) => (
                 <FormItem className="hidden">
                   <FormControl>
-                    <Input
-                      placeholder=" "
-                      {...field}
-                      type="hidden"
-                      className="hidden"
-                    />
+                    <Input placeholder=" " {...field} type="hidden" className="hidden" />
                   </FormControl>
                 </FormItem>
               )}
@@ -146,11 +124,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                     render={({ field }) => (
                       <div>
                         <FormItem>
-                          <PhoneInput
-                            field={{ ...field }}
-                            form={addressForm}
-                            name="shipping_phone"
-                          />
+                          <PhoneInput field={{ ...field }} form={addressForm} name="shipping_phone" />
                         </FormItem>
 
                         <FormMessage />
@@ -168,9 +142,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                         <FormControl>
                           <Input placeholder=" " {...field} />
                         </FormControl>
-                        <FormLabel>
-                          Flat, House no., Building, Company, Apartment
-                        </FormLabel>
+                        <FormLabel>Flat, House no., Building, Company, Apartment</FormLabel>
                       </FormItem>
 
                       <FormMessage />
@@ -300,9 +272,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                   render={({ field }) => (
                     <FormItem className="flex h-12 flex-row items-center justify-between space-x-3 space-y-0">
                       <label className="">
-                        <h3 className="text-sm font-medium">
-                          Need GST Invoice? {`(Optional)`}
-                        </h3>
+                        <h3 className="text-sm font-medium">Need GST Invoice? {`(Optional)`}</h3>
 
                         <p className="text-sm text-muted-foreground">
                           You will get gst invoice within 24 hours by Email.
@@ -310,19 +280,14 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                       </label>
 
                       <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                     </FormItem>
                   )}
                 />
               </section>
 
-              {addressForm.watch("isTaxInvoice") && (
-                <div className="hidden h-20 border-2 border-r md:block"></div>
-              )}
+              {addressForm.watch("isTaxInvoice") && <div className="hidden h-20 border-2 border-r md:block"></div>}
 
               {/* GST Billing Address */}
               {addressForm.watch("isTaxInvoice") && (
@@ -382,11 +347,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                     render={({ field }) => (
                       <div>
                         <FormItem>
-                          <PhoneInput
-                            field={{ ...field }}
-                            form={addressForm}
-                            name="billing_phone"
-                          />
+                          <PhoneInput field={{ ...field }} form={addressForm} name="billing_phone" />
                         </FormItem>
 
                         <FormMessage />
@@ -403,9 +364,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                           <FormControl>
                             <Input placeholder=" " {...field} />
                           </FormControl>
-                          <FormLabel>
-                            Flat, House no., Building, Company, Apartment
-                          </FormLabel>
+                          <FormLabel>Flat, House no., Building, Company, Apartment</FormLabel>
                         </FormItem>
 
                         <FormMessage />
@@ -515,11 +474,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
             </section>
 
             <FixedBar className="p-4 shadow-none md:relative md:p-0">
-              <Button
-                type="submit"
-                className="w-full"
-                loading={isAddressUpdating ? "true" : "false"}
-              >
+              <Button type="submit" className="w-full" loading={isAddressUpdating ? "true" : "false"}>
                 Update
               </Button>
             </FixedBar>
@@ -530,15 +485,14 @@ export default function AddressForm({ ...props }: AddressFormProps) {
           <div className="mb-6">
             <h3 className="text-2xl font-semibold">Verify</h3>
             <p className="text-sm">
-              You will receive a 4 digit otp from{" "}
-              <span className="font-semibold">OTPLESS</span>
+              You will receive a 4 digit otp from <span className="font-semibold">OTPLESS</span>
             </p>
           </div>
 
           <div className="">
             <OtpInput
-              value={addressForm.watch("shipping_otp")}
-              onChange={(value) => addressForm.setValue("shipping_otp", value)}
+              value={addressForm.watch("otp")}
+              onChange={(value) => addressForm.setValue("otp", value)}
               numInputs={4}
               renderInput={(props) => (
                 <input
@@ -552,16 +506,9 @@ export default function AddressForm({ ...props }: AddressFormProps) {
               }}
             />
 
-            <div className="py-4 text-center text-sm text-red-500">
-              {addressForm.formState.errors?.shipping_otp?.message}
-            </div>
+            <div className="py-4 text-center text-sm text-red-500">{addressForm.formState.errors?.otp?.message}</div>
 
-            <Button
-              form="address-form"
-              type="submit"
-              className="w-full"
-              loading={isAddressUpdating ? "true" : "false"}
-            >
+            <Button form="address-form" type="submit" className="w-full" loading={isAddressUpdating ? "true" : "false"}>
               Verify & Save
             </Button>
 
@@ -577,12 +524,10 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                   onClick={() => {
                     if (!api.isCompleted) return
 
-                    resendOtpHandler(() => api.reset())
+                    // resendOtpHandler(() => api.reset())
                   }}
                 >
-                  {api.isCompleted
-                    ? "Didn't receive the code? Resend"
-                    : `Resend again in 00:${count}`}
+                  {api.isCompleted ? "Didn't receive the code? Resend" : `Resend again in 00:${count}`}
                 </Button>
               )}
             />

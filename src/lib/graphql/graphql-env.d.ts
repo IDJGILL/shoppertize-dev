@@ -2,6 +2,7 @@ type GqlDataProps = {
   id: string | number
   databaseId: number
   name: string
+  username: string
   type: ProductTypesEnum
   slug: string
   date: string
@@ -189,13 +190,7 @@ type OrderStatusEnum =
   | "READYTODISPATCH"
   | "REFUNDED"
 
-type UserNodeIdTypeEnum =
-  | "DATABASE_ID"
-  | "EMAIL"
-  | "ID"
-  | "SLUG"
-  | "URI"
-  | "USERNAME"
+type UserNodeIdTypeEnum = "DATABASE_ID" | "EMAIL" | "ID" | "SLUG" | "URI" | "USERNAME"
 
 type ManageStockEnum = "FALSE" | "PARENT" | "TRUE"
 
@@ -215,9 +210,4 @@ type ProductTaxonomyEnum =
   | "PRODUCT_TYPE"
   | "PRODUCT_VISIBILITY"
 
-type ProductTypesEnum =
-  | "EXTERNAL"
-  | "GROUPED"
-  | "SIMPLE"
-  | "VARIABLE"
-  | "VARIATION"
+type ProductTypesEnum = "EXTERNAL" | "GROUPED" | "SIMPLE" | "VARIABLE" | "VARIATION"

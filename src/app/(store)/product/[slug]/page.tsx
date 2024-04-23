@@ -8,10 +8,10 @@ import ProductPrice from "../_components/shared/product-price"
 import ShoppersChoice from "../_components/shared/shoppers-choice-badge"
 import ProductRating from "../_components/shared/product-rating"
 import ProductBulletPoints from "../_components/shared/product-bulletpoints"
-import {
-  getProductBySlug,
-  getProductSlugs,
-} from "~/lib/modules/product/utils/product-apis"
+import { getProductBySlug, getProductSlugs } from "~/lib/modules/product/utils/product-apis"
+import { AddToCart } from "~/vertex/components/cart/AddToCart/adtc"
+import Skeleton from "react-loading-skeleton"
+import AddToCartButton from "../_components/add-to-cart-button"
 
 export const dynamic = "error"
 
@@ -36,9 +36,7 @@ export default async function ProductPage(props: ServerComponentParams) {
         <div className="py-4 md:px-0 md:py-0">
           <div>
             <div className="px-4 md:px-0">
-              <h1 className="mb-4 scroll-m-20 text-base md:text-xl">
-                {product.name}
-              </h1>
+              <h1 className="mb-4 scroll-m-20 text-base md:text-xl">{product.name}</h1>
 
               <ProductRating product={product} className="mb-5" />
 
@@ -54,7 +52,7 @@ export default async function ProductPage(props: ServerComponentParams) {
             <Divider />
 
             <div className="sticky bottom-0 bg-white px-4 py-2 md:px-0">
-              {/* <AddToCart
+              <AddToCart
                 productId={product.id as string}
                 error={<div>Something went wrong</div>}
                 loader={
@@ -64,7 +62,7 @@ export default async function ProductPage(props: ServerComponentParams) {
                 }
               >
                 <AddToCartButton />
-              </AddToCart> */}
+              </AddToCart>
             </div>
 
             <Divider />
@@ -91,9 +89,7 @@ export default async function ProductPage(props: ServerComponentParams) {
   )
 }
 
-export async function generateMetadata({
-  params,
-}: ServerComponentParams): Promise<Metadata> {
+export async function generateMetadata({ params }: ServerComponentParams): Promise<Metadata> {
   const product = await getProductBySlug(params.slug ?? "")
 
   if (!product) throw new Error("Something went wrong")

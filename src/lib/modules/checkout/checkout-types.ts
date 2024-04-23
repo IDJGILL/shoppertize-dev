@@ -23,48 +23,15 @@ export type CheckoutMethods = {
     }[]
     shippingAddress: Pick<
       GqlDataProps,
-      | "firstName"
-      | "lastName"
-      | "email"
-      | "phone"
-      | "postcode"
-      | "city"
-      | "state"
-      | "country"
-      | "address1"
-      | "address2"
+      "firstName" | "lastName" | "email" | "phone" | "postcode" | "city" | "state" | "country" | "address1" | "address2"
     >
     walletBalance: number
   }>
-  validate: (props: {
-    items: MainCartItem[]
-    paymentMethod?: PaymentMethod
-  }) => void
+  validate: (props: { items: MainCartItem[]; paymentMethod?: PaymentMethod }) => void
   session: {
-    set: (props: {
-      userId: string
-      payload: Partial<CheckoutSession>
-    }) => Promise<void>
+    set: (props: { userId: string; payload: Partial<CheckoutSession> }) => Promise<void>
     get: (props: { userId: string }) => Promise<CheckoutSession>
   }
-}
-
-export type CheckoutSession = {
-  referenceId: string
-  user: {
-    id: string
-    email: string
-  }
-  createdAt: string
-  paymentMethod: PaymentMethod
-}
-
-export type PaymentOption = {
-  type: PaymentMethod
-  label: string
-  description: string
-  isEligible: boolean
-  charges?: number
 }
 
 //
@@ -142,11 +109,7 @@ export type SessionCartTotals = {
   total_tax: number
 }
 
-export type CheckoutStatus =
-  | "CART_ERROR"
-  | "OTHER_ERROR"
-  | "SUCCESS"
-  | "PAY_PAGE"
+export type CheckoutStatus = "CART_ERROR" | "OTHER_ERROR" | "SUCCESS" | "PAY_PAGE"
 
 export type CheckoutGuardProps = {
   cart: CartLineItem[]

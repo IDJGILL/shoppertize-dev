@@ -2,8 +2,9 @@
 
 import { type HookActionStatus } from "next-safe-action/hooks"
 import { useActionHandler } from "~/vertex/lib/action/hook"
-import { updateQuantity } from "~/vertex/modules/cart/cart-actions"
+import { updateQuantity } from "~/vertex/lib/action/actions"
 import { type CartItemRecord } from "~/vertex/modules/cart/cart-types"
+import { api } from "~/vertex/lib/trpc/trpc-context-provider"
 
 interface UpdateQuantityComponentProps {
   cartItem: Omit<CartItemRecord, "quantity">
@@ -31,7 +32,13 @@ export type UpdateQuantityAction = {
 export function UpdateQuantity({ ...props }: UpdateQuantityComponentProps) {
   const {} = props
 
-  const action = useActionHandler(updateQuantity)
+  const utils = api.useUtils()
+
+  const action = useActionHandler(updateQuantity, {
+    onSuccess: async () => {
+      await utils.cart.count.prefetch()
+    },
+  })
 
   const mutate = (quantity: number) => {
     action.mutate({ id: props.cartItem.id, quantity })

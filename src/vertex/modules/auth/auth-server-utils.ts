@@ -1,4 +1,5 @@
 import "server-only"
+
 import {
   UserByIdGql,
   RefreshAccessTokenGql,
@@ -16,16 +17,16 @@ import { redisClient } from "~/vertex/lib/redis/client"
 import { identifyUsernameType } from "./auth-client-utils"
 import { wpClient } from "~/vertex/lib/wordpress/wp-client"
 import { ExtendedError } from "~/vertex/utils/extended-error"
-import { getCurrentAddress } from "../address/address-queries"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
 import type { AuthSession, Authentication } from "~/vertex/global/types"
+import { getCurrentAddressFromDb } from "../address/address-queries"
 
 export async function createAuthSession(props: GetAuthTokensGqlOutput["login"]) {
   const uid = props.user.databaseId
 
   const recordId = `@session/auth/${uid}`
 
-  const address = await getCurrentAddress(uid)
+  const address = await getCurrentAddressFromDb(uid)
 
   const result = await redisClient.json.set(recordId, "$", {
     uid,
@@ -37,6 +38,22 @@ export async function createAuthSession(props: GetAuthTokensGqlOutput["login"]) 
   } satisfies AuthSession)
 
   if (result !== "OK") throw new Error("Internal server error")
+}
+
+export async function updateAuthSession(props: { id: string; key: keyof AuthSession; data: Partial<AuthSession> }) {
+  const recordId = `@session/auth/${props.id}`
+
+  const s = props.data[props.key]
+
+  const result = await redisClient.json.set(recordId, `$.${props.key}`, JSON.stringify(s))
+
+  if (result !== "OK") throw new Error("Internal server error")
+}
+
+export async function getAuthSession(uid: string) {
+  const recordId = `@session/auth/${uid}`
+
+  return (await redisClient.json.get(recordId)) as AuthSession | null
 }
 
 export function createEmailId(username: string, countryCode: string) {

@@ -2,7 +2,7 @@
 
 import { useAuthContext } from "~/vertex/components/auth/auth-context"
 import { useActionHandler } from "~/vertex/lib/action/hook"
-import { signup } from "~/vertex/modules/auth/auth-actions"
+import { signup } from "~/vertex/lib/action/actions"
 
 export type AuthSignupProps = ReturnType<typeof useAuthSignup>
 
@@ -17,8 +17,7 @@ export function AuthSignup({ ...props }: Props) {
 }
 
 export function useAuthSignup() {
-  const { identifyForm, signupForm, redirect, resetFormsState } =
-    useAuthContext()
+  const { identifyForm, signupForm, redirect, resetFormsState } = useAuthContext()
 
   const signupAction = useActionHandler(signup, {
     onSuccess: () => redirect(),

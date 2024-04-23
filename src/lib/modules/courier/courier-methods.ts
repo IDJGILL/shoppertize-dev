@@ -107,56 +107,6 @@ export const courier = {
         })
       })
     },
-
-    checkService: async (props: Parameters<CourierMethods["pincode"]["checkService"]>[number]) => {
-      return wrapTRPC(async (response) => {
-        const token = await getShipRocketAuthToken()
-
-        const params = new URLSearchParams({
-          weight: "0.01",
-          delivery_postcode: props.pincode,
-          pickup_postcode: "122006",
-          cod: "1",
-        }).toString()
-
-        const request = await fetch(`https://apiv2.shiprocket.in/v1/external/courier/serviceability?${params}`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        const data = (await request.json()) as
-          | {
-              data: PincodeDetails
-            }
-          | PincodeDetailsError
-
-        if ("message" in data) {
-          throw new ExtendedError({
-            code: "BAD_REQUEST",
-            message: "This pincode is not serviceable at this moment.",
-          })
-        }
-
-        const pincodeDetails = data.data.available_courier_companies[0]
-
-        if (!pincodeDetails) {
-          throw new ExtendedError({
-            code: "BAD_REQUEST",
-            message: "This pincode is not serviceable at this moment.",
-          })
-        }
-
-        return response.success({
-          action: "none",
-          data: {
-            city: pincodeDetails.city,
-            state: pincodeDetails.state,
-          },
-        })
-      })
-    },
   },
 }
 
@@ -193,26 +143,4 @@ function getCommonEdd(courierPartners: CourierPartner[]) {
   }
 
   return moment(mostCommonEdd, "DD-MM-YYYY").format("MMMM Do YYYY")
-}
-
-async function getShipRocketAuthToken() {
-  const response = await fetch("https://apiv2.shiprocket.in/v1/external/auth/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email: "karangill@gmail.com",
-      password: "KARANarjun@@2023##",
-    }),
-  })
-
-  const data = await (response.json() as Promise<{
-    token: string
-    status_code: number
-  }>)
-
-  if (data.status_code === 400) throw new Error("Access denied")
-
-  return data.token
 }

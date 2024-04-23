@@ -1,6 +1,6 @@
 "use client"
 
-import { logout } from "~/vertex/modules/auth/auth-actions"
+import { logout } from "~/vertex/lib/action/actions"
 import { useActionHandler } from "~/vertex/lib/action/hook"
 
 export type AuthLogoutProps = ReturnType<typeof useAuthLogout>

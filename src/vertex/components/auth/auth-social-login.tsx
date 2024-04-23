@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuthContext } from "./auth-context"
-import { socialLogin } from "~/vertex/modules/auth/auth-actions"
+import { socialLogin } from "~/vertex/lib/action/actions"
 import { useActionHandler } from "~/vertex/lib/action/hook"
 import { type Social } from "~/vertex/modules/auth/auth-models"
 

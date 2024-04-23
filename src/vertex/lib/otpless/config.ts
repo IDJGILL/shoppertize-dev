@@ -1,6 +1,6 @@
 import { env } from "~/env.mjs"
-import jwt from "./jwt"
-import { doesTextContains } from "./does-text-contains"
+import jwt from "~/lib/utils/functions/jwt"
+import { compareText } from "~/vertex/utils/compare-text"
 
 const otpless = {
   send: async (phone: string): Promise<{ token: string }> => {
@@ -40,9 +40,7 @@ const otpless = {
 
     return response
   },
-  resend: async (
-    token: string,
-  ): Promise<{ newToken?: string; message: string }> => {
+  resend: async (token: string): Promise<{ newToken?: string; message: string }> => {
     const payload = jwt.decode.parse<{
       id: string
       phone: string
@@ -67,7 +65,7 @@ const otpless = {
           message: string
         }
 
-        const limitReached = doesTextContains(data.message, "3 times")
+        const limitReached = compareText(data.message, "3 times")
 
         if (limitReached) {
           return {
@@ -105,10 +103,7 @@ const otpless = {
 
     return response
   },
-  verify: async (
-    token: string,
-    otp: string,
-  ): Promise<{ success: boolean; message: string }> => {
+  verify: async (token: string, otp: string): Promise<{ success: boolean; message: string }> => {
     const payload = jwt.decode.parse<{
       id: string
       phone: string

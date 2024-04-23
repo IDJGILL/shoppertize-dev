@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { ErrorBoundary } from "react-error-boundary"
-import { getCartData } from "~/vertex/modules/cart/cart-actions"
 import { CartContextProvider } from "./context"
+import { getCart } from "~/vertex/modules/cart/cart-controllers"
 
 interface CartContextProps {
   error: React.ReactElement
@@ -28,7 +28,7 @@ interface InitialCartDataFetcherProps {
 async function InitialDataFetcher({ ...props }: InitialCartDataFetcherProps) {
   const {} = props
 
-  const data = await getCartData()
+  const data = await getCart()
 
   return <CartContextProvider data={data}>{props.children}</CartContextProvider>
 }

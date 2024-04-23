@@ -7,10 +7,7 @@ import { formatPrice } from "~/lib/utils/functions/format-price"
 import { type MainCartItem } from "~/lib/modules/cart/cart-types"
 import { useCartContext } from "~/vertex/components/cart/cart/context"
 import { RemoveItem } from "~/vertex/components/cart/remove-item"
-import {
-  UpdateQuantity,
-  type UpdateQuantityAction,
-} from "~/vertex/components/cart/update-quantity"
+import { UpdateQuantity, type UpdateQuantityAction } from "~/vertex/components/cart/update-quantity"
 import { useState } from "react"
 import { cn } from "~/lib/utils/functions/ui"
 import { useUpdateEffect } from "react-use"
@@ -64,9 +61,7 @@ export function CartItemCard({ ...props }: CartItemCardProps) {
           <span className="text-xs text-green-500 sm:text-sm">
             (
             {Math.floor(
-              ((+(product.regularPrice ?? "0") - +(product.price ?? "0")) /
-                +(product.regularPrice ?? "0")) *
-                100,
+              ((+(product.regularPrice ?? "0") - +(product.price ?? "0")) / +(product.regularPrice ?? "0")) * 100,
             )}
             % off)
           </span>
@@ -75,9 +70,7 @@ export function CartItemCard({ ...props }: CartItemCardProps) {
         {product.stockStatus === "IN_STOCK" && (
           <div className="mt-4 inline-flex gap-4">
             <UpdateQuantity cartItem={{ id: product.key }}>
-              {(action) => (
-                <QuantityAction action={action} cartItem={product} />
-              )}
+              {(action) => <QuantityAction action={action} cartItem={product} />}
             </UpdateQuantity>
           </div>
         )}
@@ -88,16 +81,10 @@ export function CartItemCard({ ...props }: CartItemCardProps) {
           </div>
         )}
 
-        {product.error && (
-          <div className="py-4 text-sm text-red-700">
-            {product.error.message}
-          </div>
-        )}
+        {product.error && <div className="py-4 text-sm text-red-700">{product.error.message}</div>}
       </div>
 
       <div className="absolute right-0 top-5 flex items-center justify-center">
-        {/* <RemoveAction cartItem={product} /> */}
-
         <RemoveItem cartItem={{ id: product.key }}>
           {(a) => {
             if (a.isLoading) return <div>Removing...</div>
@@ -133,13 +120,9 @@ function QuantityAction({ ...props }: QuantityActionProps) {
     <>
       <button
         onClick={() => OpenSet(true)}
-        className={cn(
-          "inline-flex items-center rounded-xl bg-slate-100 px-4 py-1 text-xs ",
-          {
-            "outline outline-1 outline-destructive":
-              !cartItem.hasSelectedQuantity,
-          },
-        )}
+        className={cn("inline-flex items-center rounded-xl bg-slate-100 px-4 py-1 text-xs ", {
+          "outline outline-1 outline-destructive": !cartItem.hasSelectedQuantity,
+        })}
       >
         <span>Qty: {cartItem.quantity}</span> <ChevronDown className="w-3" />
       </button>
@@ -155,8 +138,7 @@ function QuantityAction({ ...props }: QuantityActionProps) {
       >
         <div
           className={cn("flex flex-wrap items-center justify-center gap-4", {
-            "outline outline-1 outline-destructive":
-              !cartItem.hasSelectedQuantity,
+            "outline outline-1 outline-destructive": !cartItem.hasSelectedQuantity,
           })}
         >
           {cartItem.quantityOptions.map((item) => (
@@ -166,8 +148,7 @@ function QuantityAction({ ...props }: QuantityActionProps) {
               className={cn(
                 "flex aspect-square h-11 w-11 cursor-pointer items-center justify-center rounded-full border px-2 py-2 text-center hover:bg-slate-50",
                 {
-                  "bg-primary text-white hover:bg-primary":
-                    quantity === item.value,
+                  "bg-primary text-white hover:bg-primary": quantity === item.value,
                 },
               )}
             >
@@ -179,29 +160,6 @@ function QuantityAction({ ...props }: QuantityActionProps) {
     </>
   )
 }
-
-// interface RemoveActionProps extends React.HTMLAttributes<HTMLElement> {
-//   cartItem: MainCartItem
-// }
-
-// function RemoveAction({ ...props }: RemoveActionProps) {
-//   const { cartItem } = props
-
-//   const { removeApi } = useCartContext()
-
-//   const removeHandler = () => {
-//     removeApi.mutate({
-//       id: cartItem.key,
-//       quantity: cartItem.quantity,
-//     })
-//   }
-
-//   if (removeApi.isPending) {
-//     return <Spinner className="stroke-foreground" />
-//   }
-
-//   return <X className=" cursor-pointer" onClick={() => removeHandler()} />
-// }
 
 interface ActionModelWrapperProps extends React.HTMLAttributes<HTMLElement> {
   title: string

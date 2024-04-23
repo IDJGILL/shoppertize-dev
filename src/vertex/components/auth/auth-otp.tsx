@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuthContext } from "./auth-context"
-import { verify } from "~/vertex/modules/auth/auth-actions"
+import { verify } from "~/vertex/lib/action/actions"
 import { useActionHandler } from "~/vertex/lib/action/hook"
 
 export type AuthOneTimePassCodeProps = ReturnType<typeof useAuthOtp>

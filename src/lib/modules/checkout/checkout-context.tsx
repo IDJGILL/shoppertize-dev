@@ -6,30 +6,23 @@ import { type PaymentMethod } from "../payment/payment-types"
 import type { RouterOutput } from "~/lib/trpc/trpc-context"
 import { useRouter } from "next/navigation"
 
-const CheckoutContext = createContext<ReturnType<
-  typeof useCheckoutContextLogic
-> | null>(null)
+const CheckoutContext = createContext<ReturnType<typeof useCheckoutContextLogic> | null>(null)
 
 interface CheckoutContextClientProps extends React.HTMLAttributes<HTMLElement> {
   data: RouterOutput["checkout"]["get"]
 }
 
-export function CheckoutContextClient({
-  ...props
-}: CheckoutContextClientProps) {
+export function CheckoutContextClient({ ...props }: CheckoutContextClientProps) {
   const { data } = props
 
   const values = useCheckoutContextLogic(data)
 
-  return (
-    <CheckoutContext.Provider value={values}>
-      {props.children}
-    </CheckoutContext.Provider>
-  )
+  return <CheckoutContext.Provider value={values}>{props.children}</CheckoutContext.Provider>
 }
 
 function useCheckoutContextLogic(initialData: RouterOutput["checkout"]["get"]) {
   const [paymentMethod, paymentMethodSet] = useState<PaymentMethod>("ONLINE")
+
   const router = useRouter()
 
   // const navigate = useNavigate()
@@ -60,10 +53,7 @@ function useCheckoutContextLogic(initialData: RouterOutput["checkout"]["get"]) {
     defaultValue: "ONLINE",
   }
 
-  const walletAmount =
-    paymentMethod === "WALLET"
-      ? Math.min(walletBalance, cartTotals.total)
-      : undefined
+  const walletAmount = paymentMethod === "WALLET" ? Math.min(walletBalance, cartTotals.total) : undefined
 
   const codCharges = paymentOptions.find((a) => a.type === "COD")?.charges ?? 0
 

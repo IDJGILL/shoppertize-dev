@@ -14,10 +14,7 @@ query UserByIdGql($idType: UserNodeIdTypeEnum = DATABASE_ID, $id: ID = "") {
 `
 
 export type UserByIdGqlData = {
-  user: Pick<
-    GqlDataProps,
-    "databaseId" | "firstName" | "lastName" | "email" | "userMetaData"
-  >
+  user: Pick<GqlDataProps, "databaseId" | "firstName" | "lastName" | "email" | "userMetaData">
 }
 
 export type UserByIdGqlInput = Pick<GqlInputProps, "id" | "idType">
@@ -129,8 +126,10 @@ export type GetPincodeGqlResponse = {
 }
 
 export const GetUserMetaDataGql = `
-query GetUserMetaDataGql($customerId: Int = 0, $keysIn: [String] = []) {
-  customer(customerId: $customerId) {
+query GetUserMetaDataGql($keysIn: [String] = []) {
+  customer {
+    email
+    databaseId
     metaData(keysIn: $keysIn, multiple: true) {
       key
       value
@@ -142,7 +141,7 @@ query GetUserMetaDataGql($customerId: Int = 0, $keysIn: [String] = []) {
 export type GetUserMetaDataGqlResponse = {
   customer: {
     metaData: Pick<GqlDataProps, "metaData">["metaData"] | null
-  }
+  } & Pick<GqlDataProps, "email" | "databaseId">
 }
 
 export type GetUserMetaDataGqlInput = {

@@ -1,10 +1,12 @@
-import AddressContainer from "./_components/address-container"
-import { AddressContextProvider } from "~/lib/modules/address/components/address-context"
+import AddressForm from "~/lib/modules/address/components/address-form"
+import { AddressProvider } from "~/vertex/components/address/address-provider"
 
-export default function AddressPage() {
+export default function AddressPage(props: ServerComponentParams) {
+  const addressId = props.searchParams?.aid as string | undefined
+
   return (
-    <AddressContextProvider>
-      <AddressContainer />
-    </AddressContextProvider>
+    <AddressProvider addressId={addressId} loader={<div>Loading...</div>} error={<div>Something went wrong</div>}>
+      <AddressForm />
+    </AddressProvider>
   )
 }

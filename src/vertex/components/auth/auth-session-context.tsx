@@ -11,20 +11,16 @@ interface AuthSessionProviderProps extends React.HTMLAttributes<HTMLElement> {}
 export function AuthSessionProvider({ ...props }: AuthSessionProviderProps) {
   const {} = props
 
-  return (
-    <AuthSessionContext.Provider value={AuthContextLogic()}>
-      {props.children}
-    </AuthSessionContext.Provider>
-  )
+  return <AuthSessionContext.Provider value={AuthContextLogic()}>{props.children}</AuthSessionContext.Provider>
 }
 
 function AuthContextLogic() {
   const { data, isLoading } = api.vertexAuth.session.useQuery()
 
   return {
-    user: data?.user,
+    user: data,
     isLoading,
-    isLoggedIn: !!data?.user,
+    isLoggedIn: !!data,
   }
 }
 

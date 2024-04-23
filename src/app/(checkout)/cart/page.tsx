@@ -9,10 +9,7 @@ import CartAddress from "./_components/cart-address"
 
 export default function CartPage() {
   return (
-    <CartContext
-      loader={<div>Loading...</div>}
-      error={<div>Something went wrong</div>}
-    >
+    <CartContext loader={<div>Loading...</div>} error={<div>Something went wrong</div>}>
       <EmptyCartWrapper>
         <CheckoutWrapper
           left={

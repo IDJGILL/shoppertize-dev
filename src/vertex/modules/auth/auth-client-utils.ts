@@ -10,9 +10,7 @@ import jwt from "~/lib/utils/functions/jwt"
  * const usernameType = identifyUsernameType(username);
  * console.log(usernameType); // Output: "email"
  */
-export function identifyUsernameType(
-  string: string,
-): "email" | "phone" | "unknown" {
+export function identifyUsernameType(string: string): "email" | "phone" | "unknown" {
   const emailPattern = /^[\w\.-]+@[\w\.-]+\.\w+$/
   const phonePattern = /^(\+\d{1,2}\s?)?\d{10,15}$/
 
@@ -35,12 +33,12 @@ export function createTokenExpiry(authToken: string): number {
 }
 
 /**
- * Checks if the provided timestamp is expired compared to the current timestamp.
- * @param {number} timestamp - The timestamp to compare with the current timestamp.
+ * Checks if the provided timestamp in seconds compared to the current timestamp in seconds.
+ * @param {number} timestamp - The auth token expiration timestamp to compare with the current timestamp.
  * @returns {boolean} True if the provided timestamp is expired, otherwise false.
  */
 export function isTokenExpired(timestamp: number): boolean {
-  const currentTimestamp: number = new Date().getTime()
+  const currentTimestamp = Math.round(new Date().getTime() / 1000)
 
   return currentTimestamp >= timestamp
 }

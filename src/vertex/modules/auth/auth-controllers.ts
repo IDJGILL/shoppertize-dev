@@ -14,19 +14,19 @@ import {
   verifyAuthenticationSecret,
 } from "./auth-server-utils"
 import type {
-  CheckVerificationControllerOutput,
-  ForgetPasswordControllerOutput,
-  IdentifyUserControllerOutput,
-  NextAuthSignInControllerOutput,
-  ResendVerifyControllerOutput,
-  VerifyUserControllerOutput,
+  CheckVerificationOutput,
+  ForgetPasswordOutput,
+  IdentifyUserOutput,
+  NextAuthSignInOutput,
+  ResendVerifyOutput,
+  VerifyUserOutput,
 } from "./auth-types"
 import { nanoid } from "nanoid"
 import { AuthError } from "next-auth"
 import { cookies } from "next/headers"
 import { type JWT } from "next-auth/jwt"
 import { getAuthTokens } from "./auth-queries"
-import { login, signup } from "./auth-actions"
+import { login, signup } from "../../lib/action/actions"
 import { signIn } from "~/vertex/lib/auth/config"
 import { emailClient } from "~/lib/smtp/smtp-client"
 import { redisClient } from "~/vertex/lib/redis/client"
@@ -37,7 +37,7 @@ import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
 import { magicLinkEmailTemplate } from "~/lib/modules/auth/auth-emails"
 import type { Verify, Identify, AuthSessionId, Login, Signup, ForgetPassword, UpdatePassword } from "./auth-models"
 
-export const identifyUserController = async (input: Identify): Promise<IdentifyUserControllerOutput> => {
+export const identifyUser = async (input: Identify): Promise<IdentifyUserOutput> => {
   const email = createEmailId(input.username, input.countryCode)
 
   const usernameType = identifyUsernameType(input.username)
@@ -55,7 +55,7 @@ export const identifyUserController = async (input: Identify): Promise<IdentifyU
 
       setClientIdInCookies(session.clientId)
 
-      notificationController(session)
+      notification(session)
 
       return {
         id: session.id,
@@ -80,7 +80,7 @@ export const identifyUserController = async (input: Identify): Promise<IdentifyU
 
   setClientIdInCookies(session.clientId)
 
-  notificationController(session)
+  notification(session)
 
   return {
     id: session.id,
@@ -89,7 +89,7 @@ export const identifyUserController = async (input: Identify): Promise<IdentifyU
   }
 }
 
-export const verifyUserController = async (input: Verify): Promise<VerifyUserControllerOutput> => {
+export const verifyUser = async (input: Verify): Promise<VerifyUserOutput> => {
   const clientId = cookies().get("clientId")?.value
 
   const session = await verifyAuthenticationSecret({
@@ -155,10 +155,10 @@ export const verifyUserController = async (input: Verify): Promise<VerifyUserCon
   }
 }
 
-export const resendVerifyController = async (input: AuthSessionId): Promise<ResendVerifyControllerOutput> => {
+export const resendVerify = async (input: AuthSessionId): Promise<ResendVerifyOutput> => {
   const session = await recreateAuthenticationSecret(input.id)
 
-  notificationController(session)
+  notification(session)
 
   return {
     id: session.id,
@@ -167,7 +167,7 @@ export const resendVerifyController = async (input: AuthSessionId): Promise<Rese
   }
 }
 
-export const loginUserController = async (input: Login): Promise<void> => {
+export const loginUser = async (input: Login): Promise<void> => {
   try {
     await signIn("credentials", { ...input })
   } catch (error) {
@@ -190,7 +190,7 @@ export const loginUserController = async (input: Login): Promise<void> => {
   }
 }
 
-export const signUpUserController = async (input: Signup): Promise<void> => {
+export const signUpUser = async (input: Signup): Promise<void> => {
   const session = await getAuthenticationSession(input.id)
 
   if (!isVerified(session) || !hasActionPermission("signup", session)) {
@@ -214,7 +214,7 @@ export const signUpUserController = async (input: Signup): Promise<void> => {
   })
 }
 
-export const forgetPasswordController = async (input: ForgetPassword): Promise<ForgetPasswordControllerOutput> => {
+export const forgetPassword = async (input: ForgetPassword): Promise<ForgetPasswordOutput> => {
   if (!(await isExistingUser(input.email))) {
     throw new ExtendedError({
       code: "NOT_FOUND",
@@ -231,7 +231,7 @@ export const forgetPasswordController = async (input: ForgetPassword): Promise<F
 
   setClientIdInCookies(session.clientId)
 
-  notificationController(session)
+  notification(session)
 
   return {
     id: session.id,
@@ -240,7 +240,7 @@ export const forgetPasswordController = async (input: ForgetPassword): Promise<F
   }
 }
 
-export const updatePasswordController = async (input: UpdatePassword): Promise<void> => {
+export const updatePassword = async (input: UpdatePassword): Promise<void> => {
   const session = await getAuthenticationSession(input.id)
 
   const recordId = `@session/authentication/${input.id}`
@@ -282,7 +282,7 @@ export const updatePasswordController = async (input: UpdatePassword): Promise<v
   })
 }
 
-export const checkVerificationController = async (input: AuthSessionId): Promise<CheckVerificationControllerOutput> => {
+export const checkVerification = async (input: AuthSessionId): Promise<CheckVerificationOutput> => {
   const session = await getAuthenticationSession(input.id)
 
   if (session.action === "login") {
@@ -308,7 +308,7 @@ export const checkVerificationController = async (input: AuthSessionId): Promise
   }
 }
 
-export const nextAuthSignInController = async (input: Login): Promise<NextAuthSignInControllerOutput> => {
+export const nextAuthSignIn = async (input: Login): Promise<NextAuthSignInOutput> => {
   /**
    * This means that user requesting signin either email or otp
    */
@@ -319,7 +319,7 @@ export const nextAuthSignInController = async (input: Login): Promise<NextAuthSi
 
     const recordId = `@session/authentication/${input.id}`
 
-    if (!session?.isVerified || !hasActionPermission("login", session)) {
+    if (!isVerified(session) || !hasActionPermission("login", session)) {
       throw new ExtendedError({ code: "BAD_REQUEST" })
     }
 
@@ -356,7 +356,7 @@ export const nextAuthSignInController = async (input: Login): Promise<NextAuthSi
   }
 }
 
-export const nextAuthGoogleSignInController = async (token: JWT): Promise<JWT | null> => {
+export const nextAuthGoogleSignIn = async (token: JWT): Promise<JWT | null> => {
   if (!token.email) throw new Error("Email not found")
 
   const userNotFound = !(await isExistingUser(token.email))
@@ -401,7 +401,7 @@ export const nextAuthGoogleSignInController = async (token: JWT): Promise<JWT | 
   }
 }
 
-export function notificationController(session: Authentication) {
+export const notification = (session: Authentication) => {
   switch (session.verification) {
     case "link": {
       void emailClient({

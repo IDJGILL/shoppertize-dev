@@ -1,6 +1,6 @@
-import { Suspense } from "react"
-import { ErrorBoundary } from "react-error-boundary"
-import { getCartItemsCount } from "~/vertex/modules/cart/cart-actions"
+"use client"
+
+import { api } from "~/vertex/lib/trpc/trpc-context-provider"
 
 interface CartCountProps {
   error: React.ReactElement
@@ -21,25 +21,7 @@ interface CartCountProps {
 export function CartCount({ ...props }: CartCountProps) {
   const {} = props
 
-  return (
-    <ErrorBoundary fallback={props.error}>
-      <Suspense fallback={props.loader}>
-        <InitialDataFetcher>
-          {({ count }) => props.children({ count })}
-        </InitialDataFetcher>
-      </Suspense>
-    </ErrorBoundary>
-  )
-}
+  const { data } = api.cart.count.useQuery()
 
-interface InitialDataFetcherProps {
-  children: (props: { count: number }) => React.ReactNode
-}
-
-async function InitialDataFetcher({ ...props }: InitialDataFetcherProps) {
-  const {} = props
-
-  const count = await getCartItemsCount()
-
-  return <>{props.children({ count })}</>
+  return <>{props.children({ count: data ?? 0 })}</>
 }

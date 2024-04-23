@@ -13,106 +13,51 @@ import { base64 } from "~/lib/utils/functions/base64"
 import type { CartItemData, CartItemRecord, ExtendCartItem, MainCartItem } from "./cart-types"
 import { cookies } from "next/headers"
 import { calculateGst } from "~/lib/utils/functions/calculate-gst"
-import { response } from "~/vertex/lib/action"
-import { getCachedProductStock } from "../redis/redis-actions"
+import { ExtendedError } from "~/vertex/utils/extended-error"
+import { redisClient } from "~/vertex/lib/redis/client"
+
+export async function getCachedProductStock(productId: string) {
+  const data = await redisClient.get<GetAllProductsStockDetailsGqlResponse["products"]["nodes"][number]>(
+    `@cache/product/stock/${productId}`,
+  )
+
+  return data
+}
 
 export async function getCartItemData() {
   const cookieCartItems = getCookieStore()
 
   if (cookieCartItems.length === 0) return []
 
-  const responses = await Promise.all(cookieCartItems.map((a) => getCachedProductStock({ productId: a.id })))
+  const responses = await Promise.all(cookieCartItems.map((a) => getCachedProductStock(a.id)))
 
   return responses.reduce<CartItemData>((acc, item) => {
-    const existing = cookieCartItems.find((a) => a.id === item.data?.id)
+    const existing = cookieCartItems.find((a) => a.id === item?.id)
 
-    if (!existing || !item.data) return acc
+    if (!existing || !item) return acc
 
     acc.push({
-      key: item.data.id as string,
+      key: item.id as string,
       quantity: existing.quantity,
       product: {
         node: {
-          id: item.data.id as string,
-          type: item.data.type,
-          image: item.data.image,
-          name: item.data.name,
-          price: item.data.price,
-          regularPrice: item.data.regularPrice,
-          stockQuantity: item.data.stockQuantity,
-          stockStatus: item.data.stockStatus,
-          taxClass: item.data.taxClass,
-          taxStatus: item.data.taxStatus,
-          productSettings: item.data.productSettings,
+          id: item.id as string,
+          type: item.type,
+          image: item.image,
+          name: item.name,
+          price: item.price,
+          regularPrice: item.regularPrice,
+          stockQuantity: item.stockQuantity,
+          stockStatus: item.stockStatus,
+          taxClass: item.taxClass,
+          taxStatus: item.taxStatus,
+          productSettings: item.productSettings,
         },
       },
     })
 
     return acc
   }, [])
-}
-
-export async function addCartItemToCookie(item: CartItemRecord) {
-  const cookieCartItems = getCookieStore()
-
-  const product = await getCachedProductStock({ productId: item.id })
-
-  if (!product.data) {
-    throw new ExtendedError({
-      code: "NOT_FOUND",
-      message: "Product not found",
-    })
-  }
-
-  const { stockStatus, stockQuantity } = product.data
-
-  if (stockStatus === "OUT_OF_STOCK" || stockQuantity === 0) {
-    throw new ExtendedError({
-      code: "NOT_FOUND",
-      message: "Product is out of stock",
-    })
-  }
-
-  const existing = cookieCartItems.find((cartItem) => cartItem.id === item.id)
-
-  if (existing) {
-    if (existing.quantity >= (stockQuantity ?? 0)) {
-      throw new ExtendedError({
-        code: "NOT_FOUND",
-        message: `Sorry, Only ${stockQuantity} items left in stock!`,
-      })
-
-      // throw new TRPCError({
-      //   code: "BAD_REQUEST",
-      //   message: `Sorry, Only ${stockQuantity} items left in stock!`,
-      // })
-    }
-
-    const updatedCartItemRecords = cookieCartItems.map((cartItem) => {
-      if (cartItem.id === item.id) {
-        return {
-          ...cartItem,
-          quantity: cartItem.quantity + 1,
-        }
-      }
-
-      return cartItem
-    })
-
-    setCartItemsToCookie(updatedCartItemRecords)
-
-    return response.success({
-      data: null,
-    })
-  }
-
-  const updatedCartItemRecords = [...cookieCartItems, ...[{ ...item, quantity: item.quantity }]]
-
-  setCartItemsToCookie(updatedCartItemRecords)
-
-  return response.success({
-    data: null,
-  })
 }
 
 export async function updateCartItemToCookie(item: CartItemRecord) {
@@ -127,26 +72,26 @@ export async function updateCartItemToCookie(item: CartItemRecord) {
     })
   }
 
-  const product = await getCachedProductStock({ productId: item.id })
+  const product = await getCachedProductStock(item.id)
 
-  if (!product.data) {
+  if (!product) {
     throw new ExtendedError({
       code: "NOT_FOUND",
       message: "Product not found",
     })
   }
 
-  if (product.data.stockStatus === "OUT_OF_STOCK" || product.data.stockQuantity === 0) {
+  if (product.stockStatus === "OUT_OF_STOCK" || product.stockQuantity === 0) {
     throw new TRPCError({
       code: "NOT_FOUND",
       message: "Product is out of stock",
     })
   }
 
-  if (item.quantity > (product.data.stockQuantity ?? 0)) {
+  if (item.quantity > (product.stockQuantity ?? 0)) {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: `Sorry, Only ${product.data.stockQuantity} items left in stock.`,
+      message: `Sorry, Only ${product.stockQuantity} items left in stock.`,
     })
   }
 
@@ -191,7 +136,7 @@ export function countCartItemFromCookie() {
   return nodes.reduce<number>((acc, item) => acc + item.quantity, 0)
 }
 
-export function sortCartItemsData(props: { cartItems: CartItemData; postcode: string | null }) {
+export function sortCartItemsData(props: { cartItems: CartItemData; postcode: string | null }): MainCartItem[] {
   return props.cartItems.map((a) => {
     const product = a.product.node
     const productId = +base64.parse<string>({
@@ -293,7 +238,7 @@ export async function getProductStockDetails(id: string) {
   return data.product
 }
 
-function getCookieStore() {
+export function getCookieStore() {
   const cartCookie = cookies().get("store.cart.items")
 
   if (!cartCookie) return []
@@ -303,7 +248,7 @@ function getCookieStore() {
   return cookieCartItems
 }
 
-function setCartItemsToCookie(items: CartItemRecord[]) {
+export function setCartItemsToCookie(items: CartItemRecord[]) {
   cookies().set({
     name: "store.cart.items",
     value: JSON.stringify(items),

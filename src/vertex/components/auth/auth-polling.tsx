@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuthContext } from "./auth-context"
-import { authStatus } from "~/vertex/modules/auth/auth-actions"
+import { authStatus } from "~/vertex/lib/action/actions"
 import { useQuery } from "@tanstack/react-query"
 import { useCallback } from "react"
 import { useUpdateEffect } from "react-use"
@@ -53,7 +53,7 @@ export function useAuthPolling() {
     if (!pingAuthStatus.isError) return
 
     identifyForm.setError("username", {
-      message: pingAuthStatus.error.message,
+      message: "You are away for too long, Please try again.",
     })
 
     resetFormsState()

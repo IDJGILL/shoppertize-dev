@@ -4,7 +4,7 @@ import { base64 } from "~/lib/utils/functions/base64"
 import { useAuthContext } from "./auth-context"
 import { useCallback, useEffect } from "react"
 import { useActionHandler } from "~/vertex/lib/action/hook"
-import { verify } from "~/vertex/modules/auth/auth-actions"
+import { verify } from "~/vertex/lib/action/actions"
 
 export type AuthVerifyProps = ReturnType<typeof useAuthVerify>
 
@@ -26,7 +26,7 @@ export function useAuthVerify(verifyType: "manual" | "auto") {
 
   const verifyAction = useActionHandler(verify, {
     onSuccess: (response) => {
-      if (!response.sameDevice) return
+      // if (!response.sameDevice) return
 
       if (response.action === "login") return redirect()
 

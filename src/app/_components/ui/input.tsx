@@ -1,12 +1,7 @@
 import { Eye, EyeOff } from "lucide-react"
 import * as React from "react"
 import { useEffect, useState } from "react"
-import {
-  type UseFormReturn,
-  type ControllerRenderProps,
-  type FieldValues,
-  type Path,
-} from "react-hook-form"
+import { type UseFormReturn, type ControllerRenderProps, type FieldValues, type Path } from "react-hook-form"
 
 import { cn } from "~/lib/utils/functions/ui"
 import { FormLabel } from "./form"
@@ -15,24 +10,23 @@ import { ScrollArea } from "./scroll-area"
 import { TriangleDownIcon } from "@radix-ui/react-icons"
 import { Progress } from "./progress"
 import { type AddressSchemaProps } from "~/lib/modules/address/utils/address-schemas"
-import { Address } from "~/vertex/modules/address/address-schema"
+import { Address } from "~/vertex/modules/address/address-models"
 
-const Input = React.forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement>
->(({ className, type, ...props }, ref) => {
-  return (
-    <input
-      type={type}
-      className={cn(
-        "peer flex h-12 w-full overflow-hidden rounded border border-input bg-transparent px-3 py-1 text-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-0",
-        className,
-      )}
-      ref={ref}
-      {...props}
-    />
-  )
-})
+const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
+  ({ className, type, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={cn(
+          "peer flex h-12 w-full overflow-hidden rounded border border-input bg-transparent px-3 py-1 text-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-0",
+          className,
+        )}
+        ref={ref}
+        {...props}
+      />
+    )
+  },
+)
 Input.displayName = "Input"
 
 interface PasswordProps<T> {
@@ -56,8 +50,7 @@ function Password<T>({ ...props }: PasswordProps<T>) {
     return () => setView(false)
   }, [value, props.form.formState.isSubmitting, props.toggle])
 
-  const passwordScore =
-    value.length > 0 ? (value.length + 2) * 10 : value.length
+  const passwordScore = value.length > 0 ? (value.length + 2) * 10 : value.length
 
   return (
     <>
@@ -66,31 +59,14 @@ function Password<T>({ ...props }: PasswordProps<T>) {
           "mb-2": props.showPasswordStrength,
         })}
       >
-        <Input
-          placeholder=" "
-          type={view ? "text" : "password"}
-          {...props.field}
-        />
+        <Input placeholder=" " type={view ? "text" : "password"} {...props.field} />
 
-        <FormLabel
-          onClick={() =>
-            props.form.setFocus(props.field.name as Path<FieldValues & T>)
-          }
-        >
+        <FormLabel onClick={() => props.form.setFocus(props.field.name as Path<FieldValues & T>)}>
           {props.placeholder}
         </FormLabel>
 
-        <button
-          type="button"
-          className="absolute right-2 top-1/2 -translate-y-1/2"
-          onClick={() => setView(!view)}
-        >
-          {props.toggle &&
-            (view ? (
-              <Eye className="h-5 w-5" />
-            ) : (
-              <EyeOff className="h-5 w-5 text-muted-foreground" />
-            ))}
+        <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2" onClick={() => setView(!view)}>
+          {props.toggle && (view ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5 text-muted-foreground" />)}
         </button>
       </div>
 
@@ -100,13 +76,9 @@ function Password<T>({ ...props }: PasswordProps<T>) {
 
           <span>
             {passwordScore < 100 ? (
-              <div className="mt-2 text-xs font-medium">
-                Must contain at least 8 characters
-              </div>
+              <div className="mt-2 text-xs font-medium">Must contain at least 8 characters</div>
             ) : (
-              <div className="mt-2 text-xs font-medium">
-                Great! Your password is strong
-              </div>
+              <div className="mt-2 text-xs font-medium">Great! Your password is strong</div>
             )}
           </span>
         </>
@@ -147,19 +119,14 @@ function PhoneInput({ ...props }: PhoneInputProps) {
   return (
     <div className="relative w-full">
       <div className="w-full overflow-hidden rounded-md border shadow-sm">
-        <div
-          className={cn(
-            "flex w-full items-center duration-200 ease-in-out will-change-transform",
-          )}
-        >
+        <div className={cn("flex w-full items-center duration-200 ease-in-out will-change-transform")}>
           <div
             className={cn(
               "flex h-full w-16 cursor-pointer select-none items-center justify-center border-r text-sm font-medium duration-200 ease-in-out",
             )}
             onClick={() => setIsOpen((prev) => !prev)}
           >
-            {selectedCountryCode}{" "}
-            <TriangleDownIcon className="text-muted-foreground" />
+            {selectedCountryCode} <TriangleDownIcon className="text-muted-foreground" />
           </div>
 
           <input
@@ -185,13 +152,9 @@ function PhoneInput({ ...props }: PhoneInputProps) {
                       setCountryCode(countryCode.code)
                       setIsOpen(false)
                     }}
-                    className={cn(
-                      "cursor-pointer px-4 py-1 font-medium hover:bg-zinc-100",
-                      {
-                        "bg-primary text-primary text-white hover:bg-primary":
-                          countryCode.code === selectedCountryCode,
-                      },
-                    )}
+                    className={cn("cursor-pointer px-4 py-1 font-medium hover:bg-zinc-100", {
+                      "bg-primary text-primary text-white hover:bg-primary": countryCode.code === selectedCountryCode,
+                    })}
                   >
                     {countryCode.code} - {countryCode.name}
                   </li>

@@ -36,16 +36,7 @@ export type GetBothAddressesGqlResponse = {
   customer: {
     shipping: Pick<
       GqlDataProps,
-      | "firstName"
-      | "lastName"
-      | "email"
-      | "phone"
-      | "postcode"
-      | "city"
-      | "state"
-      | "country"
-      | "address1"
-      | "address2"
+      "firstName" | "lastName" | "email" | "phone" | "postcode" | "city" | "state" | "country" | "address1" | "address2"
     >
     billing: Pick<
       GqlDataProps,
@@ -149,8 +140,7 @@ export type UpdateBothAddressInput = {
   billing: RemoveNullable<BillingAddress>
 }
 
-export type ShippingAddress =
-  GetBothAddressesGqlResponse["customer"]["shipping"]
+export type ShippingAddress = GetBothAddressesGqlResponse["customer"]["shipping"]
 
 export type BillingAddress = GetBothAddressesGqlResponse["customer"]["billing"]
 
@@ -160,3 +150,7 @@ export type OrderAddresses = {
 }
 
 export type AddressDataItem = ReturnType<typeof convertAddress>
+
+export type AddAddressOutput = { token: string | null }
+
+export type UpdateAddressOutput = { token: string | null }

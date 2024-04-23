@@ -1,8 +1,10 @@
 import { initTRPC, TRPCError } from "@trpc/server"
 import superjson from "superjson"
-import { ZodError } from "zod"
+import { ZodError, ZodSchema } from "zod"
 import { type NextRequest } from "next/server"
 import { auth } from "../auth/config"
+import { ExtendedError } from "~/vertex/utils/extended-error"
+import { type Session } from "next-auth"
 
 interface CreateContextOptions {
   headers: Headers
@@ -59,11 +61,6 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 
 export const protectedProcedure = t.procedure.use(isAuthed)
 
-// export const createCallerFactory = t.createCallerFactory
-
-//
-//
-
 export type WrapTRPCSuccess<TData, TAction> = {
   data: TData
   message?: string
@@ -89,27 +86,14 @@ type WrapTRPCCallback<TData, TAction> = (response: {
   error: typeof errorResponse
 }) => Promise<WrapTRPCSuccess<TData, TAction>>
 
-export type WrapTRPCOptions = RateLimiting & Locking
-
-type RateLimiting =
-  | {
-      id?: string
-      ratelimit: true
-      limit: number
-      duration: Parameters<typeof Ratelimit.slidingWindow>["1"]
-      request: NextRequest
-    }
-  | { ratelimit: false }
+export type WrapTRPCOptions = Locking
 
 export type Locking = { id?: string; lock: true; lease: number; request: NextRequest } | { lock: false }
 
 /**
  * @deprecated This helper needs to replaced by new trpc public and protected wrappers
  */
-export const wrapTRPC = async <TData, TAction>(
-  callback: WrapTRPCCallback<TData, TAction>,
-  options?: WrapTRPCOptions,
-) => {
+export const wrapTRPC = async <TData, TAction>(callback: WrapTRPCCallback<TData, TAction>) => {
   try {
     const response = {
       success: successResponse,
@@ -193,5 +177,39 @@ export const wrapTRPC = async <TData, TAction>(
       code: trpcError.code ?? "INTERNAL_SERVER_ERROR",
       message: trpcError.message ?? "Oops, Something went wrong!",
     })
+  }
+}
+
+export const protectedQuery = <TInput, TOutput>(
+  schema: ZodSchema<TInput>,
+  callback: (input: ZodSchema<TInput>["_output"], session: Session) => Promise<TOutput>,
+) => {
+  return async (input: ZodSchema<TInput>["_input"]) => {
+    try {
+      const session = await auth()
+
+      if (!session) throw new ExtendedError({ code: "UNAUTHORIZED" })
+
+      const data = await schema.parseAsync(input)
+
+      return callback(data, session)
+    } catch (error) {
+      console.log(error)
+
+      throw new ExtendedError({ code: "INTERNAL_SERVER_ERROR" })
+    }
+  }
+}
+
+export const partialQuery = <TOutput>(callback: (session: Session | null) => Promise<TOutput>) => {
+  return async () => {
+    try {
+      const session = await auth()
+
+      return await callback(session)
+    } catch (error) {
+      console.log(error)
+      throw new ExtendedError({ code: "INTERNAL_SERVER_ERROR" })
+    }
   }
 }

@@ -41,9 +41,7 @@ export const checkout = {
       additionalDiscounts: [],
     })
 
-    const hasNoCodDeliveryItems = cartItems.data.some(
-      (a) => !a.hasCashOnDelivery,
-    )
+    const hasNoCodDeliveryItems = cartItems.data.some((a) => !a.hasCashOnDelivery)
 
     const paymentOptions = [
       {
@@ -127,10 +125,7 @@ export const checkout = {
     })
   },
 
-  validate: (props: {
-    items: MainCartItem[]
-    paymentMethod?: PaymentMethod
-  }) => {
+  validate: (props: { items: MainCartItem[]; paymentMethod?: PaymentMethod }) => {
     const isCartEmpty = props.items.length === 0
 
     if (isCartEmpty) {
@@ -145,8 +140,7 @@ export const checkout = {
     if (hasErrors) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message:
-          "Cart Contains Items with Issues: Please resolve them before proceeding.",
+        message: "Cart Contains Items with Issues: Please resolve them before proceeding.",
       })
     }
 
@@ -155,16 +149,13 @@ export const checkout = {
     if (props.paymentMethod === "COD" && hasNoCodDeliveryItems) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message:
-          "Unable to Use Cash on Delivery: Some items in your cart are not eligible for Cash on Delivery.",
+        message: "Unable to Use Cash on Delivery: Some items in your cart are not eligible for Cash on Delivery.",
       })
     }
   },
 
   session: {
-    create: async (
-      payload: Omit<CheckoutSession, "referenceId" | "createdAt">,
-    ) => {
+    create: async (payload: Omit<CheckoutSession, "referenceId" | "createdAt">) => {
       const randomString = nanoid(16)
       const recordId = `$checkout/session${randomString}`
 
@@ -190,9 +181,7 @@ export const checkout = {
     get: async (id: string) => {
       const recordId = `$checkout/session${id}`
 
-      const response = (await redisClient.json.get(
-        recordId,
-      )) as CheckoutSession | null
+      const response = (await redisClient.json.get(recordId)) as CheckoutSession | null
 
       if (!response) {
         throw new TRPCError({
@@ -205,9 +194,7 @@ export const checkout = {
 
     update: async (props: {
       id: string
-      payload: Partial<
-        Omit<CheckoutSession, "referenceId" | "createdAt" | "user">
-      >
+      payload: Partial<Omit<CheckoutSession, "referenceId" | "createdAt" | "user">>
     }) => {
       const recordId = `$checkout/session${props.id}`
 
@@ -215,14 +202,10 @@ export const checkout = {
 
       Object.entries(props.payload).forEach(([key, value]) => {
         if (typeof value === "string") {
-          return requests.push(
-            redisClient.json.set(recordId, ["$", key].join("."), `"${value}"`),
-          )
+          return requests.push(redisClient.json.set(recordId, ["$", key].join("."), `"${value}"`))
         }
 
-        requests.push(
-          redisClient.json.set(recordId, ["$", key].join("."), value),
-        )
+        requests.push(redisClient.json.set(recordId, ["$", key].join("."), value))
       })
 
       const responses = await Promise.all(requests)

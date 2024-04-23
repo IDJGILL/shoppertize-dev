@@ -1,7 +1,7 @@
 import { ErrorBoundary } from "react-error-boundary"
 import { Suspense, type ReactElement } from "react"
-import { getCachedProductStock } from "~/vertex/modules/redis/redis-actions"
 import { AddToCartContextProvider } from "./adtc-context"
+import { getCachedProductStock } from "~/vertex/modules/cart/cart-server-utils"
 
 interface AddToCartProps extends React.HTMLAttributes<HTMLElement> {
   error: ReactElement
@@ -35,9 +35,7 @@ export function AddToCart({ ...props }: AddToCartProps) {
   return (
     <ErrorBoundary fallback={props.error}>
       <Suspense fallback={props.loader}>
-        <InitialDataFetcher productId={props.productId}>
-          {props.children}
-        </InitialDataFetcher>
+        <InitialDataFetcher productId={props.productId}>{props.children}</InitialDataFetcher>
       </Suspense>
     </ErrorBoundary>
   )
@@ -50,15 +48,9 @@ interface InitialDataFetcherProps extends React.HTMLAttributes<HTMLElement> {
 async function InitialDataFetcher({ ...props }: InitialDataFetcherProps) {
   const { productId } = props
 
-  const product = await getCachedProductStock({ productId })
+  const product = await getCachedProductStock(productId)
 
-  console.log({ product })
+  if (!product) throw new Error("Product not found")
 
-  if (!product.data) throw new Error("Product not found")
-
-  return (
-    <AddToCartContextProvider initialData={product.data}>
-      {props.children}
-    </AddToCartContextProvider>
-  )
+  return <AddToCartContextProvider initialData={product}>{props.children}</AddToCartContextProvider>
 }

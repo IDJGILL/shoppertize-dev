@@ -11,9 +11,7 @@ export const $Identify = z
 
     switch (usernameType) {
       case "email": {
-        const result = z
-          .object({ email: z.string().email() })
-          .safeParse({ email: inputs.username })
+        const result = z.object({ email: z.string().email() }).safeParse({ email: inputs.username })
 
         if (!result.success) {
           ctx.addIssue({
@@ -31,10 +29,7 @@ export const $Identify = z
       case "phone": {
         const result = z
           .object({
-            phone: z
-              .string()
-              .min(10, "Please enter valid phone number")
-              .max(15, "Please enter valid phone number"),
+            phone: z.string().min(10, "Please enter valid phone number").max(15, "Please enter valid phone number"),
           })
           .safeParse({ phone: inputs.username })
 
@@ -107,7 +102,7 @@ export const $Login = z.object({
 
 export type Login = z.infer<typeof $Login>
 
-export const $Null = z.string().optional()
+export const $Null = z.string().optional().nullable()
 
 export const $Social = z.enum(["google"])
 

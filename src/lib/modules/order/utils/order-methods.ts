@@ -114,52 +114,7 @@ export const order = {
       }))
     },
 
-    feeLines: (props: {
-      items: MainCartItem[]
-      paymentMethod: PaymentMethod
-      wallet: WalletBalance
-    }) => {
-      const fee: FeeLine[] = [] as FeeLine[]
-
-      const cartTotals = summary.calc({
-        items: props.items,
-        additionalCharges: [],
-        additionalDiscounts: [],
-      })
-
-      switch (props.paymentMethod) {
-        case "COD": {
-          const codChanges = Math.round(
-            appConfig.payment.codCharges.type === "percentage"
-              ? (appConfig.payment.codCharges.amount / 100) * cartTotals.total
-              : appConfig.payment.codCharges.amount,
-          )
-
-          fee.push({
-            name: "COD Fee",
-            total: codChanges.toString(),
-            tax_status: "none",
-          })
-        }
-
-        case "WALLET": {
-          // const walletSpend = Math.min(props.wallet.amount, cartTotals.total)
-          // fee.push({
-          //   name: "Wallet",
-          //   total: "-" + walletSpend.toString(),
-          //   tax_status: "none",
-          // })
-        }
-      }
-
-      fee.push({
-        name: "Shipping",
-        total: "50",
-        tax_status: "none",
-      })
-
-      return fee
-    },
+    feeLines: ,
 
     format: {
       shipping: (address: ShippingAddress) => {
@@ -203,49 +158,3 @@ export const order = {
   },
 }
 
-type OrderProps = {
-  customer_id: number
-  status:
-    | "processing"
-    | "readytodispatch"
-    | "dispatched"
-    | "intransit"
-    | "delivered"
-    | "cancelled"
-    | "refunded"
-    | "failed"
-    | "completed"
-  payment_method: "cod" | "online"
-  set_paid: boolean
-  billing: OrderBillingProps
-  shipping: OrderShippingProps
-  line_items: LineItem[]
-  fee_lines: FeeLine[]
-  meta_data: MetaData[]
-}
-
-type OrderShippingProps = {
-  first_name: string
-  last_name: string
-  phone: string
-  postcode: string
-  city: string
-  state: string
-  country: string
-  address_1: string
-  address_2: string
-}
-
-type OrderBillingProps = {
-  first_name: string
-  last_name: string
-  email: string
-  phone: string
-  postcode: string
-  city: string
-  state: string
-  country: string
-  address_1: string
-  address_2: string
-  company: string
-}
