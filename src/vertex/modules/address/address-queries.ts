@@ -6,7 +6,7 @@ import {
   type GetUserMetaDataGqlInput,
   type GetUserMetaDataGqlResponse,
 } from "~/lib/modules/auth/auth-gql"
-import type { AddressDataItem } from "./address-types"
+import type { AddressData } from "./address-types"
 
 export const getAddressOptions = async (authToken: string) => {
   const data = await client<GetUserMetaDataGqlResponse, Omit<GetUserMetaDataGqlInput, "customerId">>({
@@ -20,14 +20,14 @@ export const getAddressOptions = async (authToken: string) => {
 
   const metaData = data.customer.metaData?.find((a) => a.key === "address-options")
 
-  if (!metaData) return { email: data.customer.email!, id: data.customer.databaseId, addresses: [] }
+  if (!metaData) return { email: data.customer.email!, uid: data.customer.databaseId.toString(), addresses: [] }
 
-  const addresses = JSON.parse(metaData.value) as AddressDataItem[]
+  const addresses = JSON.parse(metaData.value) as AddressData[]
 
   return {
     addresses,
     email: data.customer.email!,
-    id: data.customer.databaseId,
+    uid: data.customer.databaseId.toString(),
   }
 }
 
@@ -46,11 +46,11 @@ export const getCurrentAddressFromDb = async (customerId: number) => {
   const selectedAddress = data.customer.metaData?.find((a) => a.key === "address-selected")
 
   if (selectedAddress) {
-    return JSON.parse(selectedAddress.value) as AddressDataItem | null
+    return JSON.parse(selectedAddress.value) as AddressData | null
   }
 
   if (defaultAddress) {
-    return JSON.parse(defaultAddress.value) as AddressDataItem | null
+    return JSON.parse(defaultAddress.value) as AddressData | null
   }
 
   return null

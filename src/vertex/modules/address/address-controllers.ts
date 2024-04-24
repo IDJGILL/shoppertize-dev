@@ -1,112 +1,62 @@
 import "server-only"
 
-import { cloneDeep } from "lodash-es"
 import type { Address } from "./address-models"
 import otpless from "~/vertex/lib/otpless/config"
 import { getAddressOptions } from "./address-queries"
 import { ExtendedError } from "~/vertex/utils/extended-error"
-import { convertAddress, updateAddressMetaData } from "./address-server-utils"
-import type { AddAddressOutput, AddressDataItem } from "./address-types"
-import { updateAuthSession } from "../auth/auth-server-utils"
+import { addOrUpdateAddress, reshapeAddress, sendAddressOtp } from "./address-server-utils"
+import type { AddressOtpSession, VerifyAddressProps } from "./address-types"
+import { redisDelete, redisGet } from "~/vertex/lib/redis/utils"
 
-export const addressHandler = async (input: Address, authToken: string): Promise<AddAddressOutput> => {
-  const { addresses, email, id } = await getAddressOptions(authToken)
+export const addressHandler = async (input: Address, authToken: string): Promise<string | null> => {
+  const { addresses, email, uid } = await getAddressOptions(authToken)
 
-  console.log({ addresses }, { count: addresses.length })
-
-  if (addresses.length >= 5) throw new ExtendedError({ code: "BAD_REQUEST", message: "Address maximum limit reached." })
-
-  const existing = addresses.find((a) => a.id === input.address_id)
-
-  const addNewAddress = async () => {
-    const data = convertAddress({ address: input, notificationEmail: email })
-
-    const newAddress = {
-      ...data,
-      address: {
-        ...data.address,
-        shipping: {
-          ...data.address.shipping,
-          isDefault: addresses.length === 0,
-        },
-      },
-    } satisfies AddressDataItem
-
-    const mergeAddressList = [
-      ...addresses.map((a) => ({
-        ...a,
-        address: {
-          ...a.address,
-          shipping: {
-            ...a.address.shipping,
-            isDefault: input.isDefault ? false : a.address.shipping.isDefault,
-          },
-        },
-      })),
-      newAddress,
-    ]
-
-    await Promise.all([
-      updateAuthSession({ id: id.toString(), key: "currentAddress", data: { currentAddress: newAddress } }),
-      updateAddressMetaData({ list: mergeAddressList, item: newAddress, authToken }),
-    ])
-
-    return { token: null }
+  if (addresses.length >= 5) {
+    throw new ExtendedError({ code: "BAD_REQUEST", message: "Address maximum limit reached." })
   }
 
-  const updateExistingAddress = async (existing: AddressDataItem) => {
-    const existingAddressIndex = addresses.findIndex((a) => a.id === existing.id)
+  const address = reshapeAddress({ id: input.addressId, address: input, notificationEmail: email })
 
-    const addressListClone = cloneDeep(addresses)
+  const existing = addresses.find((a) => a.id === input.addressId)
 
-    const updatedAddress = convertAddress({ id: existing.id, address: input, notificationEmail: email })
+  if (!existing) {
+    const id = await sendAddressOtp(address, "add")
 
-    addressListClone[existingAddressIndex] = updatedAddress
-
-    const mergeAddressList = [
-      ...addressListClone.map((a) => {
-        if (input.isDefault && a.id !== updatedAddress.id) {
-          return {
-            ...a,
-            address: {
-              ...a.address,
-              shipping: {
-                ...a.address.shipping,
-                isDefault: false,
-              },
-            },
-          }
-        }
-
-        return a
-      }),
-    ]
-
-    await Promise.all([
-      updateAuthSession({ id: id.toString(), key: "currentAddress", data: { currentAddress: updatedAddress } }),
-      updateAddressMetaData({ list: mergeAddressList, item: updatedAddress, authToken }),
-    ])
-
-    return { token: null }
+    return id
   }
 
-  if (input.token && input.otp) {
-    const verify = await otpless.verify(input.token, input.otp)
+  const isNumberChanged = existing.address.shipping.phone !== input.shipping_phone
 
-    if (!verify.success) throw new ExtendedError({ code: "BAD_REQUEST", message: verify.message })
+  if (isNumberChanged) {
+    const id = await sendAddressOtp(address, "update")
 
-    if (existing) return await updateExistingAddress(existing)
-
-    return await addNewAddress()
+    return id
   }
 
-  const needToVerify = addresses.length === 0 || !existing || existing.address.shipping.phone !== input.shipping_phone
+  await addOrUpdateAddress({ uid, addresses: addresses, address, authToken })
 
-  if (needToVerify) {
-    const sms = await otpless.send(input.shipping_phone)
+  return null
+}
 
-    return { token: sms.token }
+export async function verifyAddress(props: VerifyAddressProps) {
+  const { addresses, uid } = await getAddressOptions(props.authToken)
+
+  const response1 = await redisGet<AddressOtpSession>({ id: props.id, idPrefix: "@session/address" })
+
+  if (!response1) throw new ExtendedError({ code: "NOT_FOUND" })
+
+  const response2 = await otpless.verify(response1.token, props.otp)
+
+  if (!response2.success) {
+    throw new ExtendedError({ code: "BAD_REQUEST", message: response2.message })
   }
 
-  return await updateExistingAddress(existing)
+  await addOrUpdateAddress({
+    uid,
+    addresses: addresses,
+    authToken: props.authToken,
+    address: { id: response1.id, address: response1.address },
+  })
+
+  await redisDelete({ id: props.id, idPrefix: "@session/address" })
 }

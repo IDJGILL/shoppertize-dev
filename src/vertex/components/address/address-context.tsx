@@ -4,10 +4,16 @@ import { createContext, useContext, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useActionHandler } from "~/vertex/lib/action/hook"
-import { $Address, type Address } from "~/vertex/modules/address/address-models"
+import {
+  $Address,
+  $AddressVerification,
+  type AddressVerification,
+  type Address,
+} from "~/vertex/modules/address/address-models"
 import { useRouter } from "next/navigation"
-import { addressHandlerAction, checkPostcodeAction, resendAddressOtpAction } from "~/vertex/lib/action/actions"
+import { addressHandlerAction, checkPostcodeAction } from "~/vertex/lib/action/actions"
 import type { getAddressById } from "~/vertex/modules/cart/cart-controllers"
+import { toast } from "sonner"
 
 const AddressContext = createContext<ReturnType<typeof useAddressContextLogic> | null>(null)
 
@@ -24,28 +30,33 @@ export function AddressContextProvider({ ...props }: AddressContextProviderProps
 function useAddressContextLogic(initial: Awaited<ReturnType<typeof getAddressById>>) {
   const [model, modelSet] = useState(false)
 
+  console.log(initial)
+
   const router = useRouter()
 
   const addressForm = useForm<Address>({
     resolver: zodResolver($Address),
     defaultValues: {
-      shipping_firstName: initial?.address?.shipping.firstName ?? "",
-      shipping_lastName: initial?.address?.shipping.lastName ?? "",
-      shipping_phone: initial?.address?.shipping.phone ?? "",
-      shipping_address1: initial?.address?.shipping.address1 ?? "",
-      shipping_address2: initial?.address?.shipping.address2 ?? "",
-      shipping_postcode: initial?.address?.shipping.postcode ?? "",
+      addressId: initial?.id ?? "",
+      shipping_firstName: initial?.address?.shipping.first_name ?? "",
+      shipping_lastName: initial?.address?.shipping.last_name ?? "",
+      shipping_address1: initial?.address?.shipping.address_1 ?? "",
+      shipping_address2: initial?.address?.shipping.address_2 ?? "",
       shipping_city: initial?.address?.shipping?.city ?? "",
       shipping_state: initial?.address?.shipping.state ?? "",
+      shipping_postcode: initial?.address?.shipping.postcode ?? "",
+      shipping_country: initial?.address?.shipping.country ?? "",
+      shipping_phone: initial?.address?.shipping.phone ?? "",
 
-      billing_firstName: initial?.address?.billing?.firstName ?? "",
-      billing_phone: initial?.address?.billing?.phone ?? "",
-      billing_address1: initial?.address?.billing?.address1 ?? "",
-      billing_address2: initial?.address?.billing?.address2 ?? "",
-      billing_postcode: initial?.address?.billing?.postcode ?? "",
+      billing_firstName: initial?.address?.billing?.first_name ?? "",
+      billing_tax: initial?.address?.billing?.company ?? "",
+      billing_address1: initial?.address?.billing?.address_1 ?? "",
+      billing_address2: initial?.address?.billing?.address_2 ?? "",
       billing_city: initial?.address?.billing?.city ?? "",
       billing_state: initial?.address?.billing?.state ?? "",
-      billing_tax: initial?.address?.billing?.company ?? "",
+      billing_postcode: initial?.address?.billing?.postcode ?? "",
+      billing_phone: initial?.address?.billing?.phone ?? "",
+      billing_country: initial?.address?.billing?.country ?? "",
 
       isTaxInvoice: initial?.address.billing ? true : false,
     },
@@ -53,49 +64,25 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof getAddressByI
 
   const addressHandler = useActionHandler(addressHandlerAction, {
     onSuccess: (response) => {
-      if (!response.token) {
-        modelSet(false)
+      if (response.data) {
+        otpForm.setValue("id", response.data ?? "")
 
-        router.push("/cart")
-
-        return
+        return modelSet(true)
       }
 
-      addressForm.setValue("token", response.token)
-
-      modelSet(true)
+      router.push("/cart")
     },
 
     onError: (error) => {
-      console.log({ error })
-
-      switch (error.code) {
-        case "BAD_REQUEST": {
-          addressForm.setValue("otp", undefined)
-          addressForm.setError("otp", { message: error.message })
-        }
-      }
+      toast.success(error.message)
     },
   })
 
   const addressFormHandler = addressForm.handleSubmit((input) => addressHandler.mutate(input))
 
-  const resendOtp = useActionHandler(resendAddressOtpAction, {
-    onSuccess: (token) => {
-      addressForm.clearErrors("otp")
-      addressForm.setValue("otp", undefined)
-      addressForm.setValue("token", token)
-    },
-
-    onError: (error) => {
-      addressForm.setValue("otp", undefined)
-      addressForm.setError("otp", { message: error.message })
-    },
+  const otpForm = useForm<AddressVerification>({
+    resolver: zodResolver($AddressVerification),
   })
-
-  const resendOtpHandler = () => {
-    resendOtp.mutate(addressForm.getValues("token") ?? "")
-  }
 
   const checkShippingPostcode = useActionHandler(checkPostcodeAction, {
     onSuccess: (response) => {
@@ -181,32 +168,32 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof getAddressByI
 
   const isAddressLoading = false
 
-  const isAddressUpdating = addressHandler.status === "executing"
-
-  const isOtpResending = resendOtp.status === "executing"
+  const isAddressUpdating = addressHandler.isLoading
 
   const modelProps = {
     open: model,
     onOpenChange: (a: boolean) => {
       modelSet(a)
-      addressForm.clearErrors("otp")
-      addressForm.setValue("otp", undefined)
-      addressForm.setValue("token", undefined)
+      otpForm.clearErrors("otp")
+      otpForm.setValue("otp", "")
+      otpForm.setValue("id", "")
     },
   }
 
   console.log(addressForm.formState.errors)
 
+  console.log(otpForm.formState.errors)
+
   return {
     modelProps,
     addressForm,
-    resendOtpHandler,
     sameAddressHandler,
     addressFormHandler,
     checkPincodeHandler,
     isAddressLoading,
     isAddressUpdating,
-    isOtpResending,
+    otpForm,
+    router,
   }
 }
 

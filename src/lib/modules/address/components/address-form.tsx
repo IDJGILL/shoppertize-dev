@@ -4,14 +4,13 @@ import FixedBar from "~/app/_components/fixed-bar"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/app/_components/ui/form"
 import { Input, PhoneInput } from "~/app/_components/ui/input"
 import { Button } from "~/app/_components/ui/button"
-import OtpInput from "react-otp-input"
-import CountDown from "~/lib/ui/_shared/countdown"
 import { ModelXDrawer } from "~/app/_components/ui/dialog"
 import { Switch } from "~/app/_components/ui/switch"
 import LoaderFallBack from "~/app/_components/loader-fallback"
 import Box from "~/app/_components/box"
-import { nanoid } from "nanoid"
 import { useAddress } from "~/vertex/components/address/address-context"
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "~/app/_components/ui/input-otp"
+import { AddressOtp } from "~/vertex/components/address/address-otp"
 
 interface AddressFormProps extends React.HTMLAttributes<HTMLElement> {}
 
@@ -23,11 +22,8 @@ export default function AddressForm({ ...props }: AddressFormProps) {
     addressFormHandler,
     sameAddressHandler,
     checkPincodeHandler,
-    modelProps,
-    resendOtpHandler,
     isAddressLoading,
     isAddressUpdating,
-    isOtpResending,
   } = useAddress()
 
   if (isAddressLoading) return <LoaderFallBack className="w-full" />
@@ -35,36 +31,12 @@ export default function AddressForm({ ...props }: AddressFormProps) {
   return (
     <div className="container px-0 py-5 md:py-10">
       <Box className="mx-auto rounded-none sm:rounded-2xl md:w-max">
+        {/* Address Form */}
         <Form {...addressForm}>
           <form id="address-form" onSubmit={addressFormHandler}>
             <FormField
               control={addressForm.control}
-              name="address_id"
-              defaultValue={nanoid()}
-              render={({ field }) => (
-                <FormItem className="hidden">
-                  <FormControl>
-                    <Input placeholder=" " {...field} type="hidden" className="hidden" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={addressForm.control}
-              name="otp"
-              render={({ field }) => (
-                <FormItem className="hidden">
-                  <FormControl>
-                    <Input placeholder=" " {...field} type="hidden" className="hidden" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={addressForm.control}
-              name="token"
+              name="addressId"
               render={({ field }) => (
                 <FormItem className="hidden">
                   <FormControl>
@@ -457,7 +429,6 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                     <FormField
                       control={addressForm.control}
                       name="billing_country"
-                      defaultValue="IN"
                       render={({ field }) => (
                         <div>
                           <FormItem className="flex-1">
@@ -480,60 +451,78 @@ export default function AddressForm({ ...props }: AddressFormProps) {
             </FixedBar>
           </form>
         </Form>
-
-        <ModelXDrawer {...modelProps}>
-          <div className="mb-6">
-            <h3 className="text-2xl font-semibold">Verify</h3>
-            <p className="text-sm">
-              You will receive a 4 digit otp from <span className="font-semibold">OTPLESS</span>
-            </p>
-          </div>
-
-          <div className="">
-            <OtpInput
-              value={addressForm.watch("otp")}
-              onChange={(value) => addressForm.setValue("otp", value)}
-              numInputs={4}
-              renderInput={(props) => (
-                <input
-                  {...props}
-                  className="h-12 w-full flex-1 rounded-md border focus-visible:outline-none"
-                  inputMode="numeric"
-                />
-              )}
-              containerStyle={{
-                gap: "1rem",
-              }}
-            />
-
-            <div className="py-4 text-center text-sm text-red-500">{addressForm.formState.errors?.otp?.message}</div>
-
-            <Button form="address-form" type="submit" className="w-full" loading={isAddressUpdating ? "true" : "false"}>
-              Verify & Save
-            </Button>
-
-            <CountDown
-              duration={60}
-              renderer={({ count, api }) => (
-                <Button
-                  variant="outline"
-                  type="button"
-                  disabled={!api.isCompleted}
-                  loading={isOtpResending ? "true" : "false"}
-                  className="mt-2 w-full"
-                  onClick={() => {
-                    if (!api.isCompleted) return
-
-                    // resendOtpHandler(() => api.reset())
-                  }}
-                >
-                  {api.isCompleted ? "Didn't receive the code? Resend" : `Resend again in 00:${count}`}
-                </Button>
-              )}
-            />
-          </div>
-        </ModelXDrawer>
       </Box>
+
+      <AddressOtp>
+        {({ form, mutateVerify, isResending, isVerifying, mutateResend, modelProps, isRunning, seconds }) => (
+          <ModelXDrawer {...modelProps}>
+            <div className="mb-6">
+              <h3 className="text-2xl font-semibold">Verify</h3>
+              <p className="text-sm">
+                You will receive a 4 digit otp from <span className="font-semibold">OTPLESS</span>
+              </p>
+            </div>
+
+            <div className="">
+              <Form {...form}>
+                <form id="address-form" onSubmit={mutateVerify}>
+                  <FormField
+                    control={form.control}
+                    name="id"
+                    render={({ field }) => (
+                      <FormItem className="hidden">
+                        <FormControl>
+                          <Input placeholder=" " {...field} type="hidden" className="hidden" />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="otp"
+                    render={({ field }) => (
+                      <FormItem className="mx-auto mb-6">
+                        <FormControl>
+                          <InputOTP maxLength={4} {...field}>
+                            <InputOTPGroup>
+                              <InputOTPSlot index={0} />
+                              <InputOTPSlot index={1} />
+                            </InputOTPGroup>
+
+                            <InputOTPSeparator />
+
+                            <InputOTPGroup>
+                              <InputOTPSlot index={2} />
+                              <InputOTPSlot index={3} />
+                            </InputOTPGroup>
+                          </InputOTP>
+                        </FormControl>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" className="w-full" loading={isVerifying ? "true" : "false"}>
+                    Verify & Save
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    type="button"
+                    loading={isResending ? "true" : "false"}
+                    className="mt-2 w-full"
+                    onClick={() => mutateResend()}
+                  >
+                    {!isRunning ? "Didn't receive the code? Resend" : `Resend again in 00:${seconds}`}
+                  </Button>
+                </form>
+              </Form>
+            </div>
+          </ModelXDrawer>
+        )}
+      </AddressOtp>
     </div>
   )
 }

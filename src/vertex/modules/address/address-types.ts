@@ -1,5 +1,3 @@
-import { convertAddress } from "./address-server-utils"
-
 export const GetBothAddressesGql = `
 query GetBothAddressesGql {
   customer {
@@ -149,8 +147,62 @@ export type OrderAddresses = {
   billing?: RemoveNullable<BillingAddress>
 }
 
-export type AddressDataItem = ReturnType<typeof convertAddress>
+export type AddressData = {
+  id: string
+  address: {
+    shipping: {
+      first_name: string
+      last_name: string
+      address_1: string
+      address_2: string
+      city: string
+      state: string
+      phone: string
+      postcode: string
+      email: string
+      country: string
+      isDefault: boolean
+    }
+    billing: {
+      first_name: string
+      last_name: string
+      company: string
+      address_1: string
+      address_2: string
+      city: string
+      state: string
+      postcode: string
+      country: string
+      email: string
+      phone: string
+    } | null
+  }
+}
 
 export type AddAddressOutput = { token: string | null }
 
 export type UpdateAddressOutput = { token: string | null }
+
+export type AddressOtpSession = {
+  address: AddressData["address"]
+  token: string
+  action: "add" | "update"
+}
+
+export type AddressHandlerOutput = {
+  id: string | null
+  isVerified: boolean
+}
+
+export type AddOrUpdateAddress = {
+  uid: string
+  addresses: AddressData[]
+  address: AddressData
+  authToken: string
+}
+
+export type VerifyAddressProps = {
+  id: string
+  otp: string
+  authToken: string
+}

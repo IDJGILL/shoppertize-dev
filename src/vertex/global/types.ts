@@ -3,18 +3,25 @@
  * The properties of the types *shell not be changed or update
  */
 
-import { type AddressDataItem } from "../modules/address/address-types"
+import { type AddressData } from "../modules/address/address-types"
+import { type cacheTagList, type pathList, type redisIDPrefixList } from "./constants"
+
+export type Path = (typeof pathList)[number]
+export type CacheTag = (typeof cacheTagList)[number]
+export type RedisIDPrefix = (typeof redisIDPrefixList)[number]
+
+// Todo - Work on this
 
 /**
  * Auth Session Types
  */
 export type AuthSession = {
-  uid: number
+  uid: string
   name: string
   username: string
   loggedInAt: string
   expireAt: string
-  currentAddress: AddressDataItem | null
+  currentAddress: AddressData | null
 }
 
 export type AuthClientSession = {
@@ -28,7 +35,6 @@ export type AuthClientSession = {
 }
 
 export type Authentication = {
-  id: string
   ip: string
   expiry: number
   createdAt: number

@@ -29,7 +29,7 @@ export function identifyUsernameType(string: string): "email" | "phone" | "unkno
 export function createTokenExpiry(authToken: string): number {
   const payload = jwt.decode.parse(authToken)
 
-  return new Date(payload.exp * 1000).getTime()
+  return payload.exp
 }
 
 /**

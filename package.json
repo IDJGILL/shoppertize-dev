@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@auth/upstash-redis-adapter": "^2.0.0",
+    "@bradgarropy/use-countdown": "^2.0.1",
     "@hookform/resolvers": "^3.3.2",
     "@next/bundle-analyzer": "^14.2.1",
     "@radix-ui/react-accordion": "^1.1.2",
@@ -44,7 +45,7 @@
     "fuse.js": "^7.0.0",
     "hono": "^4.2.4",
     "html-react-parser": "^5.0.6",
-    "input-otp": "0.3.31-beta",
+    "input-otp": "^1.2.4",
     "jose": "^5.0.2",
     "jotai": "^2.5.0",
     "js-sha256": "^0.10.1",

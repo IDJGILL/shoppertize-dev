@@ -1,4 +1,5 @@
 import "server-only"
+
 import {
   createAuthSession,
   createAuthenticationSession,
@@ -29,13 +30,14 @@ import { getAuthTokens } from "./auth-queries"
 import { login, signup } from "../../lib/action/actions"
 import { signIn } from "~/vertex/lib/auth/config"
 import { emailClient } from "~/lib/smtp/smtp-client"
-import { redisClient } from "~/vertex/lib/redis/client"
 import { identifyUsernameType } from "./auth-client-utils"
 import { type Authentication } from "~/vertex/global/types"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
 import { magicLinkEmailTemplate } from "~/lib/modules/auth/auth-emails"
 import type { Verify, Identify, AuthSessionId, Login, Signup, ForgetPassword, UpdatePassword } from "./auth-models"
+import { redisDelete, redisUpdate } from "~/vertex/lib/redis/utils"
+import { type RedisExtend } from "~/vertex/lib/redis/types"
 
 export const identifyUser = async (input: Identify): Promise<IdentifyUserOutput> => {
   const email = createEmailId(input.username, input.countryCode)
@@ -206,7 +208,7 @@ export const signUpUser = async (input: Signup): Promise<void> => {
     password: input.password,
   })
 
-  await redisClient.json.del(session.id)
+  await redisDelete({ id: session.id, idPrefix: "@session/authentication" })
 
   await login({
     username: session.username,
@@ -243,8 +245,6 @@ export const forgetPassword = async (input: ForgetPassword): Promise<ForgetPassw
 export const updatePassword = async (input: UpdatePassword): Promise<void> => {
   const session = await getAuthenticationSession(input.id)
 
-  const recordId = `@session/authentication/${input.id}`
-
   if (!isVerified(session) || !hasActionPermission("reset", session)) {
     throw new ExtendedError({
       code: "UNAUTHORIZED",
@@ -271,9 +271,7 @@ export const updatePassword = async (input: UpdatePassword): Promise<void> => {
     cacheConfig: "no-cache",
   })
 
-  const isUpdated = await redisClient.json.set(recordId, "$.action", `"login"`)
-
-  if (isUpdated !== "OK") throw new ExtendedError({ code: "INTERNAL_SERVER_ERROR" })
+  await redisUpdate<Authentication>({ id: input.id, idPrefix: "@session/authentication", payload: { action: "login" } })
 
   await login({
     id: session.id,
@@ -312,12 +310,9 @@ export const nextAuthSignIn = async (input: Login): Promise<NextAuthSignInOutput
   /**
    * This means that user requesting signin either email or otp
    */
-  const requestingSignInUsingId = !!input.id
 
-  if (requestingSignInUsingId) {
-    const session = await getAuthenticationSession(input.id!)
-
-    const recordId = `@session/authentication/${input.id}`
+  if (!!input.id) {
+    const session = await getAuthenticationSession(input.id)
 
     if (!isVerified(session) || !hasActionPermission("login", session)) {
       throw new ExtendedError({ code: "BAD_REQUEST" })
@@ -325,7 +320,9 @@ export const nextAuthSignIn = async (input: Login): Promise<NextAuthSignInOutput
 
     const data = await getAuthTokens({ username: session.username })
 
-    await redisClient.json.del(recordId)
+    console.log({ data })
+
+    await redisDelete({ id: input.id, idPrefix: "@session/authentication" })
 
     await createAuthSession(data)
 
@@ -401,7 +398,7 @@ export const nextAuthGoogleSignIn = async (token: JWT): Promise<JWT | null> => {
   }
 }
 
-export const notification = (session: Authentication) => {
+export const notification = (session: RedisExtend<Authentication>) => {
   switch (session.verification) {
     case "link": {
       void emailClient({

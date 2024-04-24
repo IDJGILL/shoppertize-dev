@@ -74,6 +74,7 @@ const callbacks: NextAuthConfig["callbacks"] = {
 
       default: {
         if (isTokenExpired(token.expiresAt)) {
+          console.log("Refreshing token")
           const tokens = await refreshAuthToken(token.refreshToken)
 
           token.authToken = tokens.authToken

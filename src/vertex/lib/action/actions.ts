@@ -27,15 +27,18 @@ import { $CartItem } from "../../modules/cart/cart-schemas"
 import { removeCartItemFromCookie, updateCartItemToCookie } from "../../modules/cart/cart-server-utils"
 import { $Revalidate } from "~/vertex/global/models"
 import { revalidatePath, revalidateTag } from "next/cache"
-import { paths, tags } from "~/vertex/global/paths-and-tags"
+import { pathList, cacheTagList } from "~/vertex/global/constants"
 import { checkoutHandler } from "~/vertex/modules/checkout/checkout-controllers"
 import { $PaymentMethod } from "~/lib/modules/payment/payment-models"
-import { addressHandler } from "~/vertex/modules/address/address-controllers"
-import { $Address, $AddressOtpToken } from "~/vertex/modules/address/address-models"
+import { addressHandler, verifyAddress } from "~/vertex/modules/address/address-controllers"
+import { $Address, $AddressVerification } from "~/vertex/modules/address/address-models"
 import otpless from "../otpless/config"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { $IndianPostcode } from "~/vertex/modules/courier/courier-models"
 import { checkPostcodeService } from "~/vertex/modules/courier/courier-controllers"
+import { z } from "zod"
+import { redisGet } from "../redis/utils"
+import { AddressOtpSession } from "~/vertex/modules/address/address-types"
 
 // Todo - Create password schema logic.
 // Todo - Test @hapi/iron package in edge environment.
@@ -45,9 +48,9 @@ import { checkPostcodeService } from "~/vertex/modules/courier/courier-controlle
 
 export const revalidate = publicAction($Revalidate, async (input) => {
   return await new Promise<boolean>((resolve) => {
-    const isPathExist = input.paths.some((a) => paths.includes(a))
+    const isPathExist = input.paths.some((a) => pathList.includes(a))
 
-    const isTagExist = input.tags.some((a) => tags.includes(a))
+    const isTagExist = input.tags.some((a) => cacheTagList.includes(a))
 
     if (isPathExist) {
       input.paths.forEach((path) => revalidatePath(path))
@@ -129,15 +132,26 @@ export const checkoutAction = authAction($PaymentMethod, async (input) => {
 })
 
 export const addressHandlerAction = authAction($Address, async (input, ctx) => {
-  return await addressHandler(input, ctx.session.authToken)
+  const data = await addressHandler(input, ctx.session.authToken)
+
+  return ctx.response.success({
+    data: data,
+    revalidatePaths: ["/cart"],
+  })
 })
 
-// export const updateAddressAction = authAction($Address, async (input, ctx) => {
-//   return updateAddress(input, ctx.session.authToken)
-// })
+export const verifyAddressAction = authAction($AddressVerification, async (input, ctx) => {
+  return await verifyAddress({ ...input, authToken: ctx.session.authToken })
+})
 
-export const resendAddressOtpAction = authAction($AddressOtpToken, async (input) => {
-  const data = await otpless.resend(input)
+export const resendAddressOtpAction = authAction(z.string(), async (input) => {
+  const session = await redisGet<AddressOtpSession>({ id: input, idPrefix: "@session/address" })
+
+  if (!session) {
+    throw new ExtendedError({ code: "BAD_REQUEST", message: "Something went wrong, Please refresh the page." })
+  }
+
+  const data = await otpless.resend(session.token)
 
   if (!data.newToken) throw new ExtendedError({ code: "BAD_REQUEST", message: data.message })
 

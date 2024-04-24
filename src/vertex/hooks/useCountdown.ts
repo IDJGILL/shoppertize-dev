@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react"
+import { useUpdateEffect } from "react-use"
 
 export type CountdownApis = {
   resetCountdown: (newDuration?: number) => void
 }
 
-export default function useCountDown(duration = 0) {
+export default function useCountDown(duration = 0, autoStart?: boolean) {
   const [remaining, remainingSet] = useState(duration)
 
   useEffect(() => {
-    if (duration === 0) return
+    if (duration === 0 || !autoStart) return
 
     const interval = setInterval(() => {
       remainingSet((prev) => prev - 1)
@@ -21,7 +22,9 @@ export default function useCountDown(duration = 0) {
     return () => {
       clearInterval(interval)
     }
-  }, [duration, remaining])
+  }, [autoStart, duration, remaining])
+
+  // useUpdateEffect(() => remainingSet(duration), [autoStart])
 
   const reset = (newDuration = 0) => remainingSet(newDuration)
 

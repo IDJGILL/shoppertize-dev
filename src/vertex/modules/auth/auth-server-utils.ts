@@ -13,47 +13,40 @@ import { cookies } from "next/headers"
 import { customAlphabet, nanoid } from "nanoid"
 import { config } from "~/vertex/global/config"
 import { type CreateUserProps } from "./auth-types"
-import { redisClient } from "~/vertex/lib/redis/client"
 import { identifyUsernameType } from "./auth-client-utils"
 import { wpClient } from "~/vertex/lib/wordpress/wp-client"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
 import type { AuthSession, Authentication } from "~/vertex/global/types"
 import { getCurrentAddressFromDb } from "../address/address-queries"
+import { redisCreate, redisDelete, redisGet, redisMerge, redisUpdate } from "~/vertex/lib/redis/utils"
 
 export async function createAuthSession(props: GetAuthTokensGqlOutput["login"]) {
-  const uid = props.user.databaseId
+  const uid = props.user.databaseId.toString()
 
-  const recordId = `@session/auth/${uid}`
+  const address = await getCurrentAddressFromDb(+uid)
 
-  const address = await getCurrentAddressFromDb(uid)
-
-  const result = await redisClient.json.set(recordId, "$", {
-    uid,
-    username: props.user.email ?? "",
-    name: props.user.name,
-    loggedInAt: Date.now().toString(),
-    expireAt: props.refreshTokenExpiration,
-    currentAddress: address,
-  } satisfies AuthSession)
-
-  if (result !== "OK") throw new Error("Internal server error")
+  await redisCreate<AuthSession>({
+    id: uid,
+    idPrefix: "@session/auth",
+    payload: {
+      uid,
+      username: props.user.email ?? "",
+      name: props.user.name,
+      loggedInAt: Date.now().toString(),
+      expireAt: props.refreshTokenExpiration,
+      currentAddress: address,
+    },
+    ttlSec: 604800, // 7 days,
+  })
 }
 
 export async function updateAuthSession(props: { id: string; key: keyof AuthSession; data: Partial<AuthSession> }) {
-  const recordId = `@session/auth/${props.id}`
-
-  const s = props.data[props.key]
-
-  const result = await redisClient.json.set(recordId, `$.${props.key}`, JSON.stringify(s))
-
-  if (result !== "OK") throw new Error("Internal server error")
+  await redisUpdate<AuthSession>({ id: props.id, idPrefix: "@session/auth", payload: props.data })
 }
 
 export async function getAuthSession(uid: string) {
-  const recordId = `@session/auth/${uid}`
-
-  return (await redisClient.json.get(recordId)) as AuthSession | null
+  return await redisGet<AuthSession>({ id: uid, idPrefix: "@session/auth" })
 }
 
 export function createEmailId(username: string, countryCode: string) {
@@ -83,10 +76,6 @@ export async function getUserBy(inputs: UserByIdGqlInput) {
 export async function createAuthenticationSession(
   props: Pick<Authentication, "ip" | "action" | "username" | "countryCode">,
 ) {
-  const randomId = nanoid()
-
-  const recordId = `@session/authentication/${randomId}`
-
   const createdAt = new Date().getTime()
 
   const { secretExpiryInSec, ttl } = config.authentication
@@ -103,24 +92,23 @@ export async function createAuthenticationSession(
 
   const username = createEmailId(props.username, props.countryCode)
 
-  await redisClient.json.set(recordId, "$", {
-    ...props,
-    id: randomId,
-    secret,
-    username,
-    createdAt,
-    resendCount: 0,
-    isVerified: false,
-    expiry: secretExpiryInSec,
-    verification: usernameType === "email" ? "link" : "otp",
-    clientId: nanoid(),
-  } satisfies Authentication)
+  const response = await redisCreate<Authentication>({
+    idPrefix: "@session/authentication",
+    payload: {
+      ...props,
+      secret,
+      username,
+      createdAt,
+      resendCount: 0,
+      isVerified: false,
+      expiry: secretExpiryInSec,
+      verification: usernameType === "email" ? "link" : "otp",
+      clientId: nanoid(),
+    },
+    ttlSec: ttl,
+  })
 
-  await redisClient.expire(recordId, ttl)
-
-  const session = await getAuthenticationSession(randomId)
-
-  return session
+  return response
 }
 
 export function createVerificationSecret(props: Pick<Authentication, "verification">) {
@@ -144,7 +132,7 @@ export function createVerificationSecret(props: Pick<Authentication, "verificati
 }
 
 export async function getAuthenticationSession(id: string) {
-  const session = (await redisClient.json.get(`@session/authentication/${id}`)) as Authentication | null
+  const session = await redisGet<Authentication>({ id, idPrefix: "@session/authentication" })
 
   if (!session) {
     throw new ExtendedError({
@@ -157,8 +145,6 @@ export async function getAuthenticationSession(id: string) {
 }
 
 export async function verifyAuthenticationSecret(props: { id: string; secret: string }) {
-  const recordId = `@session/authentication/${props.id}`
-
   const session = await getAuthenticationSession(props.id)
 
   if (session.isVerified && session.verification === "link") {
@@ -182,9 +168,11 @@ export async function verifyAuthenticationSecret(props: { id: string; secret: st
     })
   }
 
-  const isUpdated = await redisClient.json.set(recordId, "$.isVerified", true)
-
-  if (isUpdated !== "OK") throw new ExtendedError({ code: "INTERNAL_SERVER_ERROR" })
+  await redisUpdate<Authentication>({
+    id: props.id,
+    idPrefix: "@session/authentication",
+    payload: { isVerified: true },
+  })
 
   const updatedSession = await getAuthenticationSession(props.id)
 
@@ -219,10 +207,6 @@ export async function createUser(props: CreateUserProps) {
 export async function recreateAuthenticationSecret(id: string) {
   const session = await getAuthenticationSession(id)
 
-  const recordId = `@session/authentication/${id}`
-
-  const { ttl } = config.authentication
-
   const secret = createVerificationSecret(session)
 
   if (canRetryVerification(session)) {
@@ -240,7 +224,7 @@ export async function recreateAuthenticationSecret(id: string) {
   }
 
   if (!canResendVerification(session)) {
-    await redisClient.json.del(session.id)
+    await redisDelete({ id: session.id, idPrefix: "@session/authentication" })
 
     throw new ExtendedError({
       code: "TOO_MANY_REQUESTS",
@@ -248,13 +232,16 @@ export async function recreateAuthenticationSecret(id: string) {
     })
   }
 
-  await Promise.all([
-    redisClient.json.set(recordId, "$.createdAt", new Date().getTime()),
-    redisClient.json.numincrby(recordId, "$.resendCount", 1),
-    redisClient.json.set(recordId, "$.secret", `"${secret}"`),
-  ])
-
-  await redisClient.expire(recordId, ttl)
+  await redisMerge<Authentication>({
+    id: session.id,
+    idPrefix: "@session/authentication",
+    previous: session,
+    payload: {
+      createdAt: new Date().getTime(),
+      resendCount: session.resendCount + 1,
+      secret,
+    },
+  })
 
   const updatedSession = await getAuthenticationSession(id)
 
