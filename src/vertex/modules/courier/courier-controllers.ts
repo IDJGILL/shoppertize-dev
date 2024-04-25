@@ -27,6 +27,8 @@ export const checkPostcodeService = async (postcode: IndianPostcode) => {
       }
     | PincodeDetailsError
 
+  console.log({ data })
+
   if ("message" in data) {
     throw new ExtendedError({
       code: "BAD_REQUEST",

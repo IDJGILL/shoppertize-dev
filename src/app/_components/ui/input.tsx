@@ -9,8 +9,7 @@ import { countryCodes } from "~/lib/utils/constants/country-codes"
 import { ScrollArea } from "./scroll-area"
 import { TriangleDownIcon } from "@radix-ui/react-icons"
 import { Progress } from "./progress"
-import { type AddressSchemaProps } from "~/lib/modules/address/utils/address-schemas"
-import { Address } from "~/vertex/modules/address/address-models"
+import { type Shipping } from "~/vertex/modules/address/address-models"
 
 const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, type, ...props }, ref) => {
@@ -88,9 +87,9 @@ function Password<T>({ ...props }: PasswordProps<T>) {
 }
 
 interface PhoneInputProps {
-  form: UseFormReturn<Address, unknown, undefined>
+  form: UseFormReturn<Shipping, unknown, undefined>
   field: ControllerRenderProps
-  name: "shipping_phone" | "billing_phone"
+  name: "phone"
 }
 
 function PhoneInput({ ...props }: PhoneInputProps) {

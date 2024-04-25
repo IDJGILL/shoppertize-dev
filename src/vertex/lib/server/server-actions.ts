@@ -25,18 +25,18 @@ import { authAction, publicAction, revalidate } from "~/vertex/lib/server/server
 import { signIn, signOut } from "~/vertex/lib/auth/auth-config"
 import { $CartItem } from "../../modules/cart/cart-schemas"
 import { removeCartItemFromCookie, updateCartItemToCookie } from "../../modules/cart/cart-server-utils"
-import { $Revalidate } from "~/vertex/global/models"
+import { $Revalidate } from "~/vertex/global/global-models"
 import { checkoutHandler } from "~/vertex/modules/checkout/checkout-controllers"
 import { $PaymentMethod } from "~/lib/modules/payment/payment-models"
 import { addressHandler, verifyAddress } from "~/vertex/modules/address/address-controllers"
-import { $Address, $AddressVerification } from "~/vertex/modules/address/address-models"
+import { $AddressVerification, $Shipping } from "~/vertex/modules/address/address-models"
 import otpless from "../otpless/otpless-config"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { $IndianPostcode } from "~/vertex/modules/courier/courier-models"
 import { checkPostcodeService } from "~/vertex/modules/courier/courier-controllers"
 import { z } from "zod"
 import { redisGet } from "../redis/redis-utils"
-import { type AddressOtpSession } from "~/vertex/modules/address/address-types"
+import { type AddressSession } from "~/vertex/modules/address/address-types"
 
 // Todo - Create password schema logic.
 // Todo - Test @hapi/iron package in edge environment.
@@ -115,7 +115,7 @@ export const checkoutAction = authAction($PaymentMethod, async (input) => {
   return await checkoutHandler(input)
 })
 
-export const addressAction = authAction($Address, async (input, ctx) => {
+export const addressAction = authAction($Shipping, async (input, ctx) => {
   const data = await addressHandler(input, ctx.session.authToken)
 
   return ctx.response.success({
@@ -129,7 +129,7 @@ export const addressVerifyAction = authAction($AddressVerification, async (input
 })
 
 export const addressResendAction = authAction(z.string(), async (input) => {
-  const session = await redisGet<AddressOtpSession>({ id: input, idPrefix: "@session/address" })
+  const session = await redisGet<AddressSession>({ id: input, idPrefix: "@session/address" })
 
   if (!session) {
     throw new ExtendedError({ code: "BAD_REQUEST", message: "Limit reached, please refresh the page and try again." })

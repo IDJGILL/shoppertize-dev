@@ -1,79 +1,23 @@
 import "server-only"
 
-import { type Address } from "./address-models"
+import { type Shipping } from "./address-models"
 import { client } from "~/lib/graphql/client"
 import {
+  GetUserMetaDataGql,
   UpdateUserMetaDataGql,
+  type GetUserMetaDataGqlResponse,
+  type GetUserMetaDataGqlInput,
   type UpdateUserMetaDataGqlInput,
   type UpdateUserMetaDataGqlResponse,
-} from "~/lib/modules/auth/auth-gql"
-import { nanoid } from "nanoid"
-import type { AddressOtpSession, AddressData, AddOrUpdateAddress } from "./address-types"
-import { getAuthSession } from "../auth/auth-server-utils"
+} from "./address-gql"
+import type { AddressSession, AddOrUpdateAddress } from "./address-types"
 import { redisCreate, redisUpdate } from "~/vertex/lib/redis/redis-utils"
-import type { AuthSession } from "~/vertex/global/types"
+import type { AuthSession } from "~/vertex/global/global-types"
 import { cloneDeep } from "lodash-es"
 import otpless from "~/vertex/lib/otpless/otpless-config"
 
-export function reshapeAddress(props: { id?: string; address: Address; notificationEmail: string }): AddressData {
-  return {
-    id: props.id ?? nanoid(),
-    address: {
-      shipping: {
-        first_name: props.address.shipping_firstName,
-
-        last_name: props.address.shipping_lastName,
-
-        address_1: props.address.shipping_address1,
-
-        address_2: props.address.shipping_address2,
-
-        city: props.address.shipping_city,
-
-        state: "DL",
-
-        phone: props.address.shipping_phone,
-
-        postcode: props.address.shipping_postcode,
-
-        email: props.notificationEmail,
-
-        country: props.address.shipping_country,
-
-        isDefault: props.address.isDefault,
-      },
-
-      billing: props.address.isTaxInvoice
-        ? {
-            first_name: props.address.billing_firstName,
-
-            last_name: "",
-
-            company: props.address.billing_tax,
-
-            address_1: props.address.billing_address1,
-
-            address_2: props.address.billing_address2,
-
-            city: props.address.billing_city,
-
-            state: props.address.billing_state,
-
-            postcode: props.address.billing_postcode,
-
-            country: props.address.billing_country,
-
-            email: props.notificationEmail,
-
-            phone: props.address.billing_phone,
-          }
-        : null,
-    },
-  }
-}
-
-export async function updateAddressMetaData(props: { list: AddressData[]; item: AddressData; authToken: string }) {
-  const isDefault = props.item.address.shipping.isDefault
+export async function updateAddressMetaData(props: { list: Shipping[]; item: Shipping; authToken: string }) {
+  const isDefault = props.item.isDefault
 
   const metaDataItems = [
     { key: "address-options", value: JSON.stringify(props.list) },
@@ -95,18 +39,12 @@ export async function updateAddressMetaData(props: { list: AddressData[]; item: 
   })
 }
 
-export async function getCurrentAddressFromSession(uid: string) {
-  const data = await getAuthSession(uid)
+export async function sendAddressOtp(input: Shipping, action: AddressSession["action"]): Promise<string> {
+  const response1 = await otpless.send(input.phone)
 
-  return data?.currentAddress ?? null
-}
-
-export async function sendAddressOtp(input: AddressData, action: AddressOtpSession["action"]): Promise<string> {
-  const response1 = await otpless.send(input.address.shipping.phone)
-
-  const response2 = await redisCreate<AddressOtpSession>({
+  const response2 = await redisCreate<AddressSession>({
     idPrefix: "@session/address",
-    payload: { action: action, address: input.address, token: response1.token },
+    payload: { action: action, address: input, token: response1.token },
     ttlSec: 5 * 60,
   })
 
@@ -117,11 +55,11 @@ export async function addOrUpdateAddress(props: AddOrUpdateAddress) {
   // Clone the addresses array
   const updatedList = cloneDeep(props.addresses)
 
-  if (props.address.address.shipping.isDefault) {
+  if (props.address.isDefault) {
     // If the new address is set to default, update other addresses to be not default
     updatedList.forEach((address) => {
       if (address.id !== address.id) {
-        address.address.shipping.isDefault = false
+        address.isDefault = false
       }
     })
   }
@@ -141,4 +79,52 @@ export async function addOrUpdateAddress(props: AddOrUpdateAddress) {
     updateAddressMetaData({ list: updatedList, item: props.address, authToken: props.authToken }),
     redisUpdate<AuthSession>({ id: props.uid, idPrefix: "@session/auth", payload: { currentAddress: props.address } }),
   ])
+}
+
+export const getAddressOptionsFromMeta = async (authToken: string) => {
+  const data = await client<GetUserMetaDataGqlResponse, Omit<GetUserMetaDataGqlInput, "customerId">>({
+    query: GetUserMetaDataGql,
+    access: "user",
+    inputs: {
+      keysIn: ["address-options"],
+    },
+    authToken,
+  })
+
+  const metaData = data.customer.metaData?.find((a) => a.key === "address-options")
+
+  if (!metaData) return { email: data.customer.email!, uid: data.customer.databaseId.toString(), addresses: [] }
+
+  const addresses = JSON.parse(metaData.value) as Shipping[]
+
+  return {
+    addresses,
+    email: data.customer.email!,
+    uid: data.customer.databaseId.toString(),
+  }
+}
+
+export const getCurrentAddressFromMeta = async (customerId: number) => {
+  const data = await client<GetUserMetaDataGqlResponse, GetUserMetaDataGqlInput>({
+    query: GetUserMetaDataGql,
+    access: "admin",
+    inputs: {
+      keysIn: ["address-selected", "address-default"],
+      customerId,
+    },
+  })
+
+  const defaultAddress = data.customer.metaData?.find((a) => a.key === "address-default")
+
+  const selectedAddress = data.customer.metaData?.find((a) => a.key === "address-selected")
+
+  if (selectedAddress) {
+    return JSON.parse(selectedAddress.value) as Shipping | null
+  }
+
+  if (defaultAddress) {
+    return JSON.parse(defaultAddress.value) as Shipping | null
+  }
+
+  return null
 }

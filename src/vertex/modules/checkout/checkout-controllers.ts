@@ -1,24 +1,24 @@
 import "server-only"
 
 import { getWallet, phonePayPagePage } from "../payment/payment-controllers"
-import { getCurrentAddressFromSession } from "../address/address-server-utils"
 import { getCartItemData, sortCartItemsData } from "../cart/cart-server-utils"
 import { validateCartItems } from "./checkout-shared-utils"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { calcSummary } from "../cart/cart-client-utils"
 import type { PaymentMethod, PaymentOption } from "../payment/payment-types"
 import { checkoutSession, saveOrderToDatabase } from "./checkout-server-utils"
+import { getAuthSession } from "../auth/auth-server-utils"
 
 const COD_CHARGES = 50 // Todo - Move this to app config
 
 export const getCheckoutSession = async (uid: string, email: string) => {
-  const requests = await Promise.all([getWallet(email), getCartItemData(), getCurrentAddressFromSession(uid)])
+  const requests = await Promise.all([getWallet(email), getCartItemData(), getAuthSession(uid)])
 
   const wallet = requests[0]
 
   const cartItems = requests[1]
 
-  const shippingAddress = requests[2]?.address.shipping
+  const shippingAddress = requests[2]?.currentAddress?.address.shipping
 
   if (!shippingAddress) {
     throw new ExtendedError({ code: "BAD_REQUEST" })

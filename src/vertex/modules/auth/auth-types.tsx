@@ -1,6 +1,6 @@
 import { type DefaultSession } from "next-auth"
 import { type DefaultJWT } from "next-auth/jwt"
-import type { Authentication } from "~/vertex/global/types"
+import type { Authentication } from "~/vertex/global/global-types"
 import type { RedisExtend } from "~/vertex/lib/redis/redis-types"
 
 export type ExtendUser = DefaultSession["user"] & {

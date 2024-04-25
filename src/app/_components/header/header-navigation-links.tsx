@@ -2,7 +2,7 @@ import Link from "next/link"
 import { accountNavigations, authNavigations } from "~/lib/utils/constants/navigations"
 import { cn } from "~/lib/utils/functions/ui"
 import { AuthLogout } from "~/vertex/components/auth/auth-logout"
-import { type AuthClientSession } from "~/vertex/global/types"
+import { type AuthClientSession } from "~/vertex/global/global-types"
 
 interface MenuHeaderProps extends React.HTMLAttributes<HTMLElement> {
   session: AuthClientSession

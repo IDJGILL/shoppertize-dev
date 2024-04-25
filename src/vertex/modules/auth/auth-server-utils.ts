@@ -11,20 +11,20 @@ import {
 } from "./auth-gql"
 import { cookies } from "next/headers"
 import { customAlphabet, nanoid } from "nanoid"
-import { config } from "~/vertex/global/config"
+import { config } from "~/vertex/global/global-config"
 import { type CreateUserProps } from "./auth-types"
 import { identifyUsernameType } from "./auth-client-utils"
 import { wpClient } from "~/vertex/lib/wordpress/wordpress-client"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
-import type { AuthSession, Authentication } from "~/vertex/global/types"
-import { getCurrentAddressFromDb } from "../address/address-queries"
+import type { AuthSession, Authentication } from "~/vertex/global/global-types"
 import { redisCreate, redisDelete, redisGet, redisMerge, redisUpdate } from "~/vertex/lib/redis/redis-utils"
+import { getCurrentAddressFromMeta } from "../address/address-server-utils"
 
 export async function createAuthSession(props: GetAuthTokensGqlOutput["login"]) {
   const uid = props.user.databaseId.toString()
 
-  const address = await getCurrentAddressFromDb(+uid)
+  const address = await getCurrentAddressFromMeta(+uid)
 
   await redisCreate<AuthSession>({
     id: uid,

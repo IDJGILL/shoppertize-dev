@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext } from "react"
-import type { AuthClientSession } from "~/vertex/global/types"
+import type { AuthClientSession } from "~/vertex/global/global-types"
 import { api } from "~/vertex/lib/trpc/trpc-context-provider"
 
 const AuthSessionContext = createContext<AuthClientSession | null>(null)

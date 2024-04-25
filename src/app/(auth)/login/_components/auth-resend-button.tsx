@@ -10,16 +10,16 @@ export default function AuthResendButton({ ...props }: AuthResendButtonProps) {
 
   return (
     <AuthResend>
-      {({ mutate, isCompleted, isLoading, remaining }) => (
+      {({ mutate, countdown, isLoading }) => (
         <Button
           type="button"
           variant="outline"
           className="w-full"
-          disabled={!isCompleted}
+          disabled={!countdown.isCompleted}
           onClick={() => mutate()}
           loading={isLoading ? "true" : "false"}
         >
-          {!isCompleted ? `Resend in (00:${remaining})` : "Resend"}
+          {!countdown.isCompleted ? `Resend in (00:${countdown.remaining})` : "Resend"}
         </Button>
       )}
     </AuthResend>

@@ -1,47 +1,44 @@
 import "server-only"
 
-import type { Address } from "./address-models"
 import otpless from "~/vertex/lib/otpless/otpless-config"
-import { getAddressOptions } from "./address-queries"
 import { ExtendedError } from "~/vertex/utils/extended-error"
-import { addOrUpdateAddress, reshapeAddress, sendAddressOtp } from "./address-server-utils"
-import type { AddressOtpSession, VerifyAddressProps } from "./address-types"
+import { addOrUpdateAddress, getAddressOptionsFromMeta, sendAddressOtp } from "./address-server-utils"
+import type { AddressSession, VerifyAddressProps } from "./address-types"
 import { redisDelete, redisGet } from "~/vertex/lib/redis/redis-utils"
+import { type Shipping } from "./address-models"
 
-export const addressHandler = async (input: Address, authToken: string): Promise<string | null> => {
-  const { addresses, email, uid } = await getAddressOptions(authToken)
+export const addressHandler = async (input: Shipping, authToken: string): Promise<string | null> => {
+  const { addresses, uid } = await getAddressOptionsFromMeta(authToken)
 
   if (addresses.length >= 5) {
     throw new ExtendedError({ code: "BAD_REQUEST", message: "Address maximum limit reached." })
   }
 
-  const address = reshapeAddress({ id: input.addressId, address: input, notificationEmail: email })
-
-  const existing = addresses.find((a) => a.id === input.addressId)
+  const existing = addresses.find((a) => a.id === input.id)
 
   if (!existing) {
-    const id = await sendAddressOtp(address, "add")
+    const id = await sendAddressOtp(input, "add")
 
     return id
   }
 
-  const isNumberChanged = existing.address.shipping.phone !== input.shipping_phone
+  const isNumberChanged = existing.phone !== input.phone
 
   if (isNumberChanged) {
-    const id = await sendAddressOtp(address, "update")
+    const id = await sendAddressOtp(input, "update")
 
     return id
   }
 
-  await addOrUpdateAddress({ uid, addresses: addresses, address, authToken })
+  await addOrUpdateAddress({ uid, addresses: addresses, address: input, authToken })
 
   return null
 }
 
 export async function verifyAddress(props: VerifyAddressProps) {
-  const { addresses, uid } = await getAddressOptions(props.authToken)
+  const { addresses, uid } = await getAddressOptionsFromMeta(props.authToken)
 
-  const response1 = await redisGet<AddressOtpSession>({ id: props.id, idPrefix: "@session/address" })
+  const response1 = await redisGet<AddressSession>({ id: props.id, idPrefix: "@session/address" })
 
   if (!response1) throw new ExtendedError({ code: "NOT_FOUND" })
 
@@ -55,8 +52,18 @@ export async function verifyAddress(props: VerifyAddressProps) {
     uid,
     addresses: addresses,
     authToken: props.authToken,
-    address: { id: response1.id, address: response1.address },
+    address: response1.address,
   })
 
   await redisDelete({ id: props.id, idPrefix: "@session/address" })
+}
+
+export const getAddressById = async (authToken: string, id: string) => {
+  const { addresses } = await getAddressOptionsFromMeta(authToken)
+
+  const exists = addresses.find((a) => a.id === id)
+
+  if (!exists) return null
+
+  return exists
 }

@@ -1,4 +1,4 @@
-import type { RedisIDPrefix } from "~/vertex/global/types"
+import type { RedisIDPrefix } from "~/vertex/global/global-types"
 
 export type RedisExtend<T> = {
   id: string

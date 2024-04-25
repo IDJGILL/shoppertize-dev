@@ -2,7 +2,7 @@ import type { Schema, ZodTypeDef } from "zod"
 import { type SafeAction } from "next-safe-action"
 import { useAction } from "next-safe-action/hooks"
 import type { ActionCallBacks, ClientActionError } from "./server-types"
-import { type Revalidate } from "~/vertex/global/models"
+import { type Revalidate } from "~/vertex/global/global-models"
 import { revalidateAction } from "./server-actions"
 
 export const useActionHandler = <T, K, F>(

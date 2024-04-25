@@ -1,4 +1,4 @@
-import { config as routeConfig } from "./vertex/global/config"
+import { config as routeConfig } from "./vertex/global/global-config"
 import { auth } from "./vertex/lib/auth/auth-config"
 
 export default auth((req) => {

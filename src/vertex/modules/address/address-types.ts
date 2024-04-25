@@ -1,3 +1,5 @@
+import { Shipping } from "./address-models"
+
 export const GetBothAddressesGql = `
 query GetBothAddressesGql {
   customer {
@@ -147,44 +149,12 @@ export type OrderAddresses = {
   billing?: RemoveNullable<BillingAddress>
 }
 
-export type AddressData = {
-  id: string
-  address: {
-    shipping: {
-      first_name: string
-      last_name: string
-      address_1: string
-      address_2: string
-      city: string
-      state: string
-      phone: string
-      postcode: string
-      email: string
-      country: string
-      isDefault: boolean
-    }
-    billing: {
-      first_name: string
-      last_name: string
-      company: string
-      address_1: string
-      address_2: string
-      city: string
-      state: string
-      postcode: string
-      country: string
-      email: string
-      phone: string
-    } | null
-  }
-}
-
 export type AddAddressOutput = { token: string | null }
 
 export type UpdateAddressOutput = { token: string | null }
 
-export type AddressOtpSession = {
-  address: AddressData["address"]
+export type AddressSession = {
+  address: Shipping
   token: string
   action: "add" | "update"
 }
@@ -196,8 +166,8 @@ export type AddressHandlerOutput = {
 
 export type AddOrUpdateAddress = {
   uid: string
-  addresses: AddressData[]
-  address: AddressData
+  addresses: Shipping[]
+  address: Shipping
   authToken: string
 }
 

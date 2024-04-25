@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { pathList, cacheTagList } from "./constants"
+import { pathList, cacheTagList } from "./global-constants"
 
 export const $Revalidate = z.object({
   paths: z.enum([...pathList]).array(),

@@ -1,9 +1,9 @@
 import { Suspense } from "react"
 import { getCurrentAddress } from "~/vertex/modules/address/address-queries"
-import { type AddressData } from "~/vertex/modules/address/address-types"
+import { type Shipping } from "~/vertex/modules/address/address-types"
 
 interface CurrentAddressProps {
-  children: (props: { address: AddressData | null }) => React.ReactNode
+  children: (props: { address: Shipping | null }) => React.ReactNode
 }
 
 export default function CurrentAddress({ ...props }: CurrentAddressProps) {
@@ -17,7 +17,7 @@ export default function CurrentAddress({ ...props }: CurrentAddressProps) {
 }
 
 interface InitialDataFetcherProps {
-  children: (props: { address: AddressData | null }) => React.ReactNode
+  children: (props: { address: Shipping | null }) => React.ReactNode
 }
 
 async function InitialDataFetcher({ ...props }: InitialDataFetcherProps) {

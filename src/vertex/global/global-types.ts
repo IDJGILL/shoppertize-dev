@@ -1,15 +1,18 @@
-/**
- *  *** Standardized Global Types ***
- * The properties of the types *shell not be changed or update
- */
-
-import { RedisExtend } from "../lib/redis/redis-types"
-import { type AddressData } from "../modules/address/address-types"
-import { type cacheTagList, type pathList, type redisIDPrefixList } from "./constants"
+import { type Shipping } from "../modules/address/address-models"
+import type { cacheTagList, pathList, redisIDPrefixList } from "./global-constants"
 
 export type Path = (typeof pathList)[number]
+
 export type CacheTag = (typeof cacheTagList)[number]
+
 export type RedisIDPrefix = (typeof redisIDPrefixList)[number]
+
+//
+//
+//
+//
+//
+//
 
 // Todo - Work on this
 
@@ -22,7 +25,7 @@ export type AuthSession = {
   username: string
   loggedInAt: string
   expireAt: string
-  currentAddress: AddressData | null
+  currentAddress: Shipping | null
 }
 
 export type AuthClientSession = {
@@ -76,7 +79,7 @@ export type Address = {
   } | null
 }
 
-export type Shipping = ShippingItem[]
+// export type Shipping = ShippingItem[]
 
 export type ShippingItem = {
   charge: FixedCharge | PercentageCharge

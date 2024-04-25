@@ -27,6 +27,8 @@ export function useAuthResend() {
   const countdown = useCountDown(authCountdownAtom)
 
   const resendAction = useActionHandler(authResendAction, {
+    onSuccess: () => countdown.reset(60),
+
     onError: (response) => {
       switch (response.code) {
         // Session Expired
@@ -55,8 +57,6 @@ export function useAuthResend() {
   })
 
   const isLoading = resendAction.status === "executing"
-
-  useUpdateEffect(() => countdown.reset(60), [isLoading])
 
   const mutate = () => {
     resendAction.mutate({
