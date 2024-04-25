@@ -14,7 +14,7 @@ import type { CartItemData, CartItemRecord, ExtendCartItem, MainCartItem } from 
 import { cookies } from "next/headers"
 import { calculateGst } from "~/lib/utils/functions/calculate-gst"
 import { ExtendedError } from "~/vertex/utils/extended-error"
-import { redisClient } from "~/vertex/lib/redis/client"
+import { redisClient } from "~/vertex/lib/redis/redis-client"
 
 export async function getCachedProductStock(productId: string) {
   const data = await redisClient.get<GetAllProductsStockDetailsGqlResponse["products"]["nodes"][number]>(

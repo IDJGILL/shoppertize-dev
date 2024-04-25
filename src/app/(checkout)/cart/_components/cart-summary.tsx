@@ -4,7 +4,7 @@ import { CoinsIcon, ShoppingCart } from "lucide-react"
 import Box from "~/app/_components/box"
 import { currency } from "~/constants"
 import { cn } from "~/lib/utils/functions/ui"
-import { useCartContext } from "~/vertex/components/cart/cart/context"
+import { useCartContext } from "~/vertex/components/cart/cart-context"
 
 interface CartSummaryProps extends React.HTMLAttributes<HTMLElement> {}
 
@@ -14,10 +14,7 @@ export default function CartSummary({ ...props }: CartSummaryProps) {
   const { cartSummary } = useCartContext()
 
   return (
-    <Box
-      id="summary-section"
-      className={cn("scroll-m-20 text-sm", props.className)}
-    >
+    <Box id="summary-section" className={cn("scroll-m-20 text-sm", props.className)}>
       <div className="pb-1">
         <div className="flex items-center justify-between ">
           <div>Total MRP (Incl. of taxes) </div>
@@ -27,9 +24,7 @@ export default function CartSummary({ ...props }: CartSummaryProps) {
           </div>
         </div>
 
-        <div className="mb-2 text-left text-xs text-muted-foreground">
-          Based on all item{`'`}s total M.R.P price.
-        </div>
+        <div className="mb-2 text-left text-xs text-muted-foreground">Based on all item{`'`}s total M.R.P price.</div>
       </div>
 
       <div className="flex items-center justify-between text-xs">

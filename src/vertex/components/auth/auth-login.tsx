@@ -1,8 +1,8 @@
 "use client"
 
+import { authLoginActon } from "~/vertex/lib/server/server-actions"
 import { useAuthContext } from "./auth-context"
-import { useActionHandler } from "~/vertex/lib/action/hook"
-import { login } from "~/vertex/lib/action/actions"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 
 export type AuthLoginProps = ReturnType<typeof useAuthLogin>
 
@@ -19,7 +19,7 @@ export function AuthLogin({ ...props }: Props) {
 export function useAuthLogin() {
   const { loginForm, redirect } = useAuthContext()
 
-  const loginAction = useActionHandler(login, {
+  const loginAction = useActionHandler(authLoginActon, {
     onSuccess: () => redirect(),
 
     onError: (e) => {

@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid"
-import { redisClient } from "./client"
+import { redisClient } from "./redis-client"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import type {
   RedisCreateOpts,
@@ -8,7 +8,7 @@ import type {
   RedisGetOpts,
   RedisMergeOpts,
   RedisUpdateOpts,
-} from "./types"
+} from "./redis-types"
 
 export const redisCreate = async <T extends Record<keyof T, unknown>>(props: RedisCreateOpts<T>) => {
   const randomId = nanoid()

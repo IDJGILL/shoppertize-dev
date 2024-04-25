@@ -1,18 +1,7 @@
-import {
-  ApiCarouselSchema,
-  type ApiCarouselSchemaProps,
-} from "./carousel-schemas"
-import {
-  CarouselProductsGql,
-  type CarouselProductsGqlData,
-  type CarouselProductsGqlInputs,
-} from "./carousel-gql"
+import { ApiCarouselSchema, type ApiCarouselSchemaProps } from "./carousel-schemas"
+import { CarouselProductsGql, type CarouselProductsGqlData, type CarouselProductsGqlInputs } from "./carousel-gql"
 import { client } from "~/lib/graphql/client"
-import {
-  createTRPCRouter,
-  publicProcedure,
-  wrapTRPC,
-} from "~/vertex/lib/trpc/trpc-init"
+import { createTRPCRouter, publicProcedure, wrapTRPC } from "~/vertex/lib/trpc/trpc-config"
 
 export const getCarouselProducts = async (props: ApiCarouselSchemaProps) => {
   return await wrapTRPC(async (response) => {
@@ -30,10 +19,7 @@ export const getCarouselProducts = async (props: ApiCarouselSchemaProps) => {
       relation: "AND",
     }
 
-    const data = await client<
-      CarouselProductsGqlData,
-      CarouselProductsGqlInputs
-    >({
+    const data = await client<CarouselProductsGqlData, CarouselProductsGqlInputs>({
       access: "public",
       query: CarouselProductsGql,
       inputs: {

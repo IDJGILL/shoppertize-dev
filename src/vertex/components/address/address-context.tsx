@@ -3,7 +3,7 @@
 import { createContext, useContext, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useActionHandler } from "~/vertex/lib/action/hook"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 import {
   $Address,
   $AddressVerification,
@@ -11,9 +11,11 @@ import {
   type Address,
 } from "~/vertex/modules/address/address-models"
 import { useRouter } from "next/navigation"
-import { addressHandlerAction, checkPostcodeAction } from "~/vertex/lib/action/actions"
-import type { getAddressById } from "~/vertex/modules/cart/cart-controllers"
 import { toast } from "sonner"
+import { useCountDownAtom } from "~/vertex/hooks/useCountdown"
+import { addressCountdownAtom } from "./address-otp"
+import { type getAddressById } from "~/vertex/modules/address/address-queries"
+import { addressAction, addressPostcodeAction } from "~/vertex/lib/server/server-actions"
 
 const AddressContext = createContext<ReturnType<typeof useAddressContextLogic> | null>(null)
 
@@ -29,8 +31,7 @@ export function AddressContextProvider({ ...props }: AddressContextProviderProps
 
 function useAddressContextLogic(initial: Awaited<ReturnType<typeof getAddressById>>) {
   const [model, modelSet] = useState(false)
-
-  console.log(initial)
+  const countdown = useCountDownAtom(addressCountdownAtom)
 
   const router = useRouter()
 
@@ -62,10 +63,12 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof getAddressByI
     },
   })
 
-  const addressHandler = useActionHandler(addressHandlerAction, {
+  const addressHandler = useActionHandler(addressAction, {
     onSuccess: (response) => {
       if (response.data) {
         otpForm.setValue("id", response.data ?? "")
+
+        countdown(60)
 
         return modelSet(true)
       }
@@ -84,7 +87,7 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof getAddressByI
     resolver: zodResolver($AddressVerification),
   })
 
-  const checkShippingPostcode = useActionHandler(checkPostcodeAction, {
+  const checkShippingPostcode = useActionHandler(addressPostcodeAction, {
     onSuccess: (response) => {
       const shippingPostcode = addressForm.getValues("shipping_postcode")
 
@@ -105,7 +108,7 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof getAddressByI
     },
   })
 
-  const checkBillingPostcode = useActionHandler(checkPostcodeAction, {
+  const checkBillingPostcode = useActionHandler(addressPostcodeAction, {
     onSuccess: (response) => {
       const billingPostcode = addressForm.getValues("billing_postcode")
 
@@ -194,6 +197,7 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof getAddressByI
     isAddressUpdating,
     otpForm,
     router,
+    countdown,
   }
 }
 

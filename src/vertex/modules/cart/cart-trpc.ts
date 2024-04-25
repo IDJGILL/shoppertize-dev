@@ -1,4 +1,4 @@
-import { createTRPCRouter, publicProcedure } from "~/vertex/lib/trpc/trpc-init"
+import { createTRPCRouter, publicProcedure } from "~/vertex/lib/trpc/trpc-config"
 import { $CartItem } from "./cart-schemas"
 import { addItemToCart, getCartItemsCount } from "./cart-controllers"
 import { ExtendedError } from "~/vertex/utils/extended-error"

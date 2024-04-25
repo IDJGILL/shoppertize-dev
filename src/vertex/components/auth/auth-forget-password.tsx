@@ -1,8 +1,8 @@
 "use client"
 
+import { authForgetAction } from "~/vertex/lib/server/server-actions"
 import { useAuthContext } from "./auth-context"
-import { useActionHandler } from "~/vertex/lib/action/hook"
-import { forget } from "~/vertex/lib/action/actions"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 
 export type AuthForgetPasswordProps = ReturnType<typeof useAuthForgetPassword>
 
@@ -19,7 +19,7 @@ export function AuthForgetPassword({ ...props }: Props) {
 export function useAuthForgetPassword() {
   const { identifyForm, loginForm, actionSet, tokenSet } = useAuthContext()
 
-  const forgetAction = useActionHandler(forget, {
+  const forgetAction = useActionHandler(authForgetAction, {
     onSuccess: (response) => {
       actionSet("status-polling")
       tokenSet(response.id)

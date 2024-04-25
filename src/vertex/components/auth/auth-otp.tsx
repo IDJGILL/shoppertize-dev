@@ -1,8 +1,8 @@
 "use client"
 
 import { useAuthContext } from "./auth-context"
-import { verify } from "~/vertex/lib/action/actions"
-import { useActionHandler } from "~/vertex/lib/action/hook"
+import { authVerifyAction } from "~/vertex/lib/server/server-actions"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 
 export type AuthOneTimePassCodeProps = ReturnType<typeof useAuthOtp>
 
@@ -19,7 +19,7 @@ export function AuthOneTimePassCode({ ...props }: Props) {
 export function useAuthOtp() {
   const { identifyForm, otpForm, redirect, actionSet, resetFormsState, router } = useAuthContext()
 
-  const verifyAction = useActionHandler(verify, {
+  const verifyAction = useActionHandler(authVerifyAction, {
     onSuccess: (response) => {
       switch (response.action) {
         case "signup": {

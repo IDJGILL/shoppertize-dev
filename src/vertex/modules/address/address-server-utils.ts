@@ -10,10 +10,10 @@ import {
 import { nanoid } from "nanoid"
 import type { AddressOtpSession, AddressData, AddOrUpdateAddress } from "./address-types"
 import { getAuthSession } from "../auth/auth-server-utils"
-import { redisCreate, redisUpdate } from "~/vertex/lib/redis/utils"
+import { redisCreate, redisUpdate } from "~/vertex/lib/redis/redis-utils"
 import type { AuthSession } from "~/vertex/global/types"
 import { cloneDeep } from "lodash-es"
-import otpless from "~/vertex/lib/otpless/config"
+import otpless from "~/vertex/lib/otpless/otpless-config"
 
 export function reshapeAddress(props: { id?: string; address: Address; notificationEmail: string }): AddressData {
   return {

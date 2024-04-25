@@ -14,12 +14,12 @@ import { customAlphabet, nanoid } from "nanoid"
 import { config } from "~/vertex/global/config"
 import { type CreateUserProps } from "./auth-types"
 import { identifyUsernameType } from "./auth-client-utils"
-import { wpClient } from "~/vertex/lib/wordpress/wp-client"
+import { wpClient } from "~/vertex/lib/wordpress/wordpress-client"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
 import type { AuthSession, Authentication } from "~/vertex/global/types"
 import { getCurrentAddressFromDb } from "../address/address-queries"
-import { redisCreate, redisDelete, redisGet, redisMerge, redisUpdate } from "~/vertex/lib/redis/utils"
+import { redisCreate, redisDelete, redisGet, redisMerge, redisUpdate } from "~/vertex/lib/redis/redis-utils"
 
 export async function createAuthSession(props: GetAuthTokensGqlOutput["login"]) {
   const uid = props.user.databaseId.toString()

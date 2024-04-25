@@ -1,12 +1,12 @@
 import "server-only"
 
 import type { Address } from "./address-models"
-import otpless from "~/vertex/lib/otpless/config"
+import otpless from "~/vertex/lib/otpless/otpless-config"
 import { getAddressOptions } from "./address-queries"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { addOrUpdateAddress, reshapeAddress, sendAddressOtp } from "./address-server-utils"
 import type { AddressOtpSession, VerifyAddressProps } from "./address-types"
-import { redisDelete, redisGet } from "~/vertex/lib/redis/utils"
+import { redisDelete, redisGet } from "~/vertex/lib/redis/redis-utils"
 
 export const addressHandler = async (input: Address, authToken: string): Promise<string | null> => {
   const { addresses, email, uid } = await getAddressOptions(authToken)

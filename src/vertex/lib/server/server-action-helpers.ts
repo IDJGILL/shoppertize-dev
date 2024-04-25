@@ -1,8 +1,10 @@
 import { createSafeActionClient } from "next-safe-action"
-import type { Status, ActionSuccess } from "./types"
+import type { Status, ActionSuccess } from "./server-types"
 import { revalidatePath, revalidateTag } from "next/cache"
-import { auth } from "../auth/config"
+import { auth } from "../auth/auth-config"
 import { ExtendedError } from "~/vertex/utils/extended-error"
+import { type Revalidate } from "~/vertex/global/models"
+import { cacheTagList, pathList } from "~/vertex/global/constants"
 
 const response = {
   success: <TData>(props: ActionSuccess<TData>) => {
@@ -81,3 +83,21 @@ export const publicAction = createSafeActionClient({
     })
   },
 })
+
+export const revalidate = (input: Revalidate) => {
+  return new Promise<boolean>((resolve) => {
+    const isPathExist = input.paths.some((a) => pathList.includes(a))
+
+    const isTagExist = input.tags.some((a) => cacheTagList.includes(a))
+
+    if (isPathExist) {
+      input.paths.forEach((path) => revalidatePath(path))
+    }
+
+    if (isTagExist) {
+      input.tags.forEach((tag) => revalidateTag(tag))
+    }
+
+    return resolve(true)
+  })
+}

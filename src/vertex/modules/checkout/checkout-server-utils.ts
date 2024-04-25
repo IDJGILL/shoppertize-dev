@@ -1,7 +1,7 @@
 import "server-only"
 
 import { nanoid } from "nanoid"
-import { redisClient } from "~/vertex/lib/redis/client"
+import { redisClient } from "~/vertex/lib/redis/redis-client"
 import type { CheckoutSession, FeeLine, OrderBillingProps, OrderProps, OrderShippingProps } from "./checkout-types"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { getAuthSession } from "../auth/auth-server-utils"

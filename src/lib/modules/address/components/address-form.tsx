@@ -429,6 +429,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                     <FormField
                       control={addressForm.control}
                       name="billing_country"
+                      defaultValue="IN"
                       render={({ field }) => (
                         <div>
                           <FormItem className="flex-1">
@@ -454,7 +455,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
       </Box>
 
       <AddressOtp>
-        {({ form, mutateVerify, isResending, isVerifying, mutateResend, modelProps, isRunning, seconds }) => (
+        {({ form, mutateVerify, isResending, isVerifying, mutateResend, modelProps, countdown }) => (
           <ModelXDrawer {...modelProps}>
             <div className="mb-6">
               <h3 className="text-2xl font-semibold">Verify</h3>
@@ -515,7 +516,9 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                     className="mt-2 w-full"
                     onClick={() => mutateResend()}
                   >
-                    {!isRunning ? "Didn't receive the code? Resend" : `Resend again in 00:${seconds}`}
+                    {countdown.isCompleted
+                      ? "Didn't receive the code? Resend"
+                      : `Resend again in 00:${countdown.remaining}`}
                   </Button>
                 </form>
               </Form>

@@ -1,10 +1,10 @@
 "use client"
 
 import { useAuthContext } from "./auth-context"
-import { authStatus } from "~/vertex/lib/action/actions"
 import { useQuery } from "@tanstack/react-query"
 import { useCallback } from "react"
 import { useUpdateEffect } from "react-use"
+import { authStatusAction } from "~/vertex/lib/server/server-actions"
 
 export type AuthPollingProps = ReturnType<typeof useAuthPolling>
 
@@ -25,7 +25,7 @@ export function useAuthPolling() {
     queryKey: ["auth-polling"],
 
     queryFn: async () => {
-      const response = await authStatus({ id: token ?? "" })
+      const response = await authStatusAction({ id: token ?? "" })
 
       console.log("Polling...")
 

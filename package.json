@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@auth/upstash-redis-adapter": "^2.0.0",
-    "@bradgarropy/use-countdown": "^2.0.1",
     "@hookform/resolvers": "^3.3.2",
     "@next/bundle-analyzer": "^14.2.1",
     "@radix-ui/react-accordion": "^1.1.2",

@@ -12,7 +12,7 @@ import {
   type ProductCategoriesGqlData,
 } from "./product-gql"
 import type { Category, SearchTerm } from "./product-types"
-import { createTRPCRouter, publicProcedure } from "~/vertex/lib/trpc/trpc-init"
+import { createTRPCRouter, publicProcedure } from "~/vertex/lib/trpc/trpc-config"
 
 export const getProductBySlug = async (slug: string) => {
   const data = await client<GetSingleProductGqlData, GetSingleProductGqlInput>({
@@ -46,43 +46,34 @@ export const getProductSearchData = async () => {
 
   const products = data.products.nodes
 
-  const searchTerms: SearchTerm[] = products.reduce<SearchTerm[]>(
-    (acc, product) => {
-      if (
-        !product.productCategories.nodes.length ||
-        !product.productTags?.nodes.length
-      ) {
+  const searchTerms: SearchTerm[] = products.reduce<SearchTerm[]>((acc, product) => {
+    if (!product.productCategories.nodes.length || !product.productTags?.nodes.length) {
+      return acc
+    }
+
+    const categorySlug =
+      product.productCategories.nodes.length > 1
+        ? product.productCategories.nodes[1]!.slug
+        : product.productCategories.nodes[0]!.slug
+
+    product.productTags.nodes.forEach((tag) => {
+      if (acc.some((item) => item.title === tag.name)) {
         return acc
       }
 
-      const categorySlug =
-        product.productCategories.nodes.length > 1
-          ? product.productCategories.nodes[1]!.slug
-          : product.productCategories.nodes[0]!.slug
+      if (!product.productCategories?.nodes.length || !product.productTags?.nodes.length) {
+        return acc
+      }
 
-      product.productTags.nodes.forEach((tag) => {
-        if (acc.some((item) => item.title === tag.name)) {
-          return acc
-        }
-
-        if (
-          !product.productCategories?.nodes.length ||
-          !product.productTags?.nodes.length
-        ) {
-          return acc
-        }
-
-        acc.push({
-          title: tag.name,
-          slug: `${categorySlug}?search=${tag.name}`,
-          tags: [tag.name, product.name],
-        })
+      acc.push({
+        title: tag.name,
+        slug: `${categorySlug}?search=${tag.name}`,
+        tags: [tag.name, product.name],
       })
+    })
 
-      return acc
-    },
-    [],
-  )
+    return acc
+  }, [])
 
   return searchTerms
 }
@@ -94,12 +85,7 @@ export const getProductCategories = async () => {
     cacheTags: [],
   })
 
-  const excludeCategories = [
-    "todays-deal",
-    "new-arrivals",
-    "best-sellers",
-    "all-products",
-  ]
+  const excludeCategories = ["todays-deal", "new-arrivals", "best-sellers", "all-products"]
 
   const categories = data.productCategories.nodes
     .reduce<Category[]>((acc, item) => {
@@ -167,7 +153,5 @@ export const getProductCategories = async () => {
 // }
 
 export const productRouter = createTRPCRouter({
-  searchData: publicProcedure.mutation(
-    async () => await getProductSearchData(),
-  ),
+  searchData: publicProcedure.mutation(async () => await getProductSearchData()),
 })

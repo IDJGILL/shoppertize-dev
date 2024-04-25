@@ -1,5 +1,5 @@
 import "server-only"
-import { wpClient } from "~/vertex/lib/wordpress/wp-client"
+import { wpClient } from "~/vertex/lib/wordpress/wordpress-client"
 import {
   PasswordLoginGql,
   GetAuthTokensGql,

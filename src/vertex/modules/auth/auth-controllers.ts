@@ -27,8 +27,7 @@ import { AuthError } from "next-auth"
 import { cookies } from "next/headers"
 import { type JWT } from "next-auth/jwt"
 import { getAuthTokens } from "./auth-queries"
-import { login, signup } from "../../lib/action/actions"
-import { signIn } from "~/vertex/lib/auth/config"
+import { signIn } from "~/vertex/lib/auth/auth-config"
 import { emailClient } from "~/lib/smtp/smtp-client"
 import { identifyUsernameType } from "./auth-client-utils"
 import { type Authentication } from "~/vertex/global/types"
@@ -36,8 +35,9 @@ import { ExtendedError } from "~/vertex/utils/extended-error"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
 import { magicLinkEmailTemplate } from "~/lib/modules/auth/auth-emails"
 import type { Verify, Identify, AuthSessionId, Login, Signup, ForgetPassword, UpdatePassword } from "./auth-models"
-import { redisDelete, redisUpdate } from "~/vertex/lib/redis/utils"
-import { type RedisExtend } from "~/vertex/lib/redis/types"
+import { redisDelete, redisUpdate } from "~/vertex/lib/redis/redis-utils"
+import { type RedisExtend } from "~/vertex/lib/redis/redis-types"
+import { authLoginActon, authSignupAction } from "~/vertex/lib/server/server-actions"
 
 export const identifyUser = async (input: Identify): Promise<IdentifyUserOutput> => {
   const email = createEmailId(input.username, input.countryCode)
@@ -105,7 +105,7 @@ export const verifyUser = async (input: Verify): Promise<VerifyUserOutput> => {
 
   if (session.action === "login") {
     if (session)
-      await login({
+      await authLoginActon({
         id: session.id,
         username: session.username,
         password: session.secret,
@@ -122,7 +122,7 @@ export const verifyUser = async (input: Verify): Promise<VerifyUserOutput> => {
 
   if (session.verification === "otp") {
     if (session.action === "signup") {
-      await signup({ id: session.id, name: "New User", password: nanoid(32) })
+      await authSignupAction({ id: session.id, name: "New User", password: nanoid(32) })
 
       return {
         id: session.id,
@@ -133,7 +133,7 @@ export const verifyUser = async (input: Verify): Promise<VerifyUserOutput> => {
       }
     }
 
-    await login({
+    await authLoginActon({
       id: session.id,
       username: session.username,
       password: session.secret,
@@ -210,7 +210,7 @@ export const signUpUser = async (input: Signup): Promise<void> => {
 
   await redisDelete({ id: session.id, idPrefix: "@session/authentication" })
 
-  await login({
+  await authLoginActon({
     username: session.username,
     password: input.password,
   })
@@ -273,7 +273,7 @@ export const updatePassword = async (input: UpdatePassword): Promise<void> => {
 
   await redisUpdate<Authentication>({ id: input.id, idPrefix: "@session/authentication", payload: { action: "login" } })
 
-  await login({
+  await authLoginActon({
     id: session.id,
     username: session.username,
     password: input.password,
@@ -284,7 +284,7 @@ export const checkVerification = async (input: AuthSessionId): Promise<CheckVeri
   const session = await getAuthenticationSession(input.id)
 
   if (session.action === "login") {
-    await login({
+    await authLoginActon({
       id: session.id,
       username: session.username,
       password: "none",

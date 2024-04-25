@@ -1,8 +1,8 @@
 "use client"
 
+import { authUpdateAction } from "~/vertex/lib/server/server-actions"
 import { useAuthContext } from "./auth-context"
-import { useActionHandler } from "~/vertex/lib/action/hook"
-import { update } from "~/vertex/lib/action/actions"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 
 export type AuthUpdatePasswordProps = ReturnType<typeof useAuthUpdatePassword>
 
@@ -19,7 +19,7 @@ export function AuthUpdatePassword({ ...props }: Props) {
 export function useAuthUpdatePassword() {
   const { updatePasswordForm, redirect, actionSet } = useAuthContext()
 
-  const updateAction = useActionHandler(update, {
+  const updateAction = useActionHandler(authUpdateAction, {
     onSuccess: () => redirect(),
 
     onError: (error) => {

@@ -1,7 +1,7 @@
 import { env } from "~/env.mjs"
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
 import { type NextRequest } from "next/server"
-import { createTRPCContext } from "~/vertex/lib/trpc/trpc-init"
+import { createTRPCContext } from "~/vertex/lib/trpc/trpc-config"
 import { appRouter } from "~/vertex/lib/trpc/trpc-router"
 
 export const runtime = "edge"
@@ -15,9 +15,7 @@ const handler = (req: NextRequest) =>
     onError:
       env.NODE_ENV === "development"
         ? ({ path, error }) => {
-            console.error(
-              `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
-            )
+            console.error(`❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`)
           }
         : undefined,
   })

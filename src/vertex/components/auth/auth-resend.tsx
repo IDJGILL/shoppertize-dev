@@ -1,10 +1,11 @@
 "use client"
 
-import useCountDown from "~/vertex/hooks/useCountdown"
+import { useCountDown } from "~/vertex/hooks/useCountdown"
 import { useAuthContext } from "./auth-context"
 import { useUpdateEffect } from "react-use"
-import { useActionHandler } from "~/vertex/lib/action/hook"
-import { resend } from "~/vertex/lib/action/actions"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
+import { authResendAction } from "~/vertex/lib/server/server-actions"
+import { atom } from "jotai"
 
 export type AuthResendProps = ReturnType<typeof useAuthResend>
 
@@ -18,12 +19,14 @@ export function AuthResend({ ...props }: Props) {
   return <>{props.children(useAuthResend())}</>
 }
 
+export const authCountdownAtom = atom(60)
+
 export function useAuthResend() {
   const { identifyForm, otpForm, resetFormsState, token } = useAuthContext()
 
-  const countdown = useCountDown(60)
+  const countdown = useCountDown(authCountdownAtom)
 
-  const resendAction = useActionHandler(resend, {
+  const resendAction = useActionHandler(authResendAction, {
     onError: (response) => {
       switch (response.code) {
         // Session Expired
@@ -55,15 +58,15 @@ export function useAuthResend() {
 
   useUpdateEffect(() => countdown.reset(60), [isLoading])
 
-  const resendHandler = () => {
+  const mutate = () => {
     resendAction.mutate({
       id: otpForm.getValues("id") ?? token,
     })
   }
 
   return {
-    ...countdown,
-    mutate: resendHandler,
+    mutate,
     isLoading,
+    countdown,
   }
 }

@@ -1,7 +1,8 @@
 import { Suspense } from "react"
 import { ErrorBoundary } from "react-error-boundary"
 import { AddressContextProvider } from "./address-context"
-import { getAddressById } from "~/vertex/modules/cart/cart-controllers"
+import AppLoader from "../app/app-loader"
+import { getAddressById } from "~/vertex/modules/address/address-queries"
 
 interface AddressProviderProps {
   error: React.ReactElement
@@ -15,7 +16,7 @@ export function AddressProvider({ ...props }: AddressProviderProps) {
 
   return (
     <ErrorBoundary fallback={props.error}>
-      <Suspense fallback={props.loader}>
+      <Suspense fallback={<AppLoader />}>
         <InitialDataFetcher addressId={addressId}>{props.children}</InitialDataFetcher>
       </Suspense>
     </ErrorBoundary>

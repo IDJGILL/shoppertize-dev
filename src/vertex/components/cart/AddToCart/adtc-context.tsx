@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { createContext, useContext } from "react"
 import { toast } from "sonner"
-import { useRevalidate } from "~/vertex/lib/action/hook"
+import { useRevalidate } from "~/vertex/lib/server/server-hook"
 import { api } from "~/vertex/lib/trpc/trpc-context-provider"
 
 type InitialData = Pick<

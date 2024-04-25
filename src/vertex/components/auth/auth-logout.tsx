@@ -1,7 +1,7 @@
 "use client"
 
-import { logout } from "~/vertex/lib/action/actions"
-import { useActionHandler } from "~/vertex/lib/action/hook"
+import { authLogoutAction } from "~/vertex/lib/server/server-actions"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 
 export type AuthLogoutProps = ReturnType<typeof useAuthLogout>
 
@@ -16,7 +16,7 @@ export function AuthLogout({ ...props }: Props) {
 }
 
 export function useAuthLogout() {
-  const logoutAction = useActionHandler(logout, {
+  const logoutAction = useActionHandler(authLogoutAction, {
     onSuccess: () => {
       window.location.href = "/"
     },

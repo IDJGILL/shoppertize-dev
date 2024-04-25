@@ -1,4 +1,4 @@
-import type { Status } from "../lib/action/types"
+import type { Status } from "../lib/server/server-types"
 
 /**
  * Represents an error specific to the application.

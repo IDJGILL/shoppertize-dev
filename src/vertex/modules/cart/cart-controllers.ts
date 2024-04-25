@@ -11,14 +11,11 @@ import {
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { calcSummary } from "./cart-client-utils"
 import { getCurrentAddressFromSession } from "../address/address-server-utils"
-import { partialQuery, protectedQuery } from "~/vertex/lib/trpc/trpc-init"
 import { revalidatePath } from "next/cache"
-import { getAddressOptions } from "../address/address-queries"
 import type { CartItem } from "./cart-schemas"
-import { z } from "zod"
-import { $Null } from "../auth/auth-models"
+import { publicQuery } from "~/vertex/lib/server/server-query-helper"
 
-export const getCart = partialQuery(async (session) => {
+export const getCart = publicQuery(async (session) => {
   const [cartItems, currentAddress] = await Promise.all([
     getCartItemData(),
     !!session ? getCurrentAddressFromSession(session.user.id) : null,
@@ -98,17 +95,3 @@ export const getCartItemsCount = async (): Promise<number> => {
 
   return count
 }
-
-export const getCurrentAddress = protectedQuery($Null, async (_, session) => {
-  return await getCurrentAddressFromSession(session.user.id)
-})
-
-export const getAddressById = protectedQuery(z.string().optional(), async (id, session) => {
-  const { addresses } = await getAddressOptions(session.authToken)
-
-  const exists = addresses.find((a) => a.id === id)
-
-  if (!exists) return null
-
-  return exists
-})

@@ -9,7 +9,7 @@ import ShoppersChoice from "../_components/shared/shoppers-choice-badge"
 import ProductRating from "../_components/shared/product-rating"
 import ProductBulletPoints from "../_components/shared/product-bulletpoints"
 import { getProductBySlug, getProductSlugs } from "~/lib/modules/product/utils/product-apis"
-import { AddToCart } from "~/vertex/components/cart/AddToCart/adtc"
+import { AddToCart } from "~/vertex/components/cart/AddToCart/adtc-provider"
 import Skeleton from "react-loading-skeleton"
 import AddToCartButton from "../_components/add-to-cart-button"
 

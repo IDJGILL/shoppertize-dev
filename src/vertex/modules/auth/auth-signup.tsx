@@ -1,8 +1,8 @@
 "use client"
 
 import { useAuthContext } from "~/vertex/components/auth/auth-context"
-import { useActionHandler } from "~/vertex/lib/action/hook"
-import { signup } from "~/vertex/lib/action/actions"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
+import { signup } from "~/vertex/lib/server/server-actions"
 
 export type AuthSignupProps = ReturnType<typeof useAuthSignup>
 

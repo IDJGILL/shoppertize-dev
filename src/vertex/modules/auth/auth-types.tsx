@@ -1,6 +1,7 @@
 import { type DefaultSession } from "next-auth"
 import { type DefaultJWT } from "next-auth/jwt"
 import type { Authentication } from "~/vertex/global/types"
+import type { RedisExtend } from "~/vertex/lib/redis/redis-types"
 
 export type ExtendUser = DefaultSession["user"] & {
   id: string
@@ -41,18 +42,18 @@ export type CreateUserProps = {
   name?: string | null
 }
 
-export type IdentifyUserOutput = Pick<Authentication, "id" | "action" | "verification">
+export type IdentifyUserOutput = Pick<RedisExtend<Authentication>, "id" | "action" | "verification">
 
-export type VerifyUserOutput = Pick<Authentication, "id" | "action" | "verification"> & {
+export type VerifyUserOutput = Pick<RedisExtend<Authentication>, "id" | "action" | "verification"> & {
   sameDevice: boolean
   message: string
 }
 
-export type ResendVerifyOutput = Pick<Authentication, "id" | "action" | "verification">
+export type ResendVerifyOutput = Pick<RedisExtend<Authentication>, "id" | "action" | "verification">
 
-export type ForgetPasswordOutput = Pick<Authentication, "id" | "action" | "verification">
+export type ForgetPasswordOutput = Pick<RedisExtend<Authentication>, "id" | "action" | "verification">
 
-export type CheckVerificationOutput = Pick<Authentication, "id" | "action" | "verification" | "isVerified">
+export type CheckVerificationOutput = Pick<RedisExtend<Authentication>, "id" | "action" | "verification" | "isVerified">
 
 export type NextAuthSignInOutput = {
   id: string

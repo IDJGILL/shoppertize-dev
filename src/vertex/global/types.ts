@@ -3,6 +3,7 @@
  * The properties of the types *shell not be changed or update
  */
 
+import { RedisExtend } from "../lib/redis/redis-types"
 import { type AddressData } from "../modules/address/address-types"
 import { type cacheTagList, type pathList, type redisIDPrefixList } from "./constants"
 

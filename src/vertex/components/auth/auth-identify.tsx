@@ -1,8 +1,8 @@
 "use client"
 
 import { useAuthContext } from "./auth-context"
-import { identify } from "~/vertex/lib/action/actions"
-import { useActionHandler } from "~/vertex/lib/action/hook"
+import { authIdentifyAction } from "~/vertex/lib/server/server-actions"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 
 export type AuthIdentifyProps = ReturnType<typeof useAuthIdentify>
 
@@ -17,7 +17,7 @@ export function AuthIdentify({ ...props }: Props) {
 export function useAuthIdentify() {
   const { identifyForm, loginForm, actionSet, otpForm, tokenSet, updateId } = useAuthContext()
 
-  const identifyAction = useActionHandler(identify, {
+  const identifyAction = useActionHandler(authIdentifyAction, {
     onSuccess: (data) => {
       const input = identifyForm.getValues()
 

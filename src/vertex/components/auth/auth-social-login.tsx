@@ -1,8 +1,8 @@
 "use client"
 
+import { authSocialLoginAction } from "~/vertex/lib/server/server-actions"
 import { useAuthContext } from "./auth-context"
-import { socialLogin } from "~/vertex/lib/action/actions"
-import { useActionHandler } from "~/vertex/lib/action/hook"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 import { type Social } from "~/vertex/modules/auth/auth-models"
 
 export type AuthSocialLoginProps = ReturnType<typeof useSocialLogin>
@@ -20,7 +20,7 @@ export function AuthSocialLogin({ ...props }: Props) {
 export function useSocialLogin() {
   const {} = useAuthContext()
 
-  const socialLoginAction = useActionHandler(socialLogin)
+  const socialLoginAction = useActionHandler(authSocialLoginAction)
 
   const isLoading = socialLoginAction.status === "executing"
 

@@ -7,6 +7,10 @@ import {
   type GetUserMetaDataGqlResponse,
 } from "~/lib/modules/auth/auth-gql"
 import type { AddressData } from "./address-types"
+import { getCurrentAddressFromSession } from "./address-server-utils"
+import { $Null } from "../auth/auth-models"
+import { z } from "zod"
+import { authQuery } from "~/vertex/lib/server/server-query-helper"
 
 export const getAddressOptions = async (authToken: string) => {
   const data = await client<GetUserMetaDataGqlResponse, Omit<GetUserMetaDataGqlInput, "customerId">>({
@@ -55,3 +59,17 @@ export const getCurrentAddressFromDb = async (customerId: number) => {
 
   return null
 }
+
+export const getCurrentAddress = authQuery($Null, async (_, session) => {
+  return await getCurrentAddressFromSession(session.user.id)
+})
+
+export const getAddressById = authQuery(z.string().optional(), async (id, session) => {
+  const { addresses } = await getAddressOptions(session.authToken)
+
+  const exists = addresses.find((a) => a.id === id)
+
+  if (!exists) return null
+
+  return exists
+})

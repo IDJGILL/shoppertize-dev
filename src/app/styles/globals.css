@@ -118,11 +118,7 @@ input:-webkit-autofill:active {
 
 .login-background {
   background: rgb(245, 245, 245);
-  background: linear-gradient(
-    129deg,
-    rgba(245, 245, 245, 1) 50%,
-    rgba(49, 169, 225, 0.4990371148459384) 100%
-  );
+  background: linear-gradient(129deg, rgba(245, 245, 245, 1) 50%, rgba(49, 169, 225, 0.4990371148459384) 100%);
 }
 
 .confetti-explosion-screen-0-2-109 {
@@ -146,6 +142,15 @@ input:-webkit-autofill:active {
 }
 
 .loader-spinner {
+  width: 50px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 4px solid rgb(220, 220, 220);
+  border-right-color: rgb(0, 0, 0);
+  animation: l2 0.6s infinite linear;
+}
+
+.app-loader {
   width: 50px;
   aspect-ratio: 1;
   border-radius: 50%;

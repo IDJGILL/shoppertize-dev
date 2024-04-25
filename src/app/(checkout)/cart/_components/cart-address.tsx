@@ -3,7 +3,7 @@
 import { ChevronRightCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Box from "~/app/_components/box"
-import { useCartContext } from "~/vertex/components/cart/cart/context"
+import { useCartContext } from "~/vertex/components/cart/cart-context"
 
 interface CartAddressProps extends React.HTMLAttributes<HTMLElement> {}
 

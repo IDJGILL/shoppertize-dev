@@ -1,11 +1,12 @@
 "use client"
 
-import useCountDown from "~/vertex/hooks/useCountdown"
-import { useUpdateEffect } from "react-use"
-import { useActionHandler } from "~/vertex/lib/action/hook"
-import { resendAddressOtpAction, verifyAddressAction } from "~/vertex/lib/action/actions"
+import { useCountDown } from "~/vertex/hooks/useCountdown"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
+import { addressResendAction, addressVerifyAction } from "~/vertex/lib/server/server-actions"
 import { useAddress } from "./address-context"
-import useCountdown from "@bradgarropy/use-countdown"
+import { atom } from "jotai"
+
+export const addressCountdownAtom = atom(0)
 
 export type AddressOtpProps = ReturnType<typeof useAddressOtp>
 
@@ -21,34 +22,25 @@ export function AddressOtp({ ...props }: Props) {
 
 export function useAddressOtp() {
   const { otpForm, modelProps, router } = useAddress()
+  const countdown = useCountDown(addressCountdownAtom)
 
-  const countdown = useCountdown({
-    minutes: 1,
-    format: "ss",
-    autoStart: false,
-  })
-
-  //   useUpdateEffect(() => countdown.start(), [modelProps.open])
-
-  const verifyAddress = useActionHandler(verifyAddressAction, {
+  const verifyAddress = useActionHandler(addressVerifyAction, {
     onSuccess: () => {
       router.push("/cart")
     },
 
     onError: (error) => {
       otpForm.setError("otp", { message: error.message })
-      countdown.reset()
     },
   })
 
-  const resendOtp = useActionHandler(resendAddressOtpAction, {
+  const resendOtp = useActionHandler(addressResendAction, {
     onSuccess: () => {
-      countdown.reset({ minutes: 1, seconds: 0 })
+      countdown.reset(60)
     },
 
     onError: (error) => {
       otpForm.setError("otp", { message: error.message })
-      countdown.reset()
     },
   })
 
@@ -71,6 +63,6 @@ export function useAddressOtp() {
     isResending,
     isVerifying,
     modelProps,
-    ...countdown,
+    countdown,
   }
 }

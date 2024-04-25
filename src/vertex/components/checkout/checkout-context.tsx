@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/router"
 import { createContext, useContext, useState } from "react"
-import { checkoutAction } from "~/vertex/lib/action/actions"
-import { useActionHandler } from "~/vertex/lib/action/hook"
+import { checkoutAction } from "~/vertex/lib/server/server-actions"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 import { type checkoutSessionQuery } from "~/vertex/modules/checkout/checkout-queries"
 import { type PaymentMethod } from "~/vertex/modules/payment/payment-types"
 

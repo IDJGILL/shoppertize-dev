@@ -1,5 +1,5 @@
 import "server-only"
-import { getShipRocketAuthToken } from "~/vertex/lib/shiprocket/config"
+import { getShipRocketAuthToken } from "~/vertex/lib/shiprocket/shiprocket-config"
 import type { IndianPostcode } from "./courier-models"
 import type { PincodeDetails, PincodeDetailsError } from "./courier-types"
 import { ExtendedError } from "~/vertex/utils/extended-error"

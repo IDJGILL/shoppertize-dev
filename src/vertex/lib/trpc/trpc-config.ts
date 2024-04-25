@@ -1,10 +1,8 @@
 import { initTRPC, TRPCError } from "@trpc/server"
 import superjson from "superjson"
-import { ZodError, ZodSchema } from "zod"
+import { ZodError } from "zod"
 import { type NextRequest } from "next/server"
-import { auth } from "../auth/config"
-import { ExtendedError } from "~/vertex/utils/extended-error"
-import { type Session } from "next-auth"
+import { auth } from "../auth/auth-config"
 
 interface CreateContextOptions {
   headers: Headers
@@ -177,39 +175,5 @@ export const wrapTRPC = async <TData, TAction>(callback: WrapTRPCCallback<TData,
       code: trpcError.code ?? "INTERNAL_SERVER_ERROR",
       message: trpcError.message ?? "Oops, Something went wrong!",
     })
-  }
-}
-
-export const protectedQuery = <TInput, TOutput>(
-  schema: ZodSchema<TInput>,
-  callback: (input: ZodSchema<TInput>["_output"], session: Session) => Promise<TOutput>,
-) => {
-  return async (input: ZodSchema<TInput>["_input"]) => {
-    try {
-      const session = await auth()
-
-      if (!session) throw new ExtendedError({ code: "UNAUTHORIZED" })
-
-      const data = await schema.parseAsync(input)
-
-      return callback(data, session)
-    } catch (error) {
-      console.log(error)
-
-      throw new ExtendedError({ code: "INTERNAL_SERVER_ERROR" })
-    }
-  }
-}
-
-export const partialQuery = <TOutput>(callback: (session: Session | null) => Promise<TOutput>) => {
-  return async () => {
-    try {
-      const session = await auth()
-
-      return await callback(session)
-    } catch (error) {
-      console.log(error)
-      throw new ExtendedError({ code: "INTERNAL_SERVER_ERROR" })
-    }
   }
 }

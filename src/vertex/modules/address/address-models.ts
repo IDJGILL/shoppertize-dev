@@ -32,7 +32,7 @@ export const $Billing = z.object({
   billing_postcode: z.string().min(6, "Incorrect").max(50, "Incorrect"),
   billing_city: z.string().min(1, "Required").max(150, "Too long."),
   billing_state: z.string().min(1, "Required").max(150, "Too long."),
-  billing_country: z.string().min(1, "Required").max(150, "Too long."),
+  billing_country: z.string().max(150, "Too long."),
   billing_tax: z.string().min(15, "The number must be 15 digits.").max(15, "The number must be 15 digits."),
 
   isTaxInvoice: z.literal(true),

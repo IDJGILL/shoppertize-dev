@@ -1,8 +1,8 @@
 "use client"
 
 import { type HookActionStatus } from "next-safe-action/hooks"
-import { removeItem } from "~/vertex/lib/action/actions"
-import { useActionHandler } from "~/vertex/lib/action/hook"
+import { cartRemoveAction } from "~/vertex/lib/server/server-actions"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 import { api } from "~/vertex/lib/trpc/trpc-context-provider"
 import { type CartItemRecord } from "~/vertex/modules/cart/cart-types"
 
@@ -28,7 +28,7 @@ export function RemoveItem({ ...props }: RemoveItemProps) {
 
   const utils = api.useUtils()
 
-  const action = useActionHandler(removeItem, {
+  const action = useActionHandler(cartRemoveAction, {
     onSuccess: async () => {
       await utils.cart.count.prefetch()
     },

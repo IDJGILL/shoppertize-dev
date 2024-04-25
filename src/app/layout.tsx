@@ -3,8 +3,7 @@ import "react-loading-skeleton/dist/skeleton.css"
 import { Toaster } from "sonner"
 import { Inter } from "next/font/google"
 import type { Metadata, Viewport } from "next"
-import { AuthSessionProvider } from "~/vertex/components/auth/auth-session-context"
-import { TRPCContextProvider } from "~/vertex/lib/trpc/trpc-context-provider"
+import AppContext from "~/vertex/components/app/app-context"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,20 +28,11 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`font-sans text-foreground antialiased ${inter.variable}`}
-    >
+    <html lang="en" className={`font-sans text-foreground antialiased ${inter.variable}`}>
       <body>
-        <TRPCContextProvider>
-          <AuthSessionProvider>{children}</AuthSessionProvider>
-        </TRPCContextProvider>
+        <AppContext>{children}</AppContext>
 
         <Toaster position="bottom-right" />
       </body>

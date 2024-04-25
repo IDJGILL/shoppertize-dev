@@ -2,7 +2,7 @@
 
 import Box from "~/app/_components/box"
 import { Truck } from "lucide-react"
-import { useCartContext } from "~/vertex/components/cart/cart/context"
+import { useCartContext } from "~/vertex/components/cart/cart-context"
 // import { useState } from "react"
 // import { Button } from "~/app/_components/ui/button"
 // import { ModelXDrawer } from "~/app/_components/ui/dialog"
@@ -134,16 +134,13 @@ function ShowEddSection({ ...props }: ShowEddSectionProps) {
         </h4>
 
         <p className="mb-4 line-clamp-1 text-muted-foreground">
-          {shippingAddress.address1}, {shippingAddress.address2},{" "}
-          {shippingAddress.city}, {shippingAddress.state}
+          {shippingAddress.address1}, {shippingAddress.address2}, {shippingAddress.city}, {shippingAddress.state}
         </p>
 
         <div className="flex w-full items-center justify-between rounded-2xl bg-slate-100 px-4 py-1 md:w-max">
           <p>
             Delivery by:
-            <span className="ml-1 font-medium text-primary">
-              {/* {delivery.edd} */}
-            </span>
+            <span className="ml-1 font-medium text-primary">{/* {delivery.edd} */}</span>
           </p>
           <Truck className="truck ml-2 h-4 w-4" />
         </div>

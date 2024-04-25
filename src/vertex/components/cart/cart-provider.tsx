@@ -1,7 +1,8 @@
 import { Suspense } from "react"
 import { ErrorBoundary } from "react-error-boundary"
-import { CartContextProvider } from "./context"
+import { CartContextProvider } from "./cart-context"
 import { getCart } from "~/vertex/modules/cart/cart-controllers"
+import AppLoader from "../app/app-loader"
 
 interface CartContextProps {
   error: React.ReactElement
@@ -14,7 +15,7 @@ export function CartContext({ ...props }: CartContextProps) {
 
   return (
     <ErrorBoundary fallback={props.error}>
-      <Suspense fallback={props.loader}>
+      <Suspense fallback={<AppLoader />}>
         <InitialDataFetcher>{props.children}</InitialDataFetcher>
       </Suspense>
     </ErrorBoundary>

@@ -1,10 +1,10 @@
 "use client"
 
 import { type HookActionStatus } from "next-safe-action/hooks"
-import { useActionHandler } from "~/vertex/lib/action/hook"
-import { updateQuantity } from "~/vertex/lib/action/actions"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 import { type CartItemRecord } from "~/vertex/modules/cart/cart-types"
 import { api } from "~/vertex/lib/trpc/trpc-context-provider"
+import { cartQuantityAction } from "~/vertex/lib/server/server-actions"
 
 interface UpdateQuantityComponentProps {
   cartItem: Omit<CartItemRecord, "quantity">
@@ -34,7 +34,7 @@ export function UpdateQuantity({ ...props }: UpdateQuantityComponentProps) {
 
   const utils = api.useUtils()
 
-  const action = useActionHandler(updateQuantity, {
+  const action = useActionHandler(cartQuantityAction, {
     onSuccess: async () => {
       await utils.cart.count.prefetch()
     },

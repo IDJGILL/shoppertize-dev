@@ -1,6 +1,6 @@
 import { Suspense } from "react"
+import { getCurrentAddress } from "~/vertex/modules/address/address-queries"
 import { type AddressData } from "~/vertex/modules/address/address-types"
-import { getCurrentAddress } from "~/vertex/modules/cart/cart-controllers"
 
 interface CurrentAddressProps {
   children: (props: { address: AddressData | null }) => React.ReactNode
@@ -23,7 +23,7 @@ interface InitialDataFetcherProps {
 async function InitialDataFetcher({ ...props }: InitialDataFetcherProps) {
   const {} = props
 
-  const address = await getCurrentAddress()
+  const address = await getCurrentAddress(undefined)
 
   return <>{props.children({ address })}</>
 }
