@@ -8,19 +8,19 @@ import { atom } from "jotai"
 
 export const addressCountdownAtom = atom(0)
 
-export type AddressOtpProps = ReturnType<typeof useAddressOtp>
+export type AddressVerificationProps = ReturnType<typeof useAddressVerification>
 
 interface Props {
-  children: (p: AddressOtpProps) => React.ReactNode
+  children: (p: AddressVerificationProps) => React.ReactNode
 }
 
-export function AddressOtp({ ...props }: Props) {
+export function AddressVerification({ ...props }: Props) {
   const {} = props
 
-  return <>{props.children(useAddressOtp())}</>
+  return <>{props.children(useAddressVerification())}</>
 }
 
-export function useAddressOtp() {
+export function useAddressVerification() {
   const { otpForm, modelProps, router } = useAddress()
   const countdown = useCountDown(addressCountdownAtom)
 

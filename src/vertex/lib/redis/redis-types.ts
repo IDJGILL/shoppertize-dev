@@ -25,7 +25,6 @@ export type RedisUpdateOpts<T> = {
 }
 
 export type RedisMergeOpts<T> = {
-  id: string
   idPrefix: RedisIDPrefix
   payload: Partial<T>
   ttlSec?: number

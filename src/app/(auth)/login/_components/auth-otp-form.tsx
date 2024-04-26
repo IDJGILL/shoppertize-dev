@@ -3,13 +3,7 @@
 import { cn } from "~/lib/utils/functions/ui"
 import { OTPInput, type SlotProps } from "input-otp"
 import { Button } from "~/app/_components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "~/app/_components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "~/app/_components/ui/form"
 import { Input } from "~/app/_components/ui/input"
 import AuthResendButton from "./auth-resend-button"
 import AuthShell from "./auth-shell"
@@ -80,7 +74,7 @@ export default function AuthOtpForm({ ...props }: AuthOtpFormProps) {
                   type="submit"
                   className="w-full"
                   disabled={isLoading || !form.formState.isValid}
-                  loading={isLoading ? "true" : "false"}
+                  isLoading={isLoading}
                 >
                   Verify
                 </Button>

@@ -29,12 +29,7 @@ export default function AuthSignUpForm({ ...props }: AuthSignUpFormProps) {
                 render={({ field }) => (
                   <FormItem className="">
                     <FormControl>
-                      <Input
-                        placeholder=" "
-                        {...field}
-                        type="hidden"
-                        autoComplete="off"
-                      />
+                      <Input placeholder=" " {...field} type="hidden" autoComplete="off" />
                     </FormControl>
                   </FormItem>
                 )}
@@ -76,8 +71,7 @@ export default function AuthSignUpForm({ ...props }: AuthSignUpFormProps) {
                     </FormItem>
 
                     <FormDescription className="mt-2">
-                      Tip: It must be at least 9 characters long and contain
-                      letters and digits.
+                      Tip: It must be at least 9 characters long and contain letters and digits.
                     </FormDescription>
 
                     <FormMessage />
@@ -89,7 +83,7 @@ export default function AuthSignUpForm({ ...props }: AuthSignUpFormProps) {
                 type="submit"
                 className="w-full"
                 disabled={isLoading || !form.formState.isValid}
-                loading={isLoading ? "true" : "false"}
+                isLoading={isLoading}
               >
                 Create an Account
               </Button>

@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "~/app/_components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "~/app/_components/ui/form"
 import { Input, Password } from "~/app/_components/ui/input"
 import { Button } from "~/app/_components/ui/button"
 import AuthShell from "./auth-shell"
@@ -32,12 +26,7 @@ export default function AuthLoginFrom({ ...props }: AuthLoginFromProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input
-                          placeholder=" "
-                          {...field}
-                          type="hidden"
-                          autoComplete="off"
-                        />
+                        <Input placeholder=" " {...field} type="hidden" autoComplete="off" />
                       </FormControl>
 
                       <FormMessage />
@@ -65,11 +54,7 @@ export default function AuthLoginFrom({ ...props }: AuthLoginFromProps) {
                   )}
                 />
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  loading={isLoading ? "true" : "false"}
-                >
+                <Button type="submit" className="w-full" isLoading={isLoading}>
                   Continue
                 </Button>
               </form>
@@ -80,11 +65,7 @@ export default function AuthLoginFrom({ ...props }: AuthLoginFromProps) {
             <AuthForgetPassword>
               {({ mutate: mutateForget, isLoading }) => (
                 <div className="mt-2 flex w-full items-center justify-center">
-                  <button
-                    type="button"
-                    onClick={() => mutateForget()}
-                    className="py-4 text-sm text-primary"
-                  >
+                  <button type="button" onClick={() => mutateForget()} className="py-4 text-sm text-primary">
                     {isLoading ? "Requesting..." : "Forgot your password?"}
                   </button>
                 </div>

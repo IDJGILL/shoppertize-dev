@@ -28,7 +28,7 @@ export default function CheckoutFooter({ ...props }: CheckoutFooterProps) {
       <div className="hidden md:block">
         <Button
           className="w-full"
-          // loading={isLoading ? "true" : "false"}
+          // isLoading={isLoading}
           onClick={() => placeOrderHandler()}
         >
           {/* {methodLabel(method)} */}
@@ -47,11 +47,7 @@ export default function CheckoutFooter({ ...props }: CheckoutFooterProps) {
             }}
           >
             <div className="mb-1 flex items-center text-xs font-medium text-primary">
-              {paymentMethod === null ? (
-                "Choose"
-              ) : (
-                <div className="flex items-center">Selected</div>
-              )}{" "}
+              {paymentMethod === null ? "Choose" : <div className="flex items-center">Selected</div>}{" "}
               <ChevronRight className="h-4 w-4" />
             </div>
 
@@ -63,7 +59,7 @@ export default function CheckoutFooter({ ...props }: CheckoutFooterProps) {
           <div className="col-span-2">
             <Button
               className="w-full"
-              // loading={isLoading ? "true" : "false"}
+              // isLoading={isLoading}
               onClick={() => placeOrderHandler()}
             >
               Place order

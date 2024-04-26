@@ -5,19 +5,10 @@ import { motion } from "framer-motion"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { Button } from "~/app/_components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "~/app/_components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "~/app/_components/ui/form"
 import Rating from "~/app/_components/ui/rating"
 import { Textarea } from "~/app/_components/ui/textarea"
-import {
-  ShoppingFeedbackSchema,
-  type ShoppingFeedbackSchemaProps,
-} from "~/lib/modules/review/utils/review-schemas"
+import { ShoppingFeedbackSchema, type ShoppingFeedbackSchemaProps } from "~/lib/modules/review/utils/review-schemas"
 import { api } from "~/lib/server/access/client"
 
 interface ShoppingFeedbackProps extends React.HTMLAttributes<HTMLElement> {}
@@ -52,13 +43,9 @@ export default function ShoppingFeedback({ ...props }: ShoppingFeedbackProps) {
     >
       {!feedbackSuccess && (
         <>
-          <h4 className="mb-2 text-center text-lg font-medium tracking-tight">
-            Rate Your Shopping Experience
-          </h4>
+          <h4 className="mb-2 text-center text-lg font-medium tracking-tight">Rate Your Shopping Experience</h4>
 
-          <p className="text-muted-foreground">
-            Please tell us how we can improve.
-          </p>
+          <p className="text-muted-foreground">Please tell us how we can improve.</p>
 
           <div className="mx-auto flex max-w-md flex-col">
             <Form {...form}>
@@ -95,11 +82,7 @@ export default function ShoppingFeedback({ ...props }: ShoppingFeedbackProps) {
                     <FormItem>
                       <FormControl>
                         {rating !== 0 && rating < 3 ? (
-                          <Textarea
-                            {...field}
-                            placeholder="What went wrong? (Optional)"
-                            className="mt-4 w-full"
-                          />
+                          <Textarea {...field} placeholder="What went wrong? (Optional)" className="mt-4 w-full" />
                         ) : null}
                       </FormControl>
 
@@ -109,12 +92,7 @@ export default function ShoppingFeedback({ ...props }: ShoppingFeedbackProps) {
                 />
 
                 {rating >= 1 ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="mt-8 hover:bg-slate-100"
-                    loading={isLoading ? "true" : "false"}
-                  >
+                  <Button size="sm" variant="outline" className="mt-8 hover:bg-slate-100" isLoading={isLoading}>
                     Submit Feedback
                   </Button>
                 ) : null}
@@ -126,13 +104,9 @@ export default function ShoppingFeedback({ ...props }: ShoppingFeedbackProps) {
 
       {feedbackSuccess && (
         <div>
-          <h4 className="mb-2 text-center text-lg font-medium tracking-tight">
-            Thanks You
-          </h4>
+          <h4 className="mb-2 text-center text-lg font-medium tracking-tight">Thanks You</h4>
 
-          <p className="text-muted-foreground">
-            Your feedback will help us make the change.
-          </p>
+          <p className="text-muted-foreground">Your feedback will help us make the change.</p>
         </div>
       )}
     </motion.div>

@@ -17,7 +17,7 @@ export default function AuthResendButton({ ...props }: AuthResendButtonProps) {
           className="w-full"
           disabled={!countdown.isCompleted}
           onClick={() => mutate()}
-          loading={isLoading ? "true" : "false"}
+          isLoading={isLoading}
         >
           {!countdown.isCompleted ? `Resend in (00:${countdown.remaining})` : "Resend"}
         </Button>

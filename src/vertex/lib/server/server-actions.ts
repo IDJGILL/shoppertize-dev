@@ -35,7 +35,7 @@ import { ExtendedError } from "~/vertex/utils/extended-error"
 import { $IndianPostcode } from "~/vertex/modules/courier/courier-models"
 import { checkPostcodeService } from "~/vertex/modules/courier/courier-controllers"
 import { z } from "zod"
-import { redisGet } from "../redis/redis-utils"
+import { redisGet, redisMerge } from "../redis/redis-utils"
 import { type AddressSession } from "~/vertex/modules/address/address-types"
 
 // Todo - Create password schema logic.
@@ -138,6 +138,8 @@ export const addressResendAction = authAction(z.string(), async (input) => {
   const data = await otpless.resend(session.token)
 
   if (!data.newToken) throw new ExtendedError({ code: "BAD_REQUEST", message: data.message })
+
+  await redisMerge({ previous: session, idPrefix: "@session/address", payload: { token: data.newToken } })
 })
 
 export const addressPostcodeAction = authAction($IndianPostcode, async (input) => {

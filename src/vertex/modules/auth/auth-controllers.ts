@@ -307,10 +307,6 @@ export const checkVerification = async (input: AuthSessionId): Promise<CheckVeri
 }
 
 export const nextAuthSignIn = async (input: Login): Promise<NextAuthSignInOutput> => {
-  /**
-   * This means that user requesting signin either email or otp
-   */
-
   if (!!input.id) {
     const session = await getAuthenticationSession(input.id)
 
@@ -319,8 +315,6 @@ export const nextAuthSignIn = async (input: Login): Promise<NextAuthSignInOutput
     }
 
     const data = await getAuthTokens({ username: session.username })
-
-    console.log({ data })
 
     await redisDelete({ id: input.id, idPrefix: "@session/authentication" })
 

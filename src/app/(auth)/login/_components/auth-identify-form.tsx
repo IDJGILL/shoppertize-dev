@@ -22,24 +22,16 @@ export default function AuthIdentifyForm({ ...props }: AuthIdentifyForm) {
                   control={form.control}
                   name="countryCode"
                   defaultValue=""
-                  render={({ field }) => (
-                    <Input type="hidden" {...field} className="hidden" />
-                  )}
+                  render={({ field }) => <Input type="hidden" {...field} className="hidden" />}
                 />
 
                 <FormField
                   control={form.control}
                   name="username"
-                  render={({ field }) => (
-                    <EmailAndPhoneInput inputProps={field} form={form} />
-                  )}
+                  render={({ field }) => <EmailAndPhoneInput inputProps={field} form={form} />}
                 />
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  loading={isLoading ? "true" : "false"}
-                >
+                <Button type="submit" className="w-full" isLoading={isLoading}>
                   Continue
                 </Button>
               </form>

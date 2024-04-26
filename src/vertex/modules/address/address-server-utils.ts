@@ -15,6 +15,7 @@ import { redisCreate, redisUpdate } from "~/vertex/lib/redis/redis-utils"
 import type { AuthSession } from "~/vertex/global/global-types"
 import { cloneDeep } from "lodash-es"
 import otpless from "~/vertex/lib/otpless/otpless-config"
+import { nanoid } from "nanoid"
 
 export async function updateAddressMetaData(props: { list: Shipping[]; item: Shipping; authToken: string }) {
   const isDefault = props.item.isDefault
@@ -27,6 +28,8 @@ export async function updateAddressMetaData(props: { list: Shipping[]; item: Shi
       value: isDefault ? JSON.stringify(props.item) : "",
     },
   ] satisfies MetaData[]
+
+  console.log("metaDataItems", JSON.stringify(metaDataItems))
 
   await client<UpdateUserMetaDataGqlResponse, UpdateUserMetaDataGqlInput>({
     access: "user",
@@ -44,7 +47,7 @@ export async function sendAddressOtp(input: Shipping, action: AddressSession["ac
 
   const response2 = await redisCreate<AddressSession>({
     idPrefix: "@session/address",
-    payload: { action: action, address: input, token: response1.token },
+    payload: { action: action, address: { ...input, id: nanoid() }, token: response1.token },
     ttlSec: 5 * 60,
   })
 
@@ -52,32 +55,35 @@ export async function sendAddressOtp(input: Shipping, action: AddressSession["ac
 }
 
 export async function addOrUpdateAddress(props: AddOrUpdateAddress) {
-  // Clone the addresses array
-  const updatedList = cloneDeep(props.addresses)
+  const addressInput = cloneDeep(props.address)
 
-  if (props.address.isDefault) {
-    // If the new address is set to default, update other addresses to be not default
-    updatedList.forEach((address) => {
-      if (address.id !== address.id) {
+  const addressOptions = cloneDeep(props.addresses)
+
+  if (addressInput.isDefault) {
+    addressOptions.forEach((address) => {
+      if (address.id !== addressInput.id) {
         address.isDefault = false
       }
     })
+  } else {
+    const hasDefaultAddress = props.addresses.some((a) => a.isDefault)
+
+    if (!hasDefaultAddress) {
+      addressInput.isDefault = true
+    }
   }
 
-  // Check if the address already exists in the cloned list
-  const existingAddressIndex = updatedList.findIndex((address) => address.id === address.id)
+  const existingAddressIndex = addressOptions.findIndex((address) => address.id === addressInput.id)
 
   if (existingAddressIndex !== -1) {
-    // If the address already exists, update it
-    updatedList[existingAddressIndex] = props.address
+    addressOptions[existingAddressIndex] = addressInput
   } else {
-    // If the address doesn't exist, add it to the cloned list
-    updatedList.push(props.address)
+    addressOptions.push(addressInput)
   }
 
   await Promise.all([
-    updateAddressMetaData({ list: updatedList, item: props.address, authToken: props.authToken }),
-    redisUpdate<AuthSession>({ id: props.uid, idPrefix: "@session/auth", payload: { currentAddress: props.address } }),
+    updateAddressMetaData({ list: addressOptions, item: addressInput, authToken: props.authToken }),
+    redisUpdate<AuthSession>({ id: props.uid, idPrefix: "@session/auth", payload: { currentAddress: addressInput } }),
   ])
 }
 

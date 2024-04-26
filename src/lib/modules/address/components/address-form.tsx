@@ -5,38 +5,29 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input, PhoneInput } from "~/app/_components/ui/input"
 import { Button } from "~/app/_components/ui/button"
 import { ModelXDrawer } from "~/app/_components/ui/dialog"
-import LoaderFallBack from "~/app/_components/loader-fallback"
 import Box from "~/app/_components/box"
 import { useAddress } from "~/vertex/components/address/address-context"
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "~/app/_components/ui/input-otp"
-import { AddressOtp } from "~/vertex/components/address/address-otp"
+import { AddressVerification } from "~/vertex/components/address/address-verification"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/app/_components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "~/app/_components/ui/toggle-group"
 import { nanoid } from "nanoid"
+import { Checkbox } from "~/app/_components/ui/checkbox"
 
 interface AddressFormProps extends React.HTMLAttributes<HTMLElement> {}
 
 export default function AddressForm({ ...props }: AddressFormProps) {
   const {} = props
 
-  const {
-    addressForm,
-    addressFormHandler,
-    isAddressLoading,
-    isAddressUpdating,
-    statesByCountryCode,
-    country,
-    checkPostcodeHandler,
-  } = useAddress()
-
-  if (isAddressLoading) return <LoaderFallBack className="w-full" />
+  const { addressForm, addressFormHandler, isAddressUpdating, statesByCountryCode, country, checkPostcodeHandler } =
+    useAddress()
 
   return (
     <div className="container px-0 py-5 md:py-10">
       <Box className="mx-auto max-w-xl rounded-none sm:rounded-3xl">
         {/* Address Form */}
         <Form {...addressForm}>
-          <form onSubmit={addressFormHandler} className="space-y-4">
+          <form onSubmit={addressFormHandler} className="space-y-8">
             <FormField
               control={addressForm.control}
               name="id"
@@ -125,7 +116,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                 <div>
                   <FormItem>
                     <FormControl>
-                      <Input placeholder=" " type="text" {...field} onKeyUp={() => checkPostcodeHandler()}></Input>
+                      <Input placeholder=" " {...field} onKeyUp={() => checkPostcodeHandler()}></Input>
                     </FormControl>
 
                     <FormLabel>Post code</FormLabel>
@@ -166,7 +157,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select a verified email to display" />
+                                <SelectValue placeholder="Select State" />
                               </SelectTrigger>
                             </FormControl>
 
@@ -244,28 +235,57 @@ export default function AddressForm({ ...props }: AddressFormProps) {
               control={addressForm.control}
               name="saveAs"
               render={({ field }) => (
-                <FormItem className="w-max">
-                  <FormControl>
-                    <ToggleGroup {...field} type="single">
-                      <ToggleGroupItem value="home">Home</ToggleGroupItem>
-                      <ToggleGroupItem value="office">Office</ToggleGroupItem>
-                      <ToggleGroupItem value="other">Other</ToggleGroupItem>
-                    </ToggleGroup>
-                  </FormControl>
-                </FormItem>
+                <div>
+                  <h3 className="mb-4 text-sm font-medium text-muted-foreground">Save Address As</h3>
+                  <FormItem className="w-max">
+                    <FormControl>
+                      <ToggleGroup type="single" value={field.value} onValueChange={(a) => field.onChange(a)}>
+                        <ToggleGroupItem value="home">Home</ToggleGroupItem>
+                        <ToggleGroupItem value="office">Office</ToggleGroupItem>
+                        <ToggleGroupItem value="other" defaultChecked>
+                          Other
+                        </ToggleGroupItem>
+                      </ToggleGroup>
+                    </FormControl>
+                  </FormItem>
+
+                  <FormMessage />
+                </div>
+              )}
+            />
+
+            <FormField
+              control={addressForm.control}
+              name="isDefault"
+              render={({ field }) => (
+                <div>
+                  <FormItem>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} id="isDefault" />
+                      <label
+                        htmlFor="isDefault"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Set this as my default address
+                      </label>
+                    </div>
+                  </FormItem>
+
+                  <FormMessage />
+                </div>
               )}
             />
 
             <FixedBar className="p-4 shadow-none md:relative md:p-0">
-              <Button type="submit" className="w-full" loading={isAddressUpdating ? "true" : "false"}>
-                Update
+              <Button type="submit" className="w-full" isLoading={isAddressUpdating}>
+                Update Address
               </Button>
             </FixedBar>
           </form>
         </Form>
       </Box>
 
-      <AddressOtp>
+      <AddressVerification>
         {({ form, mutateVerify, isResending, isVerifying, mutateResend, modelProps, countdown }) => (
           <ModelXDrawer {...modelProps}>
             <div className="mb-6">
@@ -316,14 +336,14 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                     )}
                   />
 
-                  <Button type="submit" className="w-full" loading={isVerifying ? "true" : "false"}>
+                  <Button type="submit" className="w-full" isLoading={isVerifying}>
                     Verify & Save
                   </Button>
 
                   <Button
                     variant="outline"
                     type="button"
-                    loading={isResending ? "true" : "false"}
+                    isLoading={isResending}
                     className="mt-2 w-full"
                     onClick={() => mutateResend()}
                   >
@@ -336,7 +356,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
             </div>
           </ModelXDrawer>
         )}
-      </AddressOtp>
+      </AddressVerification>
     </div>
   )
 }

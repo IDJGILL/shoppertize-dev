@@ -1,4 +1,5 @@
 import "~/app/styles/globals.css"
+import "~/vertex/global/global-styles.css"
 import "react-loading-skeleton/dist/skeleton.css"
 import { Toaster } from "sonner"
 import { Inter } from "next/font/google"

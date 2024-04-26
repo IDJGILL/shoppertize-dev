@@ -1,21 +1,12 @@
 import { Button } from "~/app/_components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "~/app/_components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "~/app/_components/ui/form"
 import { Input, Password } from "~/app/_components/ui/input"
 import { AuthUpdatePassword } from "~/vertex/components/auth/auth-update-password"
 import AuthShell from "./auth-shell"
 
-interface AuthUpdatePasswordFormProps
-  extends React.HTMLAttributes<HTMLElement> {}
+interface AuthUpdatePasswordFormProps extends React.HTMLAttributes<HTMLElement> {}
 
-export default function AuthUpdatePasswordForm({
-  ...props
-}: AuthUpdatePasswordFormProps) {
+export default function AuthUpdatePasswordForm({ ...props }: AuthUpdatePasswordFormProps) {
   const {} = props
 
   return (
@@ -30,12 +21,7 @@ export default function AuthUpdatePasswordForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input
-                        placeholder=" "
-                        {...field}
-                        type="hidden"
-                        autoComplete="off"
-                      />
+                      <Input placeholder=" " {...field} type="hidden" autoComplete="off" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -62,12 +48,7 @@ export default function AuthUpdatePasswordForm({
                 )}
               />
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={!form.formState.isValid}
-                loading={isLoading ? "true" : "false"}
-              >
+              <Button type="submit" className="w-full" disabled={!form.formState.isValid} isLoading={isLoading}>
                 Update Password
               </Button>
             </form>

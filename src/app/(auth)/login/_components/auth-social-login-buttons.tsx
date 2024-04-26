@@ -1,12 +1,9 @@
 import { Button } from "~/app/_components/ui/button"
 import { AuthSocialLogin } from "~/vertex/components/auth/auth-social-login"
 
-interface AuthSocialLoginButtonsProps
-  extends React.HTMLAttributes<HTMLElement> {}
+interface AuthSocialLoginButtonsProps extends React.HTMLAttributes<HTMLElement> {}
 
-export default function AuthSocialLoginButtons({
-  ...props
-}: AuthSocialLoginButtonsProps) {
+export default function AuthSocialLoginButtons({ ...props }: AuthSocialLoginButtonsProps) {
   const {} = props
 
   return (
@@ -16,10 +13,11 @@ export default function AuthSocialLoginButtons({
           onClick={() => mutate("google")}
           variant="outline"
           className="mt-4 w-full space-x-4"
-          loading={isLoading ? "true" : "false"}
+          isLoading={isLoading}
         >
-          <span>
+          <div className="relative flex w-full items-center justify-center">
             <svg
+              className="absolute left-0 top-1/2 -translate-y-1/2"
               xmlns="http://www.w3.org/2000/svg"
               height="22"
               viewBox="0 0 24 24"
@@ -43,9 +41,9 @@ export default function AuthSocialLoginButtons({
               />
               <path d="M1 1h22v22H1z" fill="none" />
             </svg>
-          </span>
 
-          <span>Continue with Google</span>
+            <div className="">Continue with Google</div>
+          </div>
         </Button>
       )}
     </AuthSocialLogin>

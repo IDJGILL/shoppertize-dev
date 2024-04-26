@@ -38,11 +38,11 @@ export const addressHandler = async (input: Shipping, authToken: string): Promis
 export async function verifyAddress(props: VerifyAddressProps) {
   const { addresses, uid } = await getAddressOptionsFromMeta(props.authToken)
 
-  const response1 = await redisGet<AddressSession>({ id: props.id, idPrefix: "@session/address" })
+  const session = await redisGet<AddressSession>({ id: props.id, idPrefix: "@session/address" })
 
-  if (!response1) throw new ExtendedError({ code: "NOT_FOUND" })
+  if (!session) throw new ExtendedError({ code: "NOT_FOUND" })
 
-  const response2 = await otpless.verify(response1.token, props.otp)
+  const response2 = await otpless.verify(session.token, props.otp)
 
   if (!response2.success) {
     throw new ExtendedError({ code: "BAD_REQUEST", message: response2.message })
@@ -52,7 +52,7 @@ export async function verifyAddress(props: VerifyAddressProps) {
     uid,
     addresses: addresses,
     authToken: props.authToken,
-    address: response1.address,
+    address: session.address,
   })
 
   await redisDelete({ id: props.id, idPrefix: "@session/address" })

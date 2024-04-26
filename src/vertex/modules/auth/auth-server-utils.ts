@@ -233,7 +233,6 @@ export async function recreateAuthenticationSecret(id: string) {
   }
 
   await redisMerge<Authentication>({
-    id: session.id,
     idPrefix: "@session/authentication",
     previous: session,
     payload: {

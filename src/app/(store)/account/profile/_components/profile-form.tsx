@@ -1,22 +1,9 @@
 "use client"
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/app/_components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/app/_components/ui/form"
 import { Input } from "~/app/_components/ui/input"
 import { Button } from "~/app/_components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/app/_components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/app/_components/ui/select"
 import { ScrollArea } from "~/app/_components/ui/scroll-area"
 import useProfile from "~/lib/utils/hooks/useProfile"
 import { type ProfileDTOType } from "~/lib/server/api/auth/auth.dtos"
@@ -84,10 +71,7 @@ export default function ProfileForm({ ...props }: ProfileFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Gender</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select your gender" />
@@ -111,10 +95,7 @@ export default function ProfileForm({ ...props }: ProfileFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Country</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select your country" />
@@ -136,12 +117,7 @@ export default function ProfileForm({ ...props }: ProfileFormProps) {
             )}
           />
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-            loading={isLoading ? "true" : "false"}
-          >
+          <Button type="submit" className="w-full" disabled={isLoading} isLoading={isLoading}>
             Update
           </Button>
         </form>

@@ -9,7 +9,7 @@ export default function AddToCartButton({ ...props }: AddToCartButtonProps) {
   const { mutate, isLoading, isOutOfStock } = useAddToCart()
 
   return (
-    <Button onClick={() => mutate()} disabled={isOutOfStock} loading={isLoading ? "true" : "false"}>
+    <Button onClick={() => mutate()} disabled={isOutOfStock} isLoading={isLoading}>
       {isOutOfStock ? "Out of Stock" : "Add To Cart"}
     </Button>
   )

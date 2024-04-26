@@ -67,7 +67,7 @@ export const redisMerge = async <T extends Record<keyof T, unknown>>(props: Redi
     ttlSec: props.ttlSec ?? props.previous.ttlSec,
   } satisfies RedisExtend<T>
 
-  const key = props.idPrefix + "/" + props.id
+  const key = props.idPrefix + "/" + props.previous.id
 
   const response = await redisClient.set(key, JSON.stringify(updatedPayload), {
     ex: props.ttlSec ?? props.previous.ttlSec,

@@ -13,8 +13,8 @@ import {
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useCountDownAtom } from "~/vertex/hooks/useCountdown"
-import { addressCountdownAtom } from "./address-otp"
-import { addressAction } from "~/vertex/lib/server/server-actions"
+import { addressCountdownAtom } from "./address-verification"
+import { addressAction, addressPostcodeAction } from "~/vertex/lib/server/server-actions"
 import { countries } from "~/vertex/global/global-constants"
 
 const AddressContext = createContext<ReturnType<typeof useAddressContextLogic> | null>(null)
@@ -97,16 +97,6 @@ function useAddressContextLogic(initial: Shipping | null) {
 
   const isAddressUpdating = addressHandler.isLoading
 
-  const modelProps = {
-    open: model,
-    onOpenChange: (a: boolean) => {
-      modelSet(a)
-      otpForm.clearErrors("otp")
-      otpForm.setValue("otp", "")
-      otpForm.setValue("id", "")
-    },
-  }
-
   const currentCountry = addressForm.watch("country")
 
   const statesByCountryCode = useMemo(() => {
@@ -121,11 +111,15 @@ function useAddressContextLogic(initial: Shipping | null) {
     return countries.map((a) => ({ code: a.code, name: a.name }))
   }, [])
 
-  console.log({ statesByCountryCode })
-
-  console.log(addressForm.formState.errors)
-
-  console.log(otpForm.formState.errors)
+  const modelProps = {
+    open: model,
+    onOpenChange: (a: boolean) => {
+      modelSet(a)
+      otpForm.clearErrors("otp")
+      otpForm.setValue("otp", "")
+      otpForm.setValue("id", "")
+    },
+  }
 
   return {
     modelProps,

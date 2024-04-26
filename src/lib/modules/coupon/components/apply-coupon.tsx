@@ -3,19 +3,8 @@ import { cn } from "~/lib/utils/functions/ui"
 import { type SortedCoupon } from "../utils/coupon-types"
 import { Button } from "~/app/_components/ui/button"
 import Box from "~/app/_components/box"
-import {
-  ArrowRight,
-  BadgeCheck,
-  BadgePercent,
-  ChevronRight,
-} from "lucide-react"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "~/app/_components/ui/form"
+import { ArrowRight, BadgeCheck, BadgePercent, ChevronRight } from "lucide-react"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "~/app/_components/ui/form"
 import { Input } from "~/app/_components/ui/input"
 import { ScrollArea } from "~/app/_components/ui/scroll-area"
 import { currency } from "~/constants"
@@ -49,15 +38,8 @@ interface CouponSectionProps extends React.HTMLAttributes<HTMLElement> {}
 function CouponSection({ ...props }: CouponSectionProps) {
   const {} = props
 
-  const {
-    eligibleCoupon,
-    isApplied,
-    isModalOpenSet,
-    summary,
-    removeCoupon,
-    applyCoupon,
-    isLoading,
-  } = useCouponContext()
+  const { eligibleCoupon, isApplied, isModalOpenSet, summary, removeCoupon, applyCoupon, isLoading } =
+    useCouponContext()
 
   return (
     <Box className="p-0">
@@ -91,20 +73,12 @@ function CouponSection({ ...props }: CouponSectionProps) {
                     Save{" "}
                     {formatPrice({
                       price: eligibleCoupon.amount,
-                      prefix:
-                        eligibleCoupon.discountType === "FIXED_CART"
-                          ? "₹"
-                          : undefined,
-                      suffix:
-                        eligibleCoupon.discountType === "PERCENT"
-                          ? "%"
-                          : undefined,
+                      prefix: eligibleCoupon.discountType === "FIXED_CART" ? "₹" : undefined,
+                      suffix: eligibleCoupon.discountType === "PERCENT" ? "%" : undefined,
                     })}{" "}
                     more on this order
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    CODE: {eligibleCoupon.code.toUpperCase()}
-                  </div>
+                  <div className="text-xs text-muted-foreground">CODE: {eligibleCoupon.code.toUpperCase()}</div>
                 </div>
               </div>
 
@@ -146,9 +120,7 @@ function CouponSection({ ...props }: CouponSectionProps) {
                     })}{" "}
                     with this code🎉
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    Coupon Applied
-                  </div>
+                  <div className="text-xs text-muted-foreground">Coupon Applied</div>
                 </div>
               </div>
 
@@ -179,22 +151,10 @@ function CouponSection({ ...props }: CouponSectionProps) {
 }
 
 function Drawer() {
-  const {
-    isModalOpen,
-    isModalOpenSet,
-    form,
-    handleSubmit,
-    coupons,
-    isLoading,
-  } = useCouponContext()
+  const { isModalOpen, isModalOpenSet, form, handleSubmit, coupons, isLoading } = useCouponContext()
 
   return (
-    <ModelXDrawer
-      open={isModalOpen}
-      onOpenChange={isModalOpenSet}
-      className="md:max-w-md"
-      title="Offers"
-    >
+    <ModelXDrawer open={isModalOpen} onOpenChange={isModalOpenSet} className="md:max-w-md" title="Offers">
       <Form {...form}>
         <form onSubmit={handleSubmit} className="w-full">
           <div className="border-b">
@@ -218,26 +178,17 @@ function Drawer() {
           <ScrollArea className="h-[400px]">
             <div className="flex flex-col space-y-4 py-5 text-left">
               {coupons
-                .sort((a, b) =>
-                  a.isEligible === b.isEligible ? 0 : a.isEligible ? -1 : 1,
-                )
+                .sort((a, b) => (a.isEligible === b.isEligible ? 0 : a.isEligible ? -1 : 1))
                 .map((coupon) => (
                   <CouponCard key={coupon.code} coupon={coupon} />
                 ))}
 
-              <div className=" p-4 text-center text-sm text-muted-foreground">
-                Keep shopping for more!
-              </div>
+              <div className=" p-4 text-center text-sm text-muted-foreground">Keep shopping for more!</div>
             </div>
           </ScrollArea>
 
           <div className="w-full bg-white">
-            <Button
-              type="submit"
-              className="w-full"
-              loading={isLoading ? "true" : "false"}
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" isLoading={isLoading} disabled={isLoading}>
               Apply
             </Button>
           </div>
@@ -258,18 +209,11 @@ function CouponCard({ ...props }: CouponCardProps) {
 
   return (
     <div
-      className={cn(
-        "flex min-h-[140px] overflow-hidden rounded-2xl bg-white shadow-[0px_5px_20px_0px_#e2e8f0]",
-        {
-          "select-none opacity-80 grayscale": !coupon.isEligible,
-        },
-      )}
+      className={cn("flex min-h-[140px] overflow-hidden rounded-2xl bg-white shadow-[0px_5px_20px_0px_#e2e8f0]", {
+        "select-none opacity-80 grayscale": !coupon.isEligible,
+      })}
     >
-      <div
-        className={cn(
-          "relative flex w-12 items-center justify-center bg-primary",
-        )}
-      >
+      <div className={cn("relative flex w-12 items-center justify-center bg-primary")}>
         <div className="max-w-max -rotate-90 whitespace-nowrap font-extrabold uppercase leading-none text-white">
           Flat off
         </div>
@@ -314,11 +258,7 @@ function CouponCard({ ...props }: CouponCardProps) {
         <div className="mb-3 mt-4 h-1 w-full border-t border-dashed border-gray-300"></div>
 
         <div className="mb-3 max-w-[80%] text-xs text-muted-foreground">
-          {coupon.isEligible ? (
-            <div>{coupon.description}</div>
-          ) : (
-            <div>{coupon.eligibilityMessage}</div>
-          )}
+          {coupon.isEligible ? <div>{coupon.description}</div> : <div>{coupon.eligibilityMessage}</div>}
         </div>
       </div>
     </div>
@@ -374,12 +314,7 @@ function Success() {
   if (!!!summary.coupon) return null
 
   return (
-    <ModelXDrawer
-      open={isSuccess}
-      onOpenChange={isSuccessSet}
-      className="md:max-w-md"
-      hideBackdrop
-    >
+    <ModelXDrawer open={isSuccess} onOpenChange={isSuccessSet} className="md:max-w-md" hideBackdrop>
       <div className=" z-40 flex flex-col items-center justify-center p-4 text-center">
         <p className="mb-2 text-2xl font-semibold">
           You saved {currency}

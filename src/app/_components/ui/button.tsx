@@ -9,10 +9,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-white hover:opacity-90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border text-foreground border-input bg-transparent font-normal hover:text-primary hover:bg-gray-50",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border text-foreground border-input bg-transparent font-normal hover:text-primary hover:bg-gray-50",
         secondary: "bg-secondary text-white hover:opacity-90",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
@@ -39,7 +37,7 @@ export interface ButtonProps
   loading?: string
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const ButtonParent = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     return (
@@ -60,14 +58,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             fill="none"
             viewBox="0 0 24 24"
           >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path
               className="opacity-75"
               fill="currentColor"
@@ -80,6 +71,41 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   },
 )
 
-Button.displayName = "Button"
+ButtonParent.displayName = "ButtonParent"
 
-export { Button, buttonVariants }
+interface CustomButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  isLoading: boolean
+}
+
+export function Button({ ...props }: CustomButtonProps) {
+  const {} = props
+
+  return (
+    <ButtonParent
+      className={cn("relative", props.className)}
+      variant={props.variant}
+      disabled={props.isLoading}
+      {...props}
+    >
+      <div
+        className={cn("pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2", {
+          invisible: !props.isLoading,
+        })}
+      >
+        <div
+          className={cn(
+            "spin aspect-square w-5 rounded-full border-2 border-primary-foreground border-r-secondary-foreground",
+          )}
+        ></div>
+      </div>
+
+      <div
+        className={cn("w-full", {
+          invisible: props.isLoading,
+        })}
+      >
+        {props.children}
+      </div>
+    </ButtonParent>
+  )
+}
