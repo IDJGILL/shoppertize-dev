@@ -15,6 +15,7 @@ import {
   verifyAuthenticationSecret,
 } from "./auth-server-utils"
 import type {
+  Authentication,
   CheckVerificationOutput,
   ForgetPasswordOutput,
   IdentifyUserOutput,
@@ -30,7 +31,6 @@ import { getAuthTokens } from "./auth-queries"
 import { signIn } from "~/vertex/lib/auth/auth-config"
 import { emailClient } from "~/lib/smtp/smtp-client"
 import { identifyUsernameType } from "./auth-client-utils"
-import { type Authentication } from "~/vertex/global/global-types"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
 import { magicLinkEmailTemplate } from "~/lib/modules/auth/auth-emails"
@@ -208,7 +208,7 @@ export const signUpUser = async (input: Signup): Promise<void> => {
     password: input.password,
   })
 
-  await redisDelete({ id: session.id, idPrefix: "@session/authentication" })
+  await redisDelete({ id: session.id, idPrefix: "@verify/auth" })
 
   await authLoginActon({
     username: session.username,
@@ -271,7 +271,7 @@ export const updatePassword = async (input: UpdatePassword): Promise<void> => {
     cacheConfig: "no-cache",
   })
 
-  await redisUpdate<Authentication>({ id: input.id, idPrefix: "@session/authentication", payload: { action: "login" } })
+  await redisUpdate<Authentication>({ id: input.id, idPrefix: "@verify/auth", payload: { action: "login" } })
 
   await authLoginActon({
     id: session.id,
@@ -316,7 +316,7 @@ export const nextAuthSignIn = async (input: Login): Promise<NextAuthSignInOutput
 
     const data = await getAuthTokens({ username: session.username })
 
-    await redisDelete({ id: input.id, idPrefix: "@session/authentication" })
+    await redisDelete({ id: input.id, idPrefix: "@verify/auth" })
 
     await createAuthSession(data)
 

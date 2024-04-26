@@ -1,3 +1,5 @@
+import type { PickDataFields, PickInputFields } from "~/vertex/global/global-types"
+
 export const GetUserMetaDataGql = `
 query GetUserMetaDataGql($keysIn: [String] = []) {
   customer {
@@ -14,15 +16,12 @@ query GetUserMetaDataGql($keysIn: [String] = []) {
 
 export type GetUserMetaDataGqlResponse = {
   customer: {
-    metaData: Pick<GqlDataProps, "metaData">["metaData"] | null
-  } & Pick<GqlDataProps, "email" | "databaseId">
+    metaData: PickDataFields<"metaData">["metaData"] | null
+  } & PickDataFields<"email" | "databaseId">
   allowedCountries: string[]
 }
 
-export type GetUserMetaDataGqlInput = {
-  keysIn: string[]
-  customerId: number
-}
+export type GetUserMetaDataGqlInput = PickInputFields<"keysIn" | "customerId">
 
 export const UpdateUserMetaDataGql = `
 mutation UpdateUserMetaDataGql($metaData: [MetaDataInput] = {key: "", value: ""}, $key: String = "") {
@@ -39,8 +38,8 @@ mutation UpdateUserMetaDataGql($metaData: [MetaDataInput] = {key: "", value: ""}
 
 export type UpdateUserMetaDataGqlResponse = {
   updateCustomer: {
-    customer: Pick<GqlDataProps, "metaData">
+    customer: PickDataFields<"metaData">
   }
 }
 
-export type UpdateUserMetaDataGqlInput = Pick<GqlInputProps, "metaData" | "key">
+export type UpdateUserMetaDataGqlInput = PickInputFields<"metaData" | "key">

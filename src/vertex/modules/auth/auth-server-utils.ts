@@ -12,19 +12,15 @@ import {
 import { cookies } from "next/headers"
 import { customAlphabet, nanoid } from "nanoid"
 import { config } from "~/vertex/global/global-config"
-import { type CreateUserProps } from "./auth-types"
+import type { AuthSession, Authentication, CreateUserProps } from "./auth-types"
 import { identifyUsernameType } from "./auth-client-utils"
 import { wpClient } from "~/vertex/lib/wordpress/wordpress-client"
 import { ExtendedError } from "~/vertex/utils/extended-error"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
-import type { AuthSession, Authentication } from "~/vertex/global/global-types"
 import { redisCreate, redisDelete, redisGet, redisMerge, redisUpdate } from "~/vertex/lib/redis/redis-utils"
-import { getCurrentAddressFromMeta } from "../address/address-server-utils"
 
 export async function createAuthSession(props: GetAuthTokensGqlOutput["login"]) {
   const uid = props.user.databaseId.toString()
-
-  const address = await getCurrentAddressFromMeta(+uid)
 
   await redisCreate<AuthSession>({
     id: uid,
@@ -34,8 +30,6 @@ export async function createAuthSession(props: GetAuthTokensGqlOutput["login"]) 
       username: props.user.email ?? "",
       name: props.user.name,
       loggedInAt: Date.now().toString(),
-      expireAt: props.refreshTokenExpiration,
-      currentAddress: address,
     },
     ttlSec: 604800, // 7 days,
   })
@@ -93,7 +87,7 @@ export async function createAuthenticationSession(
   const username = createEmailId(props.username, props.countryCode)
 
   const response = await redisCreate<Authentication>({
-    idPrefix: "@session/authentication",
+    idPrefix: "@verify/auth",
     payload: {
       ...props,
       secret,
@@ -132,7 +126,7 @@ export function createVerificationSecret(props: Pick<Authentication, "verificati
 }
 
 export async function getAuthenticationSession(id: string) {
-  const session = await redisGet<Authentication>({ id, idPrefix: "@session/authentication" })
+  const session = await redisGet<Authentication>({ id, idPrefix: "@verify/auth" })
 
   if (!session) {
     throw new ExtendedError({
@@ -170,7 +164,7 @@ export async function verifyAuthenticationSecret(props: { id: string; secret: st
 
   await redisUpdate<Authentication>({
     id: props.id,
-    idPrefix: "@session/authentication",
+    idPrefix: "@verify/auth",
     payload: { isVerified: true },
   })
 
@@ -224,7 +218,7 @@ export async function recreateAuthenticationSecret(id: string) {
   }
 
   if (!canResendVerification(session)) {
-    await redisDelete({ id: session.id, idPrefix: "@session/authentication" })
+    await redisDelete({ id: session.id, idPrefix: "@verify/auth" })
 
     throw new ExtendedError({
       code: "TOO_MANY_REQUESTS",
@@ -233,7 +227,7 @@ export async function recreateAuthenticationSecret(id: string) {
   }
 
   await redisMerge<Authentication>({
-    idPrefix: "@session/authentication",
+    idPrefix: "@verify/auth",
     previous: session,
     payload: {
       createdAt: new Date().getTime(),

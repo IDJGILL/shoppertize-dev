@@ -2,14 +2,14 @@ import type { RedisIDPrefix } from "~/vertex/global/global-types"
 
 export type RedisExtend<T> = {
   id: string
-  ttlSec: number
+  ttlSec?: number
 } & T
 
 export type RedisCreateOpts<T> = {
   id?: string
   idPrefix: RedisIDPrefix
   payload: T
-  ttlSec: number
+  ttlSec?: number
 }
 
 export type RedisGetOpts = {

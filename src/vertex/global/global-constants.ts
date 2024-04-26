@@ -2,11 +2,14 @@ export const pathList = ["/", "/cart"] as const
 
 export const cacheTagList = ["some"] as const
 
-export const redisIDPrefixList = [
-  "@cache/product/stock",
+export const metaKeys = ["address-options"] as const
+
+export const redisPrefixList = [
+  "@cache/product",
   "@session/auth",
-  "@session/authentication",
   "@session/address",
+  "@verify/auth",
+  "@verify/address",
 ] as const
 
 export const countries = [

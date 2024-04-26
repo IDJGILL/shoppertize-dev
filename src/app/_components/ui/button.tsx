@@ -74,7 +74,7 @@ const ButtonParent = React.forwardRef<HTMLButtonElement, ButtonProps>(
 ButtonParent.displayName = "ButtonParent"
 
 interface CustomButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
-  isLoading: boolean
+  isLoading?: boolean
 }
 
 export function Button({ ...props }: CustomButtonProps) {

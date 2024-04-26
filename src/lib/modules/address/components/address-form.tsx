@@ -28,6 +28,8 @@ export default function AddressForm({ ...props }: AddressFormProps) {
         {/* Address Form */}
         <Form {...addressForm}>
           <form onSubmit={addressFormHandler} className="space-y-8">
+            <h3 className="font-semibold">Shipping Details</h3>
+
             <FormField
               control={addressForm.control}
               name="id"
@@ -40,8 +42,6 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                 </FormItem>
               )}
             />
-
-            <h3 className="font-semibold">Shipping Details</h3>
 
             <FormField
               control={addressForm.control}
@@ -266,7 +266,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                         htmlFor="isDefault"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        Set this as my default address
+                        Make this my default address
                       </label>
                     </div>
                   </FormItem>

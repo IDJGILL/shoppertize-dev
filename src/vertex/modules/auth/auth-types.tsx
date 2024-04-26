@@ -1,7 +1,37 @@
 import { type DefaultSession } from "next-auth"
 import { type DefaultJWT } from "next-auth/jwt"
-import type { Authentication } from "~/vertex/global/global-types"
 import type { RedisExtend } from "~/vertex/lib/redis/redis-types"
+
+export type AuthSession = {
+  uid: string
+  name: string
+  username: string
+  loggedInAt: string
+}
+
+export type AuthClientSession = {
+  user?: {
+    id: string
+    name: string
+    email: string
+  }
+  isLoading: boolean
+  isLoggedIn: boolean
+}
+
+export type Authentication = {
+  ip: string
+  expiry: number
+  createdAt: number
+  isVerified: boolean
+  username: string
+  verification: "otp" | "link"
+  action: "login" | "signup" | "reset"
+  resendCount: number
+  secret: string
+  countryCode: string
+  clientId: string
+}
 
 export type ExtendUser = DefaultSession["user"] & {
   id: string

@@ -86,16 +86,16 @@ export const publicAction = createSafeActionClient({
 
 export const revalidate = (input: Revalidate) => {
   return new Promise<boolean>((resolve) => {
-    const isPathExist = input.paths.some((a) => pathList.includes(a))
+    const isPathExist = input.paths?.some((a) => pathList.includes(a))
 
-    const isTagExist = input.tags.some((a) => cacheTagList.includes(a))
+    const isTagExist = input.tags?.some((a) => cacheTagList.includes(a))
 
     if (isPathExist) {
-      input.paths.forEach((path) => revalidatePath(path))
+      input.paths?.forEach((path) => revalidatePath(path))
     }
 
     if (isTagExist) {
-      input.tags.forEach((tag) => revalidateTag(tag))
+      input.tags?.forEach((tag) => revalidateTag(tag))
     }
 
     return resolve(true)

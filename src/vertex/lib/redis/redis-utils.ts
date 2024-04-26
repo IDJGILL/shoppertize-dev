@@ -21,7 +21,7 @@ export const redisCreate = async <T extends Record<keyof T, unknown>>(props: Red
     ttlSec: props.ttlSec,
   } satisfies RedisExtend<T>
 
-  const response = await redisClient.set(key, JSON.stringify(payload), { ex: props.ttlSec })
+  const response = await redisClient.set(key, JSON.stringify(payload), { ex: props.ttlSec! })
 
   if (response === null) throw new ExtendedError({ code: "INTERNAL_SERVER_ERROR", message: "redisCreate" })
 
@@ -51,7 +51,7 @@ export const redisUpdate = async <T extends Record<keyof T, unknown>>(props: Red
 
   const key = props.idPrefix + "/" + props.id
 
-  const response = await redisClient.set(key, JSON.stringify(updatedPayload), { ex: props.ttlSec ?? previous.ttlSec })
+  const response = await redisClient.set(key, JSON.stringify(updatedPayload), { ex: props.ttlSec! ?? previous.ttlSec })
 
   if (response === null) {
     throw new ExtendedError({ code: "INTERNAL_SERVER_ERROR", message: "redisUpdate" })
@@ -70,7 +70,7 @@ export const redisMerge = async <T extends Record<keyof T, unknown>>(props: Redi
   const key = props.idPrefix + "/" + props.previous.id
 
   const response = await redisClient.set(key, JSON.stringify(updatedPayload), {
-    ex: props.ttlSec ?? props.previous.ttlSec,
+    ex: props.ttlSec! ?? props.previous.ttlSec,
   })
 
   if (response === null) {

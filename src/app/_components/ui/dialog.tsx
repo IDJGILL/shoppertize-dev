@@ -56,31 +56,13 @@ const DialogContent = React.forwardRef<
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
-const DialogHeader = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
-      className,
-    )}
-    {...props}
-  />
+const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)} {...props} />
 )
 DialogHeader.displayName = "DialogHeader"
 
-const DialogFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className,
-    )}
-    {...props}
-  />
+const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)} {...props} />
 )
 DialogFooter.displayName = "DialogFooter"
 
@@ -88,11 +70,7 @@ const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title
-    ref={ref}
-    className={cn("text-lg font-semibold leading-none", className)}
-    {...props}
-  />
+  <DialogPrimitive.Title ref={ref} className={cn("text-lg font-semibold leading-none", className)} {...props} />
 ))
 DialogTitle.displayName = DialogPrimitive.Title.displayName
 
@@ -100,15 +78,11 @@ const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
+  <DialogPrimitive.Description ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />
 ))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
-interface ModelXDrawerProps extends React.HTMLAttributes<HTMLElement> {
+export type ModelProps = {
   trigger?: React.ReactNode
   open?: boolean
   onOpenChange?: (state: boolean) => void
@@ -122,6 +96,8 @@ interface ModelXDrawerProps extends React.HTMLAttributes<HTMLElement> {
   hideBackdrop?: boolean
 }
 
+interface ModelXDrawerProps extends React.HTMLAttributes<HTMLElement>, ModelProps {}
+
 function ModelXDrawer({ ...props }: ModelXDrawerProps) {
   const {} = props
 
@@ -131,10 +107,9 @@ function ModelXDrawer({ ...props }: ModelXDrawerProps) {
 
       <DialogContent
         className={cn(
-          "bottom-0 z-[100000000] max-w-full translate-y-[0%] rounded-t-md data-[state=closed]:!slide-out-to-bottom-[48%] data-[state=open]:!slide-in-from-bottom-1/2 sm:top-[50%] sm:max-w-[425px] sm:translate-y-[-50%] md:h-max",
+          "bottom-0 z-[100000000] max-w-full translate-y-[0%] overflow-hidden rounded-t-md data-[state=closed]:!slide-out-to-bottom-[48%] data-[state=open]:!slide-in-from-bottom-1/2 sm:top-[50%] sm:max-w-[425px] sm:translate-y-[-50%] md:h-max",
           {
-            "top-[0%] z-[100000000] h-full gap-0 rounded-none":
-              props.height === "screen",
+            "top-[0%] z-[100000000] h-full gap-0 rounded-none": props.height === "screen",
             "h-[360px]": props.scroll,
           },
           props.className,
@@ -142,7 +117,7 @@ function ModelXDrawer({ ...props }: ModelXDrawerProps) {
         hideBackdrop={props.hideBackdrop}
       >
         {props.title && (
-          <DialogHeader className="mb-6">
+          <DialogHeader className="p-4">
             <DialogTitle>{props.title}</DialogTitle>
             <DialogDescription>{props.description}</DialogDescription>
           </DialogHeader>
@@ -156,11 +131,7 @@ function ModelXDrawer({ ...props }: ModelXDrawerProps) {
           {props.children}
 
           {props.isLoading && (
-            <div
-              className={cn(
-                "absolute inset-x-0 top-0 h-full w-full bg-white bg-opacity-50",
-              )}
-            ></div>
+            <div className={cn("absolute inset-x-0 top-0 h-full w-full bg-white bg-opacity-50")}></div>
           )}
         </main>
 

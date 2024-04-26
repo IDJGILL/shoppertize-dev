@@ -18,7 +18,7 @@ import { redisClient } from "~/vertex/lib/redis/redis-client"
 
 export async function getCachedProductStock(productId: string) {
   const data = await redisClient.get<GetAllProductsStockDetailsGqlResponse["products"]["nodes"][number]>(
-    `@cache/product/stock/${productId}`,
+    `@cache/product/${productId}`,
   )
 
   return data

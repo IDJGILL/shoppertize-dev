@@ -13,14 +13,17 @@ import { calcSummary } from "./cart-client-utils"
 import { revalidatePath } from "next/cache"
 import type { CartItem } from "./cart-schemas"
 import { publicQuery } from "~/vertex/lib/server/server-query-helper"
-import { getAuthSession } from "../auth/auth-server-utils"
+import { getCurrentAddress } from "../address/address-server-utils"
 
 export const getCart = publicQuery(async (session) => {
-  const [cartItems, auth] = await Promise.all([getCartItemData(), !!session ? getAuthSession(session.user.id) : null])
+  const [cartItems, address] = await Promise.all([
+    getCartItemData(),
+    !!session ? getCurrentAddress(session.user.id) : null,
+  ])
 
   const items = sortCartItemsData({
     cartItems,
-    postcode: auth?.currentAddress?.postcode ?? null,
+    postcode: address?.postcode ?? null,
   })
 
   const cartSummary = calcSummary({ items })
@@ -28,7 +31,7 @@ export const getCart = publicQuery(async (session) => {
   return {
     items,
     cartSummary,
-    address: auth?.currentAddress ?? null,
+    address: address ?? null,
     isCartEmpty: cartItems.length === 0,
   }
 })

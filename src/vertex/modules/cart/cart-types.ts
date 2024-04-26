@@ -1,10 +1,9 @@
-import { type ShippingAddress } from "~/lib/modules/address/utils/address-types"
+import type { PickDataFields } from "~/vertex/global/global-types"
 
 export type CartItemData = Array<
-  Pick<GqlDataProps, "key" | "quantity"> & {
+  PickDataFields<"key" | "quantity"> & {
     product: {
-      node: Pick<
-        GqlDataProps,
+      node: PickDataFields<
         | "id"
         | "type"
         | "name"
@@ -30,13 +29,7 @@ export type CartItemRecord = {
 export type MainCartItem = Pick<CartItemData[number], "key" | "quantity"> &
   Pick<
     CartItemData[number]["product"]["node"],
-    | "type"
-    | "name"
-    | "image"
-    | "price"
-    | "regularPrice"
-    | "stockQuantity"
-    | "stockStatus"
+    "type" | "name" | "image" | "price" | "regularPrice" | "stockQuantity" | "stockStatus"
   > &
   ExtendCartItem
 
@@ -71,10 +64,4 @@ export type Summary = {
   cod?: number
   wallet?: number
   coupon?: number
-}
-
-export type GetCartOutput = {
-  items: MainCartItem[]
-  cartSummary: Summary
-  shippingAddress: ShippingAddress | null
 }

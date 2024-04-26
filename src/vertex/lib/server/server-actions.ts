@@ -28,7 +28,12 @@ import { removeCartItemFromCookie, updateCartItemToCookie } from "../../modules/
 import { $Revalidate } from "~/vertex/global/global-models"
 import { checkoutHandler } from "~/vertex/modules/checkout/checkout-controllers"
 import { $PaymentMethod } from "~/lib/modules/payment/payment-models"
-import { addressHandler, verifyAddress } from "~/vertex/modules/address/address-controllers"
+import {
+  addressHandler,
+  changeAddress,
+  deleteAddress,
+  verifyAddress,
+} from "~/vertex/modules/address/address-controllers"
 import { $AddressVerification, $Shipping } from "~/vertex/modules/address/address-models"
 import otpless from "../otpless/otpless-config"
 import { ExtendedError } from "~/vertex/utils/extended-error"
@@ -36,7 +41,7 @@ import { $IndianPostcode } from "~/vertex/modules/courier/courier-models"
 import { checkPostcodeService } from "~/vertex/modules/courier/courier-controllers"
 import { z } from "zod"
 import { redisGet, redisMerge } from "../redis/redis-utils"
-import { type AddressSession } from "~/vertex/modules/address/address-types"
+import { type VerifyAddress } from "~/vertex/modules/address/address-types"
 
 // Todo - Create password schema logic.
 // Todo - Test @hapi/iron package in edge environment.
@@ -116,7 +121,7 @@ export const checkoutAction = authAction($PaymentMethod, async (input) => {
 })
 
 export const addressAction = authAction($Shipping, async (input, ctx) => {
-  const data = await addressHandler(input, ctx.session.authToken)
+  const data = await addressHandler(ctx.session.user.id, input)
 
   return ctx.response.success({
     data: data,
@@ -125,11 +130,11 @@ export const addressAction = authAction($Shipping, async (input, ctx) => {
 })
 
 export const addressVerifyAction = authAction($AddressVerification, async (input, ctx) => {
-  return await verifyAddress({ ...input, authToken: ctx.session.authToken })
+  return await verifyAddress({ ...input, uid: ctx.session.user.id })
 })
 
 export const addressResendAction = authAction(z.string(), async (input) => {
-  const session = await redisGet<AddressSession>({ id: input, idPrefix: "@session/address" })
+  const session = await redisGet<VerifyAddress>({ id: input, idPrefix: "@verify/address" })
 
   if (!session) {
     throw new ExtendedError({ code: "BAD_REQUEST", message: "Limit reached, please refresh the page and try again." })
@@ -139,9 +144,21 @@ export const addressResendAction = authAction(z.string(), async (input) => {
 
   if (!data.newToken) throw new ExtendedError({ code: "BAD_REQUEST", message: data.message })
 
-  await redisMerge({ previous: session, idPrefix: "@session/address", payload: { token: data.newToken } })
+  await redisMerge({ previous: session, idPrefix: "@verify/address", payload: { token: data.newToken } })
 })
 
 export const addressPostcodeAction = authAction($IndianPostcode, async (input) => {
   return await checkPostcodeService(input)
+})
+
+export const addressChangeAction = authAction(z.string(), async (input, ctx) => {
+  await changeAddress(ctx.session.user.id, input)
+
+  return revalidate({ paths: ["/cart"] })
+})
+
+export const addressDeleteAction = authAction(z.string(), async (input, ctx) => {
+  await deleteAddress(ctx.session.user.id, input)
+
+  return revalidate({ paths: ["/cart"] })
 })

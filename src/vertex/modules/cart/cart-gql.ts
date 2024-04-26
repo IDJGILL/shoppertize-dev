@@ -1,3 +1,5 @@
+import type { PickDataFields, PickInputFields } from "~/vertex/global/global-types"
+
 export const AddToCartGql = `
 mutation AddToCartGql($productId: Int = 0, $quantity: Int) {
   addToCart(input: {productId: $productId, quantity: $quantity}) {
@@ -18,7 +20,7 @@ export type AddToCartGqlResponse = {
   } | null
 }
 
-export type AddToCartGqlInput = Pick<GqlInputProps, "productId" | "quantity">
+export type AddToCartGqlInput = PickInputFields<"productId" | "quantity">
 
 export const UpdateCartItemQuantityGql = `
 mutation UpdateCartItemQuantityGql($items: [CartItemQuantityInput] = []) {
@@ -64,7 +66,7 @@ export type RemoveCartItemGqlData = {
   }
 }
 
-export type RemoveCartItemGqlInput = Pick<GqlInputProps, "keys" | "all">
+export type RemoveCartItemGqlInput = PickInputFields<"keys" | "all">
 
 export const GetCartItemsCountGql = `
 query GetCartItemsCountGql {
@@ -79,7 +81,7 @@ query GetCartItemsCountGql {
 
 export type GetCartItemsCountGqlProps = {
   customer: {
-    session: Pick<GqlDataProps, "metaData">["metaData"]
+    session: PickDataFields<"metaData">["metaData"]
   }
 }
 
@@ -147,8 +149,7 @@ query GetAllProductsStockDetailsGql {
 `
 export type GetAllProductsStockDetailsGqlResponse = {
   products: {
-    nodes: (Pick<
-      GqlDataProps,
+    nodes: (PickDataFields<
       | "id"
       | "type"
       | "slug"
@@ -199,8 +200,7 @@ query GetProductStockDetailsGql($id: ID = "") {
 `
 
 export type GetProductStockDetailsGqlResponse = {
-  product: Pick<
-    GqlDataProps,
+  product: PickDataFields<
     | "id"
     | "type"
     | "slug"

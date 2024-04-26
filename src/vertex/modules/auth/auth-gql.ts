@@ -1,3 +1,5 @@
+import type { PickDataFields, PickInputFields } from "~/vertex/global/global-types"
+
 export const UserByIdGql = `
 query UserByIdGql($idType: UserNodeIdTypeEnum = DATABASE_ID, $id: ID = "") {
   user(id: $id, idType: $idType) {
@@ -14,13 +16,10 @@ query UserByIdGql($idType: UserNodeIdTypeEnum = DATABASE_ID, $id: ID = "") {
 `
 
 export type UserByIdGqlOutput = {
-  user: Pick<
-    GqlDataProps,
-    "databaseId" | "firstName" | "lastName" | "email" | "userMetaData"
-  >
+  user: PickDataFields<"databaseId" | "firstName" | "lastName" | "email" | "userMetaData">
 }
 
-export type UserByIdGqlInput = Pick<GqlInputProps, "id" | "idType">
+export type UserByIdGqlInput = PickInputFields<"id" | "idType">
 
 export const PasswordLoginGql = `
 mutation PasswordLoginGql($credentials: PasswordProviderResponseInput = {username: "", password: ""}) {
@@ -39,13 +38,13 @@ mutation PasswordLoginGql($credentials: PasswordProviderResponseInput = {usernam
 `
 
 export type PasswordLoginGqlOutput = {
-  login: Pick<GqlDataProps, "authToken" | "refreshToken"> & {
-    user: Pick<GqlDataProps, "databaseId" | "name" | "email">
-  } & Pick<GqlDataProps, "authTokenExpiration" | "refreshTokenExpiration">
+  login: PickDataFields<"authToken" | "refreshToken"> & {
+    user: PickDataFields<"databaseId" | "name" | "email">
+  } & PickDataFields<"authTokenExpiration" | "refreshTokenExpiration">
 }
 
 export type PasswordLoginGqlInput = {
-  credentials: Pick<GqlInputProps, "username" | "password">
+  credentials: PickInputFields<"username" | "password">
 }
 
 export const GetAuthTokensGql = `
@@ -65,12 +64,12 @@ mutation GetAuthTokensGql($identity: String = "") {
 `
 
 export type GetAuthTokensGqlOutput = {
-  login: Pick<GqlDataProps, "authToken" | "refreshToken"> & {
-    user: Pick<GqlDataProps, "databaseId" | "name" | "email">
-  } & Pick<GqlDataProps, "authTokenExpiration" | "refreshTokenExpiration">
+  login: PickDataFields<"authToken" | "refreshToken"> & {
+    user: PickDataFields<"databaseId" | "name" | "email">
+  } & PickDataFields<"authTokenExpiration" | "refreshTokenExpiration">
 }
 
-export type GetAuthTokensGqlInput = Pick<GqlInputProps, "identity">
+export type GetAuthTokensGqlInput = PickInputFields<"identity">
 
 export const RefreshAccessTokenGql = `
 mutation RefreshAccessTokenGql($refreshToken: String = "") {
@@ -82,7 +81,7 @@ mutation RefreshAccessTokenGql($refreshToken: String = "") {
 `
 
 export type RefreshAccessTokenGqlOutput = {
-  refreshToken: Pick<GqlDataProps, "authToken" | "authTokenExpiration">
+  refreshToken: PickDataFields<"authToken" | "authTokenExpiration">
 }
 
-export type RefreshAccessTokenGqlInput = Pick<GqlInputProps, "refreshToken">
+export type RefreshAccessTokenGqlInput = PickDataFields<"refreshToken">

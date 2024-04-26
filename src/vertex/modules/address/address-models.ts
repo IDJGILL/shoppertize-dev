@@ -16,11 +16,10 @@ export const $Shipping = z.object({
   postcode: z.string().min(6, "Incorrect").max(50, "Incorrect"),
   country: z.string().max(150, "Too long."),
   saveAs: z.enum(["home", "office", "other"], {
-    errorMap: (e) => {
-      return { message: "Please select from options above." }
-    },
+    errorMap: () => ({ message: "Please select from options above." }),
   }),
   isDefault: z.boolean().default(false),
+  isSelected: z.boolean().default(true),
 })
 
 export type Shipping = z.infer<typeof $Shipping>

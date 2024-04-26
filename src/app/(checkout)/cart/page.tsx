@@ -5,7 +5,7 @@ import CartSummary from "./_components/cart-summary"
 import PaymentButton from "./_components/payment-button"
 import { CartContext } from "~/vertex/components/cart/cart-provider"
 import EmptyCartWrapper from "./_components/cart-empty-screen"
-import CartAddress from "./_components/cart-address"
+import AddressBar from "./_components/cart-addressbar"
 
 export default function CartPage() {
   return (
@@ -14,7 +14,7 @@ export default function CartPage() {
         <CheckoutWrapper
           left={
             <>
-              <CartAddress />
+              <AddressBar />
 
               <CartItems />
             </>

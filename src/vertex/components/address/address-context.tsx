@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useCountDownAtom } from "~/vertex/hooks/useCountdown"
 import { addressCountdownAtom } from "./address-verification"
-import { addressAction, addressPostcodeAction } from "~/vertex/lib/server/server-actions"
+import { addressAction } from "~/vertex/lib/server/server-actions"
 import { countries } from "~/vertex/global/global-constants"
 
 const AddressContext = createContext<ReturnType<typeof useAddressContextLogic> | null>(null)
