@@ -43,3 +43,13 @@ export type UpdateUserMetaDataGqlResponse = {
 }
 
 export type UpdateUserMetaDataGqlInput = PickInputFields<"metaData" | "key">
+
+export const GetAllowedCountriesGql = `
+query GetAllowedCountriesGql {
+  allowedCountries
+}
+`
+
+export type GetAllowedCountriesGqlResponse = {
+  allowedCountries: string[]
+}

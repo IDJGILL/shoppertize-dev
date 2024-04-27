@@ -4,13 +4,6 @@ Other Types
   
 */
 
-type GqlProductSettingsProps = {
-  allowedShippingPincodes: string | null
-  allowedShippingStates: string | null
-  hasCashOnDelivery: boolean
-  hasReturnExchange: boolean
-}
-
 type OrderProperties = {
   status: OrderStatusEnum
   datePaid: string

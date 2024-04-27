@@ -1,7 +1,6 @@
 "use client"
 
 import { Pencil, Trash } from "lucide-react"
-import Link from "next/link"
 import { useState } from "react"
 import Box from "~/app/_components/box"
 import { Button } from "~/app/_components/ui/button"
@@ -15,6 +14,7 @@ interface AddressBarProps extends React.HTMLAttributes<HTMLElement> {}
 
 export default function AddressBar({ ...props }: AddressBarProps) {
   const {} = props
+
   const [open, openSet] = useState(false)
 
   const { address } = useCartContext()

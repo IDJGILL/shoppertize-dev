@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useMemo, useState } from "react"
+import { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useActionHandler } from "~/vertex/lib/server/server-hook"
@@ -16,11 +16,12 @@ import { useCountDownAtom } from "~/vertex/hooks/useCountdown"
 import { addressCountdownAtom } from "./address-verification"
 import { addressAction } from "~/vertex/lib/server/server-actions"
 import { countries } from "~/vertex/global/global-constants"
+import { type queryAddressById } from "~/vertex/lib/server/server-queries"
 
 const AddressContext = createContext<ReturnType<typeof useAddressContextLogic> | null>(null)
 
 interface AddressContextProviderProps extends React.HTMLAttributes<HTMLElement> {
-  data: Shipping | null
+  data: Awaited<ReturnType<typeof queryAddressById>>
 }
 
 export function AddressContextProvider({ ...props }: AddressContextProviderProps) {
@@ -29,7 +30,7 @@ export function AddressContextProvider({ ...props }: AddressContextProviderProps
   return <AddressContext.Provider value={useAddressContextLogic(data)}>{props.children}</AddressContext.Provider>
 }
 
-function useAddressContextLogic(initial: Shipping | null) {
+function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressById>>) {
   const [model, modelSet] = useState(false)
   const countdown = useCountDownAtom(addressCountdownAtom)
 
@@ -37,7 +38,7 @@ function useAddressContextLogic(initial: Shipping | null) {
 
   const addressForm = useForm<Shipping>({
     resolver: zodResolver($Shipping),
-    defaultValues: { ...initial },
+    defaultValues: { saveAs: "other", ...initial?.address },
   })
 
   const addressHandler = useActionHandler(addressAction, {
@@ -108,8 +109,10 @@ function useAddressContextLogic(initial: Shipping | null) {
   }, [currentCountry])
 
   const country = useMemo(() => {
-    return countries.map((a) => ({ code: a.code, name: a.name }))
-  }, [])
+    return countries
+      .filter((a) => initial?.allowedCountries.includes(a.code))
+      .map((a) => ({ code: a.code, name: a.name }))
+  }, [initial?.allowedCountries])
 
   const modelProps = {
     open: model,

@@ -2,7 +2,7 @@ import "server-only"
 
 import otpless from "~/vertex/lib/otpless/otpless-config"
 import { ExtendedError } from "~/vertex/utils/extended-error"
-import { getAddressOptions, sendAddressOtp } from "./address-server-utils"
+import { getAddressOptions, getAllowedCountries, sendAddressOtp } from "./address-server-utils"
 import type { AddressSession, VerifyAddress, VerifyAddressProps } from "./address-types"
 import { redisCreate, redisDelete, redisGet, redisUpdate } from "~/vertex/lib/redis/redis-utils"
 import { type Shipping } from "./address-models"
@@ -151,11 +151,9 @@ export const deleteAddress = async (uid: string, id: string) => {
 }
 
 export const getAddressById = async (uid: string, id: string) => {
-  const options = await getAddressOptions(uid)
+  const [options, allowedCountries] = await Promise.all([getAddressOptions(uid), getAllowedCountries()])
 
-  const exists = options.find((a) => a.id === id)
+  const address = options.find((a) => a.id === id)
 
-  if (!exists) return null
-
-  return exists
+  return { address, allowedCountries }
 }

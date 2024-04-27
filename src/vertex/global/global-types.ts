@@ -116,6 +116,13 @@ export type MetaData = {
   value: string
 }
 
+export type GqlProductSettingsProps = {
+  allowedShippingPincodes: string | null
+  allowedShippingStates: string | null
+  hasCashOnDelivery: boolean
+  hasReturnExchange: boolean
+}
+
 export type ProductTypesEnum = "EXTERNAL" | "GROUPED" | "SIMPLE" | "VARIABLE" | "VARIATION"
 
 export type UserNodeIdTypeEnum = "DATABASE_ID" | "EMAIL" | "ID" | "SLUG" | "URI" | "USERNAME"
@@ -154,26 +161,3 @@ export type ProductTaxonomyEnum =
   | "PRODUCT_TAG"
   | "PRODUCT_TYPE"
   | "PRODUCT_VISIBILITY"
-
-// export type Shipping = ShippingItem[]
-
-// export type ShippingItem = {
-//   charge: FixedCharge | PercentageCharge
-//   exclude: [""]
-//   include: [""]
-//   free?: {
-//     min?: 1000
-//     max?: 2000
-//   }
-// }
-
-// export type FixedCharge = {
-//   type: "fixed"
-//   amount: number
-// }
-
-// export type PercentageCharge = {
-//   type: "percentage"
-//   amount: number
-//   max: number
-// }

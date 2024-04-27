@@ -15,9 +15,11 @@ export const $Shipping = z.object({
   phone: z.string().min(10, "Required").max(15, "Incorrect phone number"),
   postcode: z.string().min(6, "Incorrect").max(50, "Incorrect"),
   country: z.string().max(150, "Too long."),
-  saveAs: z.enum(["home", "office", "other"], {
-    errorMap: () => ({ message: "Please select from options above." }),
-  }),
+  saveAs: z
+    .enum(["home", "office", "other"], {
+      errorMap: () => ({ message: "Please select from options above." }),
+    })
+    .default("other"),
   isDefault: z.boolean().default(false),
   isSelected: z.boolean().default(true),
 })

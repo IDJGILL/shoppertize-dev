@@ -4,6 +4,8 @@ import { type Shipping } from "./address-models"
 import { client } from "~/lib/graphql/client"
 import {
   UpdateUserMetaDataGql,
+  GetAllowedCountriesGql,
+  type GetAllowedCountriesGqlResponse,
   type UpdateUserMetaDataGqlInput,
   type UpdateUserMetaDataGqlResponse,
 } from "./address-gql"
@@ -11,6 +13,7 @@ import type { VerifyAddress, AddressSession } from "./address-types"
 import { redisCreate, redisGet } from "~/vertex/lib/redis/redis-utils"
 import otpless from "~/vertex/lib/otpless/otpless-config"
 import { nanoid } from "nanoid"
+import { wpClient } from "~/vertex/lib/wordpress/wordpress-client"
 
 export async function updateAddressMetaData(props: { list: Shipping[]; item: Shipping; authToken: string }) {
   await client<UpdateUserMetaDataGqlResponse, UpdateUserMetaDataGqlInput>({
@@ -48,54 +51,11 @@ export const getCurrentAddress = async (uid: string) => {
   return options.find((a) => a.isSelected)
 }
 
-// export async function addAddress(props: AddAddress) {
-//   const input = cloneDeep(props.input)
+export async function getAllowedCountries() {
+  const data = await wpClient<GetAllowedCountriesGqlResponse, unknown>({
+    access: "admin",
+    query: GetAllowedCountriesGql,
+  })
 
-//   const options = cloneDeep(props.options)
-
-//   if (options.length === 0) {
-//     return await redisCreate<AddressSession>({
-//       id: props.uid,
-//       idPrefix: "@session/address",
-//       payload: { options: [{ ...input, isSelected: true, isDefault: true }] },
-//     })
-//   }
-
-//   if (input.isDefault) {
-//     options.forEach((address) => {
-//       if (address.id !== input.id) {
-//         address.isDefault = false
-//       }
-//     })
-//   }
-
-//   if (input.isSelected) {
-//     options.forEach((address) => {
-//       if (address.id !== input.id) {
-//         address.isSelected = false
-//       }
-//     })
-//   }
-
-//   const hasDefaultAddress = props.options.some((a) => a.isDefault)
-
-//   if (!hasDefaultAddress) {
-//     input.isDefault = true
-//   }
-
-//   const existingAddressIndex = options.findIndex((address) => address.id === input.id)
-
-//   if (existingAddressIndex !== -1) {
-//     options[existingAddressIndex] = input
-//   } else {
-//     options.push(input)
-//   }
-
-//   console.log({ options })
-
-//   await redisUpdate<AddressSession>({
-//     id: props.uid,
-//     idPrefix: "@session/address",
-//     payload: { options },
-//   })
-// }
+  return data.allowedCountries
+}
