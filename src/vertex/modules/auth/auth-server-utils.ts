@@ -3,7 +3,6 @@ import "server-only"
 import {
   UserByIdGql,
   RefreshAccessTokenGql,
-  type GetAuthTokensGqlOutput,
   type RefreshAccessTokenGqlInput,
   type RefreshAccessTokenGqlOutput,
   type UserByIdGqlInput,
@@ -15,25 +14,25 @@ import { config } from "~/vertex/global/global-config"
 import type { AuthSession, Authentication, CreateUserProps } from "./auth-types"
 import { identifyUsernameType } from "./auth-client-utils"
 import { wpClient } from "~/vertex/lib/wordpress/wordpress-client"
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
 import { redisCreate, redisDelete, redisGet, redisMerge, redisUpdate } from "~/vertex/lib/redis/redis-utils"
 
-export async function createAuthSession(props: GetAuthTokensGqlOutput["login"]) {
-  const uid = props.user.databaseId.toString()
+// export async function createAuthSession(props: GetAuthTokensGqlOutput["login"]) {
+//   const uid = props.user.databaseId.toString()
 
-  await redisCreate<AuthSession>({
-    id: uid,
-    idPrefix: "@session/auth",
-    payload: {
-      uid,
-      username: props.user.email ?? "",
-      name: props.user.name,
-      loggedInAt: Date.now().toString(),
-    },
-    ttlSec: 604800, // 7 days,
-  })
-}
+//   await redisCreate<AuthSession>({
+//     id: uid,
+//     idPrefix: "@session/auth",
+//     payload: {
+//       uid,
+//       username: props.user.email ?? "",
+//       name: props.user.name,
+//       loggedInAt: Date.now().toString(),
+//     },
+//     ttlSec: 604800, // 7 days,
+//   })
+// }
 
 export async function updateAuthSession(props: { id: string; key: keyof AuthSession; data: Partial<AuthSession> }) {
   await redisUpdate<AuthSession>({ id: props.id, idPrefix: "@session/auth", payload: props.data })
@@ -284,19 +283,6 @@ export function setClientIdInCookies(clientId: string) {
   })
 }
 
-/**
- * Checks if the provided authentication action matches the action in the provided authentication object.
- * @param {Authentication["action"]} to - The authentication action to check against.
- * @param {Authentication} s - The authentication object containing the action to compare.
- * @returns {boolean} True if the authentication action matches, otherwise false.
- *
- * @example
- * Example of using hasActionPermission function
- * const authentication = { action: "login" };
- * const actionToCheck = "login";
- * const hasActionPermissionResult = hasActionPermission(actionToCheck, authentication);
- * console.log(hasActionPermissionResult); // Output: true
- */
 export function hasActionPermission(to: Authentication["action"], s: Authentication): boolean {
   return s.action === to
 }

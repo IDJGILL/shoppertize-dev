@@ -2,7 +2,7 @@
 
 import FixedBar from "~/app/_components/fixed-bar"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/app/_components/ui/form"
-import { Input, PhoneInput } from "~/app/_components/ui/input"
+import { Input } from "~/app/_components/ui/input"
 import { Button } from "~/app/_components/ui/button"
 import { ModelXDrawer } from "~/app/_components/ui/dialog"
 import Box from "~/app/_components/box"
@@ -13,25 +13,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { ToggleGroup, ToggleGroupItem } from "~/app/_components/ui/toggle-group"
 import { nanoid } from "nanoid"
 import { Checkbox } from "~/app/_components/ui/checkbox"
+import { PhoneInput } from "~/app/_components/phone-input"
 
 interface AddressFormProps extends React.HTMLAttributes<HTMLElement> {}
 
 export default function AddressForm({ ...props }: AddressFormProps) {
   const {} = props
 
-  const { addressForm, addressFormHandler, isAddressUpdating, statesByCountryCode, country, checkPostcodeHandler } =
+  const { form, formHandler, isAddressUpdating, stateController, cityController, country, postcodeController } =
     useAddress()
 
   return (
     <div className="container px-0 py-5 md:py-10">
       <Box className="mx-auto max-w-xl rounded-none sm:rounded-3xl">
         {/* Address Form */}
-        <Form {...addressForm}>
-          <form onSubmit={addressFormHandler} className="space-y-8">
+        <Form {...form}>
+          <form onSubmit={formHandler} className="space-y-8">
             <h3 className="font-semibold">Shipping Details</h3>
 
             <FormField
-              control={addressForm.control}
+              control={form.control}
               name="id"
               defaultValue={nanoid()}
               render={({ field }) => (
@@ -44,7 +45,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
             />
 
             <FormField
-              control={addressForm.control}
+              control={form.control}
               name="fullName"
               render={({ field }) => (
                 <div className="flex-1">
@@ -62,12 +63,18 @@ export default function AddressForm({ ...props }: AddressFormProps) {
             />
 
             <FormField
-              control={addressForm.control}
+              control={form.control}
               name="phone"
               render={({ field }) => (
                 <div>
                   <FormItem>
-                    <PhoneInput field={{ ...field }} form={addressForm} name="phone" />
+                    <FormControl>
+                      <PhoneInput {...field} />
+                    </FormControl>
+
+                    <p className="mt-2 text-xs text-gray-400">
+                      Note: The phone number is required for order delivery and notifications.
+                    </p>
                   </FormItem>
 
                   <FormMessage />
@@ -76,7 +83,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
             />
 
             <FormField
-              control={addressForm.control}
+              control={form.control}
               name="address"
               render={({ field }) => (
                 <div>
@@ -93,7 +100,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
             />
 
             <FormField
-              control={addressForm.control}
+              control={form.control}
               name="locality"
               render={({ field }) => (
                 <div>
@@ -110,13 +117,13 @@ export default function AddressForm({ ...props }: AddressFormProps) {
             />
 
             <FormField
-              control={addressForm.control}
+              control={form.control}
               name="postcode"
               render={({ field }) => (
                 <div>
                   <FormItem>
                     <FormControl>
-                      <Input placeholder=" " {...field} onKeyUp={() => checkPostcodeHandler()}></Input>
+                      <Input placeholder=" " {...{ ...field, ...postcodeController }}></Input>
                     </FormControl>
 
                     <FormLabel>Post code</FormLabel>
@@ -129,13 +136,13 @@ export default function AddressForm({ ...props }: AddressFormProps) {
 
             <div className="flex gap-2">
               <FormField
-                control={addressForm.control}
+                control={form.control}
                 name="city"
                 render={({ field }) => (
                   <div className="flex-1">
                     <FormItem className="flex-1">
                       <FormControl>
-                        <Input placeholder=" " {...field} />
+                        <Input placeholder=" " {...{ ...field, ...cityController }} />
                       </FormControl>
 
                       <FormLabel>City</FormLabel>
@@ -146,61 +153,63 @@ export default function AddressForm({ ...props }: AddressFormProps) {
                 )}
               />
 
-              {statesByCountryCode !== null ? (
-                <FormField
-                  control={addressForm.control}
-                  name="state"
-                  render={({ field }) => (
-                    <div className="flex-1">
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select State" />
-                              </SelectTrigger>
-                            </FormControl>
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <div className="flex-1">
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <Input placeholder=" " {...{ ...field, ...stateController }} />
+                      </FormControl>
 
-                            <SelectContent>
-                              {statesByCountryCode.map((a) => (
-                                <SelectItem key={a.code} value={a.code}>
-                                  {a.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
+                      <FormLabel>State</FormLabel>
+                    </FormItem>
 
-                        <FormLabel>State</FormLabel>
-                      </FormItem>
+                    <FormMessage />
+                  </div>
+                )}
+              />
 
-                      <FormMessage />
-                    </div>
-                  )}
-                />
-              ) : (
-                <FormField
-                  control={addressForm.control}
-                  name="state"
-                  render={({ field }) => (
-                    <div className="flex-1">
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <Input placeholder=" " {...field} />
-                        </FormControl>
+              {/* <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <div className="flex-1">
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={form.watch("country") === "IN"}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select State" />
+                            </SelectTrigger>
+                          </FormControl>
 
-                        <FormLabel>State</FormLabel>
-                      </FormItem>
+                          <SelectContent>
+                            {statesByCountryCode.map((a) => (
+                              <SelectItem key={a.code} value={a.code}>
+                                {a.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
 
-                      <FormMessage />
-                    </div>
-                  )}
-                />
-              )}
+                      <FormLabel>State</FormLabel>
+                    </FormItem>
+
+                    <FormMessage />
+                  </div>
+                )}
+              /> */}
             </div>
 
             <FormField
-              control={addressForm.control}
+              control={form.control}
               name="country"
               render={({ field }) => (
                 <div>
@@ -232,7 +241,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
             />
 
             <FormField
-              control={addressForm.control}
+              control={form.control}
               name="saveAs"
               render={({ field }) => (
                 <div>
@@ -255,7 +264,7 @@ export default function AddressForm({ ...props }: AddressFormProps) {
             />
 
             <FormField
-              control={addressForm.control}
+              control={form.control}
               name="isDefault"
               render={({ field }) => (
                 <div>
@@ -286,8 +295,8 @@ export default function AddressForm({ ...props }: AddressFormProps) {
       </Box>
 
       <AddressVerification>
-        {({ form, mutateVerify, isResending, isVerifying, mutateResend, modelProps, countdown }) => (
-          <ModelXDrawer {...modelProps}>
+        {({ form, mutateVerify, isResending, isVerifying, mutateResend, modelController, countdown }) => (
+          <ModelXDrawer {...modelController}>
             <div className="mb-6">
               <h3 className="text-2xl font-semibold">Verify</h3>
               <p className="text-sm">

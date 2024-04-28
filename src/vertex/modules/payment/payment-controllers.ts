@@ -14,7 +14,7 @@ import { nanoid } from "nanoid"
 import { base64 } from "~/lib/utils/functions/base64"
 import { sha256 } from "js-sha256"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 
 export const LIVE_TEST_DOMAIN = "https://4r9tl1g1-3000.inc1.devtunnels.ms"
 

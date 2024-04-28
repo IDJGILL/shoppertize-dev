@@ -1,4 +1,4 @@
-import type { PickDataFields } from "~/vertex/global/global-types"
+import type { GqlProductSettingsProps, PickDataFields } from "~/vertex/global/global-types"
 
 export type CartItemData = Array<
   PickDataFields<"key" | "quantity"> & {

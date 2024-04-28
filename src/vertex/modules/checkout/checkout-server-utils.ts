@@ -3,7 +3,7 @@ import "server-only"
 import { nanoid } from "nanoid"
 import { redisClient } from "~/vertex/lib/redis/redis-client"
 import type { CheckoutSession, FeeLine, OrderBillingProps, OrderProps, OrderShippingProps } from "./checkout-types"
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 import { getAuthSession } from "../auth/auth-server-utils"
 import { getWallet } from "../payment/payment-controllers"
 import type { MainCartItem } from "../cart/cart-types"
@@ -44,9 +44,9 @@ export const checkoutSession = {
 
     const authSession = requests[1]
 
-    if (!checkoutSession || !authSession?.currentAddress) throw new ExtendedError({ code: "INTERNAL_SERVER_ERROR" })
+    if (!checkoutSession) throw new ExtendedError({ code: "INTERNAL_SERVER_ERROR" })
 
-    return { ...checkoutSession, ...authSession, currentAddress: authSession.currentAddress }
+    return { ...checkoutSession, ...authSession }
   },
 
   //   update: async (props: {
@@ -72,15 +72,7 @@ export const checkoutSession = {
 }
 
 export async function saveOrderToDatabase(referenceId: string): Promise<{ orderId: string }> {
-  const {
-    uid,
-    items,
-    username,
-    paymentMethod,
-    currentAddress: {
-      address: { shipping: shippingData, billing: billingData },
-    },
-  } = await checkoutSession.get(referenceId)
+  const { uid, items, username, paymentMethod } = await checkoutSession.get(referenceId)
 
   const cartItems = sortCartItemsData({
     cartItems: items,

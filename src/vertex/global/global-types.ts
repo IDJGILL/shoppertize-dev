@@ -1,3 +1,4 @@
+import { type callingCodes } from "./data/data-calling-codes"
 import type { cacheTagList, metaKeys, pathList, redisPrefixList } from "./global-constants"
 
 export type Path = (typeof pathList)[number]
@@ -11,6 +12,8 @@ export type MetaKey = (typeof metaKeys)[number]
 export type PickDataFields<T extends keyof DataFields> = Pick<DataFields, T>
 
 export type PickInputFields<T extends keyof InputFields> = Pick<InputFields, T>
+
+export type CallingCode = (typeof callingCodes)[number]["code"]
 
 export type DataFields = {
   id: string | number

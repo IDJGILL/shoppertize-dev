@@ -6,12 +6,52 @@ import Google from "next-auth/providers/google"
 import type { Provider } from "next-auth/providers"
 import { env } from "~/env.mjs"
 import { $Login } from "~/vertex/modules/auth/auth-models"
-import { refreshAuthToken } from "~/vertex/modules/auth/auth-server-utils"
-import { createTokenExpiry, isTokenExpired } from "~/vertex/modules/auth/auth-client-utils"
-import { safeAsync } from "~/vertex/utils/safe-async"
+import { safeAsync } from "~/vertex/lib/utils/safe-async"
 import { nextAuthGoogleSignIn, nextAuthSignIn } from "~/vertex/modules/auth/auth-controllers"
+import { createTokenExpiry, isTokenExpired } from "~/vertex/modules/auth/auth-client-utils"
+import { refreshAuthToken } from "~/vertex/modules/auth/auth-server-utils"
 
-// Todo - The authentication flow and error handling needs more work...
+export const callbacks: NextAuthConfig["callbacks"] = {
+  session: ({ ...props }) => {
+    if ("token" in props) {
+      props.session.user.id = props.token.id
+      props.session.authToken = props.token.authToken
+    }
+
+    return props.session
+  },
+
+  jwt: async ({ token, user, account }) => {
+    if (account?.provider === "google") {
+      return nextAuthGoogleSignIn(token).catch(() => null)
+    }
+
+    if (account?.provider === "credentials") {
+      if (!user.tokens) return null
+
+      const expiresAt = createTokenExpiry(user.tokens.authToken)
+
+      return {
+        ...token,
+        ...user.tokens,
+        id: user.id!,
+        expiresAt,
+      }
+    }
+
+    if (isTokenExpired(token.expiresAt)) {
+      const tokens = await refreshAuthToken(token.refreshToken).catch(() => null)
+
+      if (!tokens) return null
+
+      token.authToken = tokens.authToken
+
+      token.expiresAt = +tokens.authTokenExpiration
+    }
+
+    return token
+  },
+}
 
 const providers = [
   Google({
@@ -42,51 +82,6 @@ const providers = [
     },
   }),
 ] satisfies Provider[]
-
-const callbacks: NextAuthConfig["callbacks"] = {
-  session: ({ ...props }) => {
-    if ("token" in props) {
-      props.session.user.id = props.token.id
-      props.session.authToken = props.token.authToken
-    }
-
-    return props.session
-  },
-
-  jwt: async ({ token, user, account }) => {
-    switch (account?.provider) {
-      case "google": {
-        return nextAuthGoogleSignIn(token).catch(() => null)
-      }
-
-      case "credentials": {
-        if (!user.tokens) return null
-
-        const expiresAt = createTokenExpiry(user.tokens.authToken)
-
-        return {
-          ...token,
-          ...user.tokens,
-          id: user.id!,
-          expiresAt,
-        }
-      }
-
-      default: {
-        if (isTokenExpired(token.expiresAt)) {
-          console.log("Refreshing token")
-          const tokens = await refreshAuthToken(token.refreshToken)
-
-          token.authToken = tokens.authToken
-
-          token.expiresAt = +tokens.authTokenExpiration
-        }
-
-        return token
-      }
-    }
-  },
-}
 
 export const {
   handlers: { GET, POST },

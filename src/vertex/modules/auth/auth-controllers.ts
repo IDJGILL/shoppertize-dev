@@ -1,7 +1,6 @@
 import "server-only"
 
 import {
-  createAuthSession,
   createAuthenticationSession,
   createEmailId,
   createUser,
@@ -11,6 +10,7 @@ import {
   isExistingUser,
   isVerified,
   recreateAuthenticationSecret,
+  refreshAuthToken,
   setClientIdInCookies,
   verifyAuthenticationSecret,
 } from "./auth-server-utils"
@@ -24,14 +24,14 @@ import type {
   VerifyUserOutput,
 } from "./auth-types"
 import { nanoid } from "nanoid"
-import { AuthError } from "next-auth"
+import { AuthError, type NextAuthConfig } from "next-auth"
 import { cookies } from "next/headers"
 import { type JWT } from "next-auth/jwt"
 import { getAuthTokens } from "./auth-queries"
 import { signIn } from "~/vertex/lib/auth/auth-config"
 import { emailClient } from "~/lib/smtp/smtp-client"
-import { identifyUsernameType } from "./auth-client-utils"
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { createTokenExpiry, identifyUsernameType, isTokenExpired } from "./auth-client-utils"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
 import { magicLinkEmailTemplate } from "~/lib/modules/auth/auth-emails"
 import type { Verify, Identify, AuthSessionId, Login, Signup, ForgetPassword, UpdatePassword } from "./auth-models"
@@ -318,8 +318,6 @@ export const nextAuthSignIn = async (input: Login): Promise<NextAuthSignInOutput
 
     await redisDelete({ id: input.id, idPrefix: "@verify/auth" })
 
-    await createAuthSession(data)
-
     const { authToken, refreshToken, user } = data
 
     return {
@@ -334,8 +332,6 @@ export const nextAuthSignIn = async (input: Login): Promise<NextAuthSignInOutput
     username: input.username,
     password: input.password,
   })
-
-  await createAuthSession(data)
 
   const { authToken, refreshToken, user } = data
 
@@ -357,8 +353,6 @@ export const nextAuthGoogleSignIn = async (token: JWT): Promise<JWT | null> => {
 
     const data = await getAuthTokens({ username: token.email })
 
-    await createAuthSession(data)
-
     const { user, authToken, refreshToken, authTokenExpiration } = data
 
     return {
@@ -371,8 +365,6 @@ export const nextAuthGoogleSignIn = async (token: JWT): Promise<JWT | null> => {
   }
 
   const data = await getAuthTokens({ username: token.email })
-
-  await createAuthSession(data)
 
   const {
     authToken,

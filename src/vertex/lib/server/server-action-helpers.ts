@@ -2,7 +2,7 @@ import { createSafeActionClient } from "next-safe-action"
 import type { Status, ActionSuccess } from "./server-types"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { auth } from "../auth/auth-config"
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 import { type Revalidate } from "~/vertex/global/global-models"
 import { cacheTagList, pathList } from "~/vertex/global/global-constants"
 

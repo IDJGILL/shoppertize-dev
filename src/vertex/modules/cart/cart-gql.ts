@@ -1,4 +1,4 @@
-import type { PickDataFields, PickInputFields } from "~/vertex/global/global-types"
+import type { GqlProductSettingsProps, PickDataFields, PickInputFields } from "~/vertex/global/global-types"
 
 export const AddToCartGql = `
 mutation AddToCartGql($productId: Int = 0, $quantity: Int) {

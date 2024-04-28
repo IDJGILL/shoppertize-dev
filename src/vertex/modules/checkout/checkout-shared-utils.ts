@@ -1,4 +1,4 @@
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 import type { MainCartItem } from "../cart/cart-types"
 import type { PaymentMethod } from "../payment/payment-types"
 

@@ -2,23 +2,15 @@
 
 import { useEffect, useState } from "react"
 import { type UseFormReturn, type ControllerRenderProps } from "react-hook-form"
-import {
-  FormControl,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/app/_components/ui/form"
+import { FormControl, FormItem, FormLabel, FormMessage } from "~/app/_components/ui/form"
 import { Input } from "~/app/_components/ui/input"
 import { ScrollArea } from "~/app/_components/ui/scroll-area"
 import { countryCodes } from "~/lib/utils/constants/country-codes"
 import { cn } from "~/lib/utils/functions/ui"
 import { ChevronDown, Search } from "lucide-react"
 import { useUpdateEffect } from "react-use"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/app/_components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "~/app/_components/ui/popover"
+import { type CallingCode } from "~/vertex/global/global-types"
 
 interface EmailAndPhoneInputProps extends React.HTMLAttributes<HTMLElement> {
   inputProps: ControllerRenderProps<
@@ -38,20 +30,16 @@ interface EmailAndPhoneInputProps extends React.HTMLAttributes<HTMLElement> {
   >
 }
 
-export default function EmailAndPhoneInput({
-  ...props
-}: EmailAndPhoneInputProps) {
+export default function EmailAndPhoneInput({ ...props }: EmailAndPhoneInputProps) {
   const { inputProps, form } = props
-  const [code, codeSet] = useState<(typeof countryCodes)[number]["code"]>("+91")
+  const [code, codeSet] = useState<CallingCode>("+91")
   const [search, searchSet] = useState("")
 
   const [dropdown, dropdownSet] = useState(false)
 
   const inputValue = inputProps.value ?? ""
 
-  const isPhoneNumber = !!(
-    inputValue.match(/^\d+$/) && !inputValue.match(/^[a-zA-Z]+$/)
-  )
+  const isPhoneNumber = !!(inputValue.match(/^\d+$/) && !inputValue.match(/^[a-zA-Z]+$/))
 
   useUpdateEffect(() => {
     dropdownSet(false)
@@ -100,11 +88,7 @@ export default function EmailAndPhoneInput({
               <ScrollArea className="h-[180px] p-2">
                 <ul className="w-full text-sm">
                   {countryCodes
-                    .filter(
-                      (a) =>
-                        a.name.toLowerCase().includes(search.toLowerCase()) ||
-                        a.code.includes(search),
-                    )
+                    .filter((a) => a.name.toLowerCase().includes(search.toLowerCase()) || a.code.includes(search))
                     .map((country) => (
                       <li
                         key={country.name}
@@ -117,8 +101,7 @@ export default function EmailAndPhoneInput({
                         className={cn(
                           "flex h-10 cursor-pointer items-center rounded-sm px-4 font-medium hover:bg-zinc-100",
                           {
-                            "bg-primary text-primary text-white hover:bg-primary":
-                              country.code === code,
+                            "bg-primary text-primary text-white hover:bg-primary": country.code === code,
                           },
                         )}
                       >
@@ -144,11 +127,7 @@ export default function EmailAndPhoneInput({
             </FormControl>
 
             <FormLabel>
-              {inputValue.length < 1
-                ? "Email or phone number"
-                : isPhoneNumber
-                  ? "Phone number"
-                  : "Email address"}
+              {inputValue.length < 1 ? "Email or phone number" : isPhoneNumber ? "Phone number" : "Email address"}
             </FormLabel>
           </FormItem>
         </div>

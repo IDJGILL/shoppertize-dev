@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { ErrorBoundary } from "react-error-boundary"
 import { CheckoutContextProvider } from "./checkout-context"
 import { checkoutSessionQuery } from "~/vertex/modules/checkout/checkout-queries"
-import { safeAsync } from "~/vertex/utils/safe-async"
+import { safeAsync } from "~/vertex/lib/utils/safe-async"
 import { permanentRedirect } from "next/navigation"
 
 interface CheckoutProviderProps extends React.HTMLAttributes<HTMLElement> {

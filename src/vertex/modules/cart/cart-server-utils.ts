@@ -13,7 +13,7 @@ import { base64 } from "~/lib/utils/functions/base64"
 import type { CartItemData, CartItemRecord, ExtendCartItem, MainCartItem } from "./cart-types"
 import { cookies } from "next/headers"
 import { calculateGst } from "~/lib/utils/functions/calculate-gst"
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 import { redisClient } from "~/vertex/lib/redis/redis-client"
 
 export async function getCachedProductStock(productId: string) {

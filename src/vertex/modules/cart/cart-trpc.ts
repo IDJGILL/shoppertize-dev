@@ -1,7 +1,7 @@
 import { createTRPCRouter, publicProcedure } from "~/vertex/lib/trpc/trpc-config"
 import { $CartItem } from "./cart-schemas"
 import { addItemToCart, getCartItemsCount } from "./cart-controllers"
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 import { TRPCError } from "@trpc/server"
 
 // Todo - Create a callback wrapper for trpc resolving ExtendedError class to TRPCError

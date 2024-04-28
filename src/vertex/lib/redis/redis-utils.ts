@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid"
 import { redisClient } from "./redis-client"
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 import type {
   RedisCreateOpts,
   RedisDeleteOpts,

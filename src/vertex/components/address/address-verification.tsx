@@ -21,7 +21,7 @@ export function AddressVerification({ ...props }: Props) {
 }
 
 export function useAddressVerification() {
-  const { otpForm, modelProps, router } = useAddress()
+  const { otpForm, modelController, router } = useAddress()
   const countdown = useCountDown(addressCountdownAtom)
 
   const verifyAddress = useActionHandler(addressVerifyAction, {
@@ -62,7 +62,7 @@ export function useAddressVerification() {
     mutateVerify,
     isResending,
     isVerifying,
-    modelProps,
+    modelController,
     countdown,
   }
 }

@@ -32,20 +32,19 @@ import {
   addressHandler,
   changeAddress,
   deleteAddress,
+  getPostcodeData,
   verifyAddress,
 } from "~/vertex/modules/address/address-controllers"
 import { $AddressVerification, $Shipping } from "~/vertex/modules/address/address-models"
 import otpless from "../otpless/otpless-config"
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 import { $IndianPostcode } from "~/vertex/modules/courier/courier-models"
-import { checkPostcodeService } from "~/vertex/modules/courier/courier-controllers"
 import { z } from "zod"
 import { redisGet, redisMerge } from "../redis/redis-utils"
 import { type VerifyAddress } from "~/vertex/modules/address/address-types"
 
-// Todo - Create password schema logic.
-// Todo - Test @hapi/iron package in edge environment.
 // Todo - Add JsDocs
+// Todo - Test @hapi/iron package in edge environment.
 // Todo - Add Options query to conditionally display login options to the users.
 // Todo - Add a TTL to user login and its session.
 
@@ -148,7 +147,7 @@ export const addressResendAction = authAction(z.string(), async (input) => {
 })
 
 export const addressPostcodeAction = authAction($IndianPostcode, async (input) => {
-  return await checkPostcodeService(input)
+  return await getPostcodeData(input)
 })
 
 export const addressChangeAction = authAction(z.string(), async (input, ctx) => {

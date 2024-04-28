@@ -14,6 +14,7 @@ import { redisCreate, redisGet } from "~/vertex/lib/redis/redis-utils"
 import otpless from "~/vertex/lib/otpless/otpless-config"
 import { nanoid } from "nanoid"
 import { wpClient } from "~/vertex/lib/wordpress/wordpress-client"
+import { phoneInputValues } from "~/vertex/lib/utils/phone-input-values"
 
 export async function updateAddressMetaData(props: { list: Shipping[]; item: Shipping; authToken: string }) {
   await client<UpdateUserMetaDataGqlResponse, UpdateUserMetaDataGqlInput>({
@@ -28,7 +29,9 @@ export async function updateAddressMetaData(props: { list: Shipping[]; item: Shi
 }
 
 export async function sendAddressOtp(input: Shipping, action: VerifyAddress["action"]): Promise<string> {
-  const response1 = await otpless.send(input.phone)
+  const { phoneNumber } = phoneInputValues(input.phone)
+
+  const response1 = await otpless.send(phoneNumber)
 
   const response2 = await redisCreate<VerifyAddress>({
     idPrefix: "@verify/address",

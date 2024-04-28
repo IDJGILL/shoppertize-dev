@@ -1,6 +1,6 @@
 import { env } from "~/env.mjs"
 import jwt from "~/lib/utils/functions/jwt"
-import { compareText } from "~/vertex/utils/compare-text"
+import { compareText } from "~/vertex/lib/utils/compare-text"
 
 const otpless = {
   send: async (phone: string): Promise<{ token: string }> => {

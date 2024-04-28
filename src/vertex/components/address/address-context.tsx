@@ -14,9 +14,10 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useCountDownAtom } from "~/vertex/hooks/useCountdown"
 import { addressCountdownAtom } from "./address-verification"
-import { addressAction } from "~/vertex/lib/server/server-actions"
-import { countries } from "~/vertex/global/global-constants"
+import { addressAction, addressPostcodeAction } from "~/vertex/lib/server/server-actions"
 import { type queryAddressById } from "~/vertex/lib/server/server-queries"
+import { countries } from "~/vertex/global/data/data-countries"
+import { useUpdateEffect } from "react-use"
 
 const AddressContext = createContext<ReturnType<typeof useAddressContextLogic> | null>(null)
 
@@ -31,12 +32,12 @@ export function AddressContextProvider({ ...props }: AddressContextProviderProps
 }
 
 function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressById>>) {
-  const [model, modelSet] = useState(false)
+  const [modelState, modelStateSet] = useState(false)
   const countdown = useCountDownAtom(addressCountdownAtom)
 
   const router = useRouter()
 
-  const addressForm = useForm<Shipping>({
+  const form = useForm<Shipping>({
     resolver: zodResolver($Shipping),
     defaultValues: { saveAs: "other", ...initial?.address },
   })
@@ -48,7 +49,7 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressB
 
         countdown(60)
 
-        return modelSet(true)
+        return modelStateSet(true)
       }
 
       router.push("/cart")
@@ -59,46 +60,39 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressB
     },
   })
 
-  const addressFormHandler = addressForm.handleSubmit((input) => addressHandler.mutate(input))
+  const formHandler = form.handleSubmit((input) => {
+    addressHandler.mutate(input)
+  })
 
   const otpForm = useForm<AddressVerification>({
     resolver: zodResolver($AddressVerification),
   })
 
-  // const checkPostcode = useActionHandler(addressPostcodeAction, {
-  //   onSuccess: (response) => {
-  //     const shippingPostcode = addressForm.getValues("postcode")
+  const checkPostcodeAction = useActionHandler(addressPostcodeAction, {
+    onSuccess: (response) => {
+      console.log(response)
+      form.setValue("postcode", response.postcode)
+      form.setValue("city", response.city)
+      form.setValue("state", response.state)
+      form.clearErrors(["postcode", "city", "state"])
+    },
 
-  //     const state = statesByCountryCode?.find((a) => a.name.toLowerCase() === response.state.toLowerCase())?.code ?? ""
+    onError: (error) => {
+      form.reset({ postcode: "", city: "", state: "" })
 
-  //     addressForm.reset({ state: state, city: response.city, postcode: shippingPostcode })
-  //     addressForm.clearErrors("postcode")
-  //   },
+      form.setError("postcode", { message: error.message })
+    },
+  })
 
-  //   onError: (error) => {
-  //     addressForm.setError("postcode", {
-  //       message: error.message,
-  //     })
+  const checkPostcode = () => {
+    const postcode = form.getValues("postcode") ?? ""
 
-  //     addressForm.setValue("postcode", "")
-  //     addressForm.setValue("city", "")
-  //     addressForm.setValue("state", "")
-  //   },
-  // })
+    if (postcode.length < 6 || countryValue !== "IN") return
 
-  const checkPostcodeHandler = () => {
-    const shippingPostcode = addressForm.getValues("postcode")
-
-    if (shippingPostcode.length !== 6) return
-
-    // checkPostcode.mutate(shippingPostcode)
+    checkPostcodeAction.mutate(postcode)
   }
 
-  const isAddressLoading = false
-
-  const isAddressUpdating = addressHandler.isLoading
-
-  const currentCountry = addressForm.watch("country")
+  const currentCountry = form.watch("country")
 
   const statesByCountryCode = useMemo(() => {
     const data = countries.find((a) => a.code === currentCountry)
@@ -114,28 +108,59 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressB
       .map((a) => ({ code: a.code, name: a.name }))
   }, [initial?.allowedCountries])
 
-  const modelProps = {
-    open: model,
+  const modelController = {
+    open: modelState,
     onOpenChange: (a: boolean) => {
-      modelSet(a)
+      modelStateSet(a)
       otpForm.clearErrors("otp")
       otpForm.setValue("otp", "")
       otpForm.setValue("id", "")
     },
   }
 
+  const countryValue = form.watch("country")
+
+  const stateController = {
+    autoComplete: countryValue === "IN" ? "none" : "on",
+    disabled: countryValue === "IN",
+  } satisfies React.InputHTMLAttributes<HTMLInputElement>
+
+  const cityController = {
+    autoComplete: countryValue === "IN" ? "none" : "on",
+    disabled: countryValue === "IN",
+  } satisfies React.InputHTMLAttributes<HTMLInputElement>
+
+  const postcodeController = {
+    onKeyUp: (e) => {
+      const value = e.currentTarget.value
+
+      if (value.length < 6 || countryValue !== "IN") return
+
+      checkPostcode()
+    },
+    maxLength: countryValue === "IN" ? 6 : 10,
+    type: "text",
+    inputMode: "numeric",
+  } satisfies React.InputHTMLAttributes<HTMLInputElement>
+
+  useUpdateEffect(() => checkPostcode(), [countryValue])
+
+  const isAddressUpdating = addressHandler.isLoading
+
   return {
-    modelProps,
-    addressForm,
-    addressFormHandler,
-    isAddressLoading,
+    form,
+    formHandler,
     isAddressUpdating,
     otpForm,
     router,
     countdown,
     statesByCountryCode,
     country,
-    checkPostcodeHandler,
+    checkPostcode,
+    stateController,
+    cityController,
+    modelController,
+    postcodeController,
   }
 }
 

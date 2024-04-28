@@ -1,7 +1,7 @@
 import type { Session } from "next-auth"
 import type { ZodSchema } from "zod"
 import { auth } from "../auth/auth-config"
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 
 export const authQuery = <TInput, TOutput>(
   schema: ZodSchema<TInput>,

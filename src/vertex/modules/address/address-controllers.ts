@@ -1,14 +1,24 @@
 import "server-only"
 
 import otpless from "~/vertex/lib/otpless/otpless-config"
-import { ExtendedError } from "~/vertex/utils/extended-error"
 import { getAddressOptions, getAllowedCountries, sendAddressOtp } from "./address-server-utils"
 import type { AddressSession, VerifyAddress, VerifyAddressProps } from "./address-types"
 import { redisCreate, redisDelete, redisGet, redisUpdate } from "~/vertex/lib/redis/redis-utils"
 import { type Shipping } from "./address-models"
+import { redisClient } from "~/lib/redis/redis-client"
+import { textTransform } from "~/vertex/lib/utils/transform-text"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 
 export const addressHandler = async (uid: string, input: Shipping): Promise<string | null> => {
   const options = await getAddressOptions(uid)
+
+  if (input.country === "IN") {
+    const postcodeData = await getPostcodeData(input.postcode)
+
+    if (postcodeData.city !== input.city || postcodeData.state !== input.state) {
+      throw new ExtendedError({ code: "BAD_REQUEST", message: "Please enter correct city and state." })
+    }
+  }
 
   const existing = options.find((a) => a.id === input.id)
 
@@ -155,5 +165,21 @@ export const getAddressById = async (uid: string, id: string) => {
 
   const address = options.find((a) => a.id === id)
 
-  return { address, allowedCountries }
+  const defaultCountry = allowedCountries.length === 1 ? allowedCountries[0] : address?.country
+
+  return { address: { ...address, country: defaultCountry }, allowedCountries }
+}
+
+export const getPostcodeData = async (postcode: string) => {
+  const pincodeData = await redisClient.hget<string>("postcodes", postcode)
+
+  const data = pincodeData?.split("::")
+
+  if (!data) throw new ExtendedError({ code: "BAD_REQUEST", message: "Invalid Pincode, please enter a valid pincode." })
+
+  const city = textTransform.capitalize(data[0])
+
+  const state = textTransform.capitalize(data[1])
+
+  return { postcode, state, city }
 }

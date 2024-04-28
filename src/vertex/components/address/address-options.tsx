@@ -45,7 +45,7 @@ function useAddressOptionsLogic(props: Omit<AddressOptionsProps, "children">) {
 
   const edit = (id: string) => router.push(`/checkout/address?aid=${id}`)
 
-  const addNew = () => router.push("/checkout/address")
+  const addNew = () => router.push("/checkout/address?")
 
   const isLoading = isGetting || changeAction.isLoading
 

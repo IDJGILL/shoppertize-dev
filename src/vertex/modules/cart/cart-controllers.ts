@@ -8,7 +8,7 @@ import {
   setCartItemsToCookie,
   sortCartItemsData,
 } from "./cart-server-utils"
-import { ExtendedError } from "~/vertex/utils/extended-error"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 import { calcSummary } from "./cart-client-utils"
 import { revalidatePath } from "next/cache"
 import type { CartItem } from "./cart-schemas"

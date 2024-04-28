@@ -60,6 +60,13 @@ export const $Identify = z
 
 export type Identify = z.infer<typeof $Identify>
 
+const $Password = z
+  .string()
+  .min(10, { message: "Password must be at least 8 characters long" })
+  .max(50, { message: "Password must be at most 50 characters long" })
+  .regex(/[A-Z]/, { message: "Password must contain an uppercase letter" })
+  .regex(/[0-9]/, { message: "Password must contain a number" })
+
 export const $Verify = z.object({
   id: z.string(),
   value: z.string(),
@@ -76,7 +83,7 @@ export type AuthSessionId = z.infer<typeof $AuthSessionId>
 export const $Signup = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  password: z.string(),
+  password: $Password,
 })
 
 export type Signup = z.infer<typeof $Signup>
@@ -89,7 +96,7 @@ export type ForgetPassword = z.infer<typeof $ForgetPassword>
 
 export const $UpdatePassword = z.object({
   id: z.string().min(1),
-  password: z.string(),
+  password: $Password,
 })
 
 export type UpdatePassword = z.infer<typeof $UpdatePassword>
