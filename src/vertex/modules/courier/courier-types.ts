@@ -1,3 +1,5 @@
+import { CourierTrackingStatusCode, CourierTrackingStatusLabel } from "~/vertex/global/global-types"
+
 export type CourierPartner = {
   id: string
   name: string
@@ -66,4 +68,23 @@ export type PincodeDetails = {
 export type PincodeDetailsError = {
   message: string
   status: number
+}
+
+export type CourierAdapter = {
+  serviceability: (
+    origin: number,
+    destination: number,
+  ) => Promise<{ distanceString: string; distanceNumeric: number; date: string } | null>
+
+  tracking: (awb: string) => Promise<{
+    status: { code: CourierTrackingStatusCode; label: CourierTrackingStatusLabel }
+    history: CourierTrackingHistory[]
+  } | null>
+}
+
+export type CourierTrackingHistory = {
+  status: { code: CourierTrackingStatusCode; label: CourierTrackingStatusLabel }
+  location: string
+  time: string
+  message: string
 }

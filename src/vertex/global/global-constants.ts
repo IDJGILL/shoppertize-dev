@@ -12,3 +12,7 @@ export const redisPrefixList = [
   "@verify/address",
   "@data/postcode",
 ] as const
+
+export const courierTrackingStatusCodes = ["PP", "IT", "OFD", "DL"] as const
+
+export const courierTrackingStatusLabels = ["Pending Pickup", "In Transit", "Out For Delivery", "Delivered"] as const

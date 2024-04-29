@@ -1,5 +1,12 @@
 import { type callingCodes } from "./data/data-calling-codes"
-import type { cacheTagList, metaKeys, pathList, redisPrefixList } from "./global-constants"
+import type {
+  cacheTagList,
+  courierTrackingStatusCodes,
+  courierTrackingStatusLabels,
+  metaKeys,
+  pathList,
+  redisPrefixList,
+} from "./global-constants"
 
 export type Path = (typeof pathList)[number]
 
@@ -14,6 +21,10 @@ export type PickDataFields<T extends keyof DataFields> = Pick<DataFields, T>
 export type PickInputFields<T extends keyof InputFields> = Pick<InputFields, T>
 
 export type CallingCode = (typeof callingCodes)[number]["code"]
+
+export type CourierTrackingStatusCode = (typeof courierTrackingStatusCodes)[number]
+
+export type CourierTrackingStatusLabel = (typeof courierTrackingStatusLabels)[number]
 
 export type DataFields = {
   id: string | number

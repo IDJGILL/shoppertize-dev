@@ -3,9 +3,7 @@ import { z } from "zod"
 
 export const env = createEnv({
   server: {
-    NODE_ENV: z
-      .enum(["development", "test", "production"])
-      .default("development"),
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     AUTH_SECRET: z.string(),
     REVALIDATION_SECRET: z.string(),
     BACKEND_DOMAIN: z.string().url(),
@@ -26,6 +24,7 @@ export const env = createEnv({
     OTP_LESS_CLIENT_SECRET: z.string(),
     UPSTASH_REDIS_REST_URL: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
+    NIMBUS_BASE_URI: z.string().url(),
     NIMBUS_EMAIL: z.string(),
     NIMBUS_PASSWORD: z.string(),
     SMTP_USER_EMAIL: z.string(),
@@ -44,8 +43,7 @@ export const env = createEnv({
     NEXT_PUBLIC_FRONTEND_DOMAIN: process.env.NEXT_PUBLIC_FRONTEND_DOMAIN,
     WOOCOMMERCE_CONSUMER_KEY: process.env.WOOCOMMERCE_CONSUMER_KEY,
     WOOCOMMERCE_CONSUMER_SECRET: process.env.WOOCOMMERCE_CONSUMER_SECRET,
-    WORDPRESS_WEBHOOK_SECRET_ENDPOINT:
-      process.env.WORDPRESS_WEBHOOK_SECRET_ENDPOINT,
+    WORDPRESS_WEBHOOK_SECRET_ENDPOINT: process.env.WORDPRESS_WEBHOOK_SECRET_ENDPOINT,
     WORDPRESS_APPLICATION_USERNAME: process.env.WORDPRESS_APPLICATION_USERNAME,
     WORDPRESS_APPLICATION_SECRET: process.env.WORDPRESS_APPLICATION_SECRET,
     PHONEPE_MERCHANT_ID: process.env.PHONEPE_MERCHANT_ID,
@@ -62,6 +60,7 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
 
+    NIMBUS_BASE_URI: process.env.NIMBUS_BASE_URI,
     NIMBUS_EMAIL: process.env.NIMBUS_EMAIL,
     NIMBUS_PASSWORD: process.env.NIMBUS_PASSWORD,
 

@@ -40,6 +40,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^1.0.0",
+    "date-fns": "^3.6.0",
     "embla-carousel-autoplay": "8.0.0-rc19",
     "embla-carousel-react": "8.0.0-rc19",
     "framer-motion": "^11.0.3",
