@@ -42,6 +42,7 @@ import { $IndianPostcode } from "~/vertex/modules/courier/courier-models"
 import { z } from "zod"
 import { redisGet, redisMerge } from "../redis/redis-utils"
 import { type VerifyAddress } from "~/vertex/modules/address/address-types"
+import { setPostcode } from "~/vertex/modules/courier/courier-controllers"
 
 // Todo - Add JsDocs
 // Todo - Test @hapi/iron package in edge environment.
@@ -160,4 +161,8 @@ export const addressDeleteAction = authAction(z.string(), async (input, ctx) => 
   await deleteAddress(ctx.session.user.id, input)
 
   return revalidate({ paths: ["/cart"] })
+})
+
+export const courierPostcodeAction = publicAction(z.string(), async (input) => {
+  return await setPostcode(input)
 })

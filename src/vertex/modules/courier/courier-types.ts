@@ -1,4 +1,4 @@
-import { CourierTrackingStatusCode, CourierTrackingStatusLabel } from "~/vertex/global/global-types"
+import type { CourierTrackingStatusCode, CourierTrackingStatusLabel } from "~/vertex/global/global-types"
 
 export type CourierPartner = {
   id: string
