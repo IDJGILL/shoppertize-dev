@@ -8,6 +8,7 @@ import { type Shipping } from "./address-models"
 import { redisClient } from "~/lib/redis/redis-client"
 import { textTransform } from "~/vertex/lib/utils/transform-text"
 import { ExtendedError } from "~/vertex/lib/utils/extended-error"
+import { checkIndianPostcode } from "../courier/courier-controllers"
 
 export const addressHandler = async (uid: string, input: Shipping): Promise<string | null> => {
   const options = await getAddressOptions(uid)
@@ -116,6 +117,10 @@ export async function updateAddress(uid: string, input: Shipping, options: Shipp
 
     return acc
   }, [])
+
+  console.log("Address updated...")
+
+  await checkIndianPostcode(input.postcode).catch(() => null)
 
   await redisUpdate<AddressSession>({
     id: uid,

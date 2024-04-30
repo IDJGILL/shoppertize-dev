@@ -2,60 +2,67 @@
 
 import { Pencil, Trash } from "lucide-react"
 import { useState } from "react"
-import Box from "~/app/_components/box"
 import { Button } from "~/app/_components/ui/button"
 import { ModelXDrawer } from "~/app/_components/ui/dialog"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/app/_components/ui/form"
+import { Input } from "~/app/_components/ui/input"
 import { ScrollArea } from "~/app/_components/ui/scroll-area"
 import { cn } from "~/lib/utils/functions/ui"
 import AddressOptions from "~/vertex/components/address/address-options"
-import { useCartContext } from "~/vertex/components/cart/cart-context"
+import { CourierServiceabilityForm } from "~/vertex/components/courier/courier-serviceability-form"
 
-interface AddressBarProps extends React.HTMLAttributes<HTMLElement> {}
+interface AddressModelProps extends React.HTMLAttributes<HTMLElement> {}
 
-export default function AddressBar({ ...props }: AddressBarProps) {
+export default function AddressModel({ ...props }: AddressModelProps) {
   const {} = props
-
   const [open, openSet] = useState(false)
 
-  const { address } = useCartContext()
-
-  const hasAddress = !!address?.address
-
   return (
-    <Box>
-      {!hasAddress && (
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <div className="mb-1 text-sm font-semibold">Please add a Delivery Address</div>
-          </div>
-
-          <Button size="sm" variant="outline" onClick={() => openSet(true)}>
-            Change
-          </Button>
-        </div>
-      )}
-
-      {hasAddress && (
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <div className="mb-1 text-sm font-semibold">
-              <span className="font-normal text-muted-foreground opacity-80">Delivering order to:</span>{" "}
-              {address.fullName}
-            </div>
-
-            <div className="line-clamp-1 text-sm">{address?.address}</div>
-          </div>
-
-          <Button size="sm" variant="outline" onClick={() => openSet(true)}>
-            Change
-          </Button>
-        </div>
-      )}
+    <>
+      <Button size="sm" variant="outline" onClick={() => openSet(true)}>
+        Change
+      </Button>
 
       <ModelXDrawer open={open} onOpenChange={openSet} title="Select Delivery Address" className="p-0">
-        <AddressOptions open={open} onOpenChange={openSet}>
+        <AddressOptions onSuccess={() => openSet(false)}>
           {(props) => (
             <div className="w-full bg-slate-50">
+              <div className="bg-white p-4">
+                <CourierServiceabilityForm onSuccess={() => openSet(false)}>
+                  {(props) => (
+                    <div>
+                      <FormField
+                        control={props.form.control}
+                        name="postcode"
+                        render={({ field }) => (
+                          <div>
+                            <div className="relative">
+                              <FormItem>
+                                <FormControl>
+                                  <Input placeholder=" " {...{ ...field, ...props.postcodeFieldController }} />
+                                </FormControl>
+
+                                <FormLabel>Post code</FormLabel>
+                              </FormItem>
+
+                              <Button
+                                type="submit"
+                                isLoading={props.isLoading}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-0 px-0 text-sm font-medium uppercase text-foreground"
+                              >
+                                Check
+                              </Button>
+                            </div>
+
+                            <FormMessage />
+                          </div>
+                        )}
+                      />
+                    </div>
+                  )}
+                </CourierServiceabilityForm>
+              </div>
+
               <ScrollArea className="h-[400px]">
                 {props.options.map((a) => (
                   <div
@@ -107,6 +114,6 @@ export default function AddressBar({ ...props }: AddressBarProps) {
           )}
         </AddressOptions>
       </ModelXDrawer>
-    </Box>
+    </>
   )
 }

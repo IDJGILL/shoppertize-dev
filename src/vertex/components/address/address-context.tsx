@@ -1,15 +1,15 @@
 "use client"
 
-import { createContext, useContext, useMemo, useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useActionHandler } from "~/vertex/lib/server/server-hook"
 import {
   $Shipping,
   type Shipping,
   $AddressVerification,
   type AddressVerification,
 } from "~/vertex/modules/address/address-models"
+import { createContext, useContext, useMemo, useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useActionHandler } from "~/vertex/lib/server/server-hook"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useCountDownAtom } from "~/vertex/hooks/useCountdown"
@@ -89,7 +89,7 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressB
 
     if (postcode.length < 6 || countryValue !== "IN") return
 
-    checkPostcodeAction.mutate(postcode)
+    checkPostcodeAction.mutate({ postcode })
   }
 
   const currentCountry = form.watch("country")

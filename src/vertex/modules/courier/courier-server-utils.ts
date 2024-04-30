@@ -1,13 +1,11 @@
-import { cookies } from "next/headers"
 import "server-only"
-
-export function setPostcodeCookie(postcode: string) {
-  cookies().set("_postcode-store", postcode, {
-    expires: 3.456e7,
-    sameSite: true,
-  })
-}
+import { cookies } from "next/headers"
+import { type Serviceability } from "./courier-types"
 
 export function getPostcodeCookie() {
-  return cookies().get("_postcode-store")?.value ?? null
+  const values = cookies().get("_postcode-store")?.value
+
+  if (!values) return null
+
+  return JSON.parse(values) as Serviceability
 }

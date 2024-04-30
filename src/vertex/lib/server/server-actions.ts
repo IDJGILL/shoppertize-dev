@@ -42,7 +42,8 @@ import { $IndianPostcode } from "~/vertex/modules/courier/courier-models"
 import { z } from "zod"
 import { redisGet, redisMerge } from "../redis/redis-utils"
 import { type VerifyAddress } from "~/vertex/modules/address/address-types"
-import { setPostcode } from "~/vertex/modules/courier/courier-controllers"
+import { checkIndianPostcode } from "~/vertex/modules/courier/courier-controllers"
+import { cookies } from "next/headers"
 
 // Todo - Add JsDocs
 // Todo - Test @hapi/iron package in edge environment.
@@ -91,6 +92,8 @@ export const authStatusAction = publicAction($AuthSessionId, async (input) => {
 
 export const authLogoutAction = publicAction($Null, async (...props) => {
   await signOut({ redirect: false })
+
+  cookies().delete("store.cart.items")
 
   return props[1].response.success({
     data: null,
@@ -148,7 +151,7 @@ export const addressResendAction = authAction(z.string(), async (input) => {
 })
 
 export const addressPostcodeAction = authAction($IndianPostcode, async (input) => {
-  return await getPostcodeData(input)
+  return await getPostcodeData(input.postcode)
 })
 
 export const addressChangeAction = authAction(z.string(), async (input, ctx) => {
@@ -163,6 +166,13 @@ export const addressDeleteAction = authAction(z.string(), async (input, ctx) => 
   return revalidate({ paths: ["/cart"] })
 })
 
-export const courierPostcodeAction = publicAction(z.string(), async (input) => {
-  return await setPostcode(input)
+export const courierPostcodeAction = publicAction($IndianPostcode, async (input, ctx) => {
+  const data = await checkIndianPostcode(input.postcode)
+
+  console.log({ data })
+
+  return ctx.response.success({
+    data,
+    revalidatePaths: ["/cart"],
+  })
 })

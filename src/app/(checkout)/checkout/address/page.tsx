@@ -1,4 +1,4 @@
-import AddressForm from "~/lib/modules/address/components/address-form"
+import AddressForm from "~/app/(checkout)/checkout/address/_components/address-form"
 import { AddressProvider } from "~/vertex/components/address/address-provider"
 
 export default function AddressPage(props: ServerComponentParams) {

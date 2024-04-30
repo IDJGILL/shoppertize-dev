@@ -71,15 +71,20 @@ export type PincodeDetailsError = {
 }
 
 export type CourierAdapter = {
-  serviceability: (
-    origin: number,
-    destination: number,
-  ) => Promise<{ distanceString: string; distanceNumeric: number; date: string } | null>
+  serviceability: (origin: number, destination: number) => Promise<Serviceability | null>
 
   tracking: (awb: string) => Promise<{
     status: { code: CourierTrackingStatusCode; label: CourierTrackingStatusLabel }
     history: CourierTrackingHistory[]
   } | null>
+}
+
+export type Serviceability = {
+  postcode: string
+  distanceString: string
+  distanceNumeric: number
+  date: string
+  checkedAt: number
 }
 
 export type CourierTrackingHistory = {

@@ -82,7 +82,7 @@ const DialogDescription = React.forwardRef<
 ))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
-export type ModelProps = {
+type ModelProps = {
   trigger?: React.ReactNode
   open?: boolean
   onOpenChange?: (state: boolean) => void

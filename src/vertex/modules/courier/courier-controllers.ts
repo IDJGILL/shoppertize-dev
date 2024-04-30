@@ -1,31 +1,38 @@
 import "server-only"
 import { cookies } from "next/headers"
 import { nimbusAdapter } from "~/vertex/lib/nimbus/nimbus-client"
-import { getCurrentAddress } from "../address/address-server-utils"
-import { setPostcodeCookie } from "./courier-server-utils"
+import { ExtendedError } from "~/vertex/lib/utils/extended-error"
+import { type Serviceability } from "./courier-types"
 
-export const setPostcode = async (postcode: string) => {
+export const checkIndianPostcode = async (postcode: string) => {
   const data = await nimbusAdapter.serviceability(122001, +postcode)
 
-  setPostcodeCookie(postcode)
+  if (!data) {
+    throw new ExtendedError({
+      code: "BAD_REQUEST",
+      message: "Invalid postcode, please check you postcode and try again.",
+    })
+  }
+
+  cookies().set("_postcode", JSON.stringify({ ...data, checkedAt: new Date().getTime() } satisfies Serviceability), {
+    maxAge: 864000,
+  })
 
   return data
 }
 
-export const getPostcodeServiceability = async (uid?: string) => {
-  if (!uid) {
-    const postcode = cookies().get("_postcode-store")?.value
+export const getPostcodeServiceability = async () => {
+  const value = await new Promise<string | undefined>((resolve) => resolve(cookies().get("_postcode")?.value))
 
-    if (!postcode) return null
+  if (!value) return null
 
-    return await nimbusAdapter.serviceability(122001, +postcode)
+  const data = JSON.parse(value) as Serviceability
+
+  const currentTime = new Date().getTime()
+
+  if (currentTime > data.checkedAt + 600000) {
+    return await checkIndianPostcode(data.postcode)
   }
 
-  const address = await getCurrentAddress(uid)
-
-  if (!address) return null
-
-  setPostcodeCookie(address.postcode)
-
-  return await nimbusAdapter.serviceability(122001, +address.postcode)
+  return data
 }

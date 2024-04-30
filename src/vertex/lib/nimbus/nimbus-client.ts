@@ -53,6 +53,7 @@ export const nimbusAdapter: CourierAdapter = {
     const date = standardDateTime(sortedEdd.date, "dd-MM-yyyy")
 
     return {
+      postcode: destination.toString(),
       distanceString: formatDistanceToNow(date, { addSuffix: true }),
       date: date.toLocaleDateString(),
       distanceNumeric: +(formatDistanceToNow(date, { addSuffix: false }).split(" ")[0] ?? ""),

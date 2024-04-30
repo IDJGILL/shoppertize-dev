@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useUpdate, useUpdateEffect } from "react-use"
+import { useUpdateEffect } from "react-use"
 import { Input } from "./ui/input"
 import React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
@@ -32,8 +32,9 @@ import { callingCodes } from "~/vertex/global/data/data-calling-codes"
  */
 const PhoneInput = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }) => {
-    const [callingCode, phoneNumber] = ((props.value as string) ?? "+1").split("::")
-    const [code, codeSet] = useState("+" + callingCode ?? "+91")
+    const [callingCode, phoneNumber] = ((props.value as string) ?? "").split("::")
+    console.log({ callingCode })
+    const [code, codeSet] = useState(callingCode!.length > 1 ? "+" + callingCode : "+1")
     const [search, searchSet] = useState("")
     const [dropdown, dropdownSet] = useState(false)
     const [input, inputSet] = useState<React.ChangeEvent<HTMLInputElement>>()
