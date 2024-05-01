@@ -1,5 +1,4 @@
 import { keyBy } from "lodash-es"
-import { redisClient } from "~/lib/redis/redis-client"
 import { wpClient } from "~/vertex/lib/wordpress/wordpress-client"
 import { GetCouponsGql, type GetCouponsGqlResponse } from "./coupon-gql"
 import { type Coupon } from "./coupon-types"
@@ -16,5 +15,7 @@ export const seedCoupons = async () => {
     excludedProductCategories: a.excludedProductCategories.nodes.map((a) => a.databaseId),
   }))
 
-  await redisClient.hset("coupons", keyBy(payload, "a"))
+  //   await redisClient.hset("coupons", keyBy(payload, "code"))
+
+  return keyBy(payload, "code")
 }

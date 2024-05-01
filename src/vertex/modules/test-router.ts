@@ -1,9 +1,9 @@
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/vertex/lib/trpc/trpc-config"
-import { nimbusAdapter } from "../lib/nimbus/nimbus-client"
+import { seedCoupons } from "./coupon/coupon-server-utils"
 
 export const testRouter = createTRPCRouter({
   public: publicProcedure.mutation(async () => {
-    return await nimbusAdapter.serviceability(122001, 400018)
+    return await seedCoupons()
   }),
 
   protected: protectedProcedure.mutation(({ ctx }) => {
