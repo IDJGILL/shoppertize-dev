@@ -57,6 +57,7 @@ export const nimbusAdapter: CourierAdapter = {
       distanceString: formatDistanceToNow(date, { addSuffix: true }),
       date: date.toLocaleDateString(),
       distanceNumeric: +(formatDistanceToNow(date, { addSuffix: false }).split(" ")[0] ?? ""),
+      checkedAt: new Date().getTime(),
     }
   },
 

@@ -12,42 +12,48 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useActionHandler } from "~/vertex/lib/server/server-hook"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { useCountDownAtom } from "~/vertex/hooks/useCountdown"
-import { addressCountdownAtom } from "./address-verification"
-import { addressAction, addressPostcodeAction } from "~/vertex/lib/server/server-actions"
-import { type queryAddressById } from "~/vertex/lib/server/server-queries"
+import {
+  addressAction,
+  addressPostcodeAction,
+  addressResendAction,
+  addressVerifyAction,
+} from "~/vertex/lib/server/server-actions"
 import { countries } from "~/vertex/global/data/data-countries"
 import { useUpdateEffect } from "react-use"
+import { useCountdown } from "~/vertex/hooks/useCountdown"
 
-const AddressContext = createContext<ReturnType<typeof useAddressContextLogic> | null>(null)
+const AddressContext = createContext<ReturnType<typeof useAddressFormLogic> | null>(null)
 
-interface AddressContextProviderProps extends React.HTMLAttributes<HTMLElement> {
-  data: Awaited<ReturnType<typeof queryAddressById>>
+interface AddressFormContextProps {
+  initial: { address: Partial<Shipping>; allowedCountries: string[] }
+  children: React.ReactNode
 }
 
-export function AddressContextProvider({ ...props }: AddressContextProviderProps) {
-  const { data } = props
+export function AddressFormContext({ ...props }: AddressFormContextProps) {
+  const {} = props
 
-  return <AddressContext.Provider value={useAddressContextLogic(data)}>{props.children}</AddressContext.Provider>
+  const values = useAddressFormLogic({ initial: props.initial })
+
+  return <AddressContext.Provider value={values}>{props.children}</AddressContext.Provider>
 }
 
-function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressById>>) {
+function useAddressFormLogic(props: Omit<AddressFormContextProps, "children">) {
   const [modelState, modelStateSet] = useState(false)
-  const countdown = useCountDownAtom(addressCountdownAtom)
+  const countdown = useCountdown({ seconds: 60, autoStart: false })
 
   const router = useRouter()
 
-  const form = useForm<Shipping>({
+  const addressForm = useForm<Shipping>({
     resolver: zodResolver($Shipping),
-    defaultValues: { saveAs: "other", ...initial?.address },
+    defaultValues: { saveAs: "other", ...props.initial?.address },
   })
 
-  const addressHandler = useActionHandler(addressAction, {
+  const addressHandlerAction = useActionHandler(addressAction, {
     onSuccess: (response) => {
       if (response.data) {
         otpForm.setValue("id", response.data ?? "")
 
-        countdown(60)
+        countdown.start()
 
         return modelStateSet(true)
       }
@@ -60,39 +66,63 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressB
     },
   })
 
-  const formHandler = form.handleSubmit((input) => {
-    addressHandler.mutate(input)
+  const addressFormHandler = addressForm.handleSubmit((input) => {
+    addressHandlerAction.mutate(input)
+  })
+
+  const verifyAddressAction = useActionHandler(addressVerifyAction, {
+    onSuccess: () => {
+      router.push("/cart")
+    },
+
+    onError: (error) => {
+      otpForm.setError("otp", { message: error.message })
+    },
   })
 
   const otpForm = useForm<AddressVerification>({
     resolver: zodResolver($AddressVerification),
   })
 
-  const checkPostcodeAction = useActionHandler(addressPostcodeAction, {
-    onSuccess: (response) => {
-      console.log(response)
-      form.setValue("postcode", response.postcode)
-      form.setValue("city", response.city)
-      form.setValue("state", response.state)
-      form.clearErrors(["postcode", "city", "state"])
+  const otpFormHandler = otpForm.handleSubmit((input) => verifyAddressAction.mutate(input))
+
+  const resendOtpAction = useActionHandler(addressResendAction, {
+    onSuccess: () => {
+      countdown.restart()
     },
 
     onError: (error) => {
-      form.reset({ postcode: "", city: "", state: "" })
+      otpForm.setError("otp", { message: error.message })
+    },
+  })
 
-      form.setError("postcode", { message: error.message })
+  const mutateResend = () => resendOtpAction.mutate(otpForm.getValues("id"))
+
+  const checkPostcodeAction = useActionHandler(addressPostcodeAction, {
+    onSuccess: (response) => {
+      console.log(response)
+      addressForm.setValue("postcode", response.postcode)
+      addressForm.setValue("city", response.city)
+      addressForm.setValue("state", response.state)
+      addressForm.clearErrors(["postcode", "city", "state"])
+    },
+
+    onError: (error) => {
+      addressForm.reset({ postcode: "", city: "", state: "" })
+
+      addressForm.setError("postcode", { message: error.message })
     },
   })
 
   const checkPostcode = () => {
-    const postcode = form.getValues("postcode") ?? ""
+    const postcode = addressForm.getValues("postcode") ?? ""
 
     if (postcode.length < 6 || countryValue !== "IN") return
 
     checkPostcodeAction.mutate({ postcode })
   }
 
-  const currentCountry = form.watch("country")
+  const currentCountry = addressForm.watch("country")
 
   const statesByCountryCode = useMemo(() => {
     const data = countries.find((a) => a.code === currentCountry)
@@ -104,9 +134,9 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressB
 
   const country = useMemo(() => {
     return countries
-      .filter((a) => initial?.allowedCountries.includes(a.code))
+      .filter((a) => props.initial.allowedCountries.includes(a.code))
       .map((a) => ({ code: a.code, name: a.name }))
-  }, [initial?.allowedCountries])
+  }, [props.initial.allowedCountries])
 
   const modelController = {
     open: modelState,
@@ -118,7 +148,7 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressB
     },
   }
 
-  const countryValue = form.watch("country")
+  const countryValue = addressForm.watch("country")
 
   const stateController = {
     autoComplete: countryValue === "IN" ? "none" : "on",
@@ -145,12 +175,19 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressB
 
   useUpdateEffect(() => checkPostcode(), [countryValue])
 
-  const isAddressUpdating = addressHandler.isLoading
+  const isUpdating = addressHandlerAction.isLoading
+
+  const isResending = resendOtpAction.isLoading
+
+  const isVerifying = verifyAddressAction.isLoading
+
+  const countdownRemaining = countdown.remaining
+
+  const isCountdownComplete = countdown.isCompleted
 
   return {
-    form,
-    formHandler,
-    isAddressUpdating,
+    addressForm,
+    addressFormHandler,
     otpForm,
     router,
     countdown,
@@ -161,13 +198,20 @@ function useAddressContextLogic(initial: Awaited<ReturnType<typeof queryAddressB
     cityController,
     modelController,
     postcodeController,
+    isUpdating,
+    isResending,
+    isVerifying,
+    otpFormHandler,
+    mutateResend,
+    countdownRemaining,
+    isCountdownComplete,
   }
 }
 
-export const useAddress = () => {
+export const useAddressForm = () => {
   const context = useContext(AddressContext)
 
-  if (!context) throw new Error()
+  if (!context) throw new Error("Wrap useAddressForm inside AddressFormBuilder")
 
   return context
 }

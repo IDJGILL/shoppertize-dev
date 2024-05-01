@@ -37,7 +37,11 @@ function useAddressOptions(props: Omit<AddressOptionsProps, "children">) {
     },
   })
 
-  const mutateChange = (id: string) => changeAction.mutate(id)
+  const mutateChange = (id: string) => {
+    if (data?.some((a) => a.id === id && a.isSelected)) return props.onSuccess()
+
+    changeAction.mutate(id)
+  }
 
   const mutateDelete = (id: string) => deleteAction.mutate(id)
 

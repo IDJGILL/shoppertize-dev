@@ -1,12 +1,13 @@
 import AddressForm from "~/app/(checkout)/checkout/address/_components/address-form"
-import { AddressProvider } from "~/vertex/components/address/address-provider"
+import { AddressFormBuilder } from "~/vertex/components/address/address-form-builder"
+import AppLoader from "~/vertex/components/app/app-loader"
 
 export default function AddressPage(props: ServerComponentParams) {
   const addressId = props.searchParams?.aid as string | undefined
 
   return (
-    <AddressProvider addressId={addressId} loader={<div>Loading...</div>} error={<div>Something went wrong</div>}>
+    <AddressFormBuilder addressId={addressId} loader={<AppLoader />} error={<div></div>}>
       <AddressForm />
-    </AddressProvider>
+    </AddressFormBuilder>
   )
 }

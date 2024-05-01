@@ -13,7 +13,7 @@ export default function Test() {
   return (
     <div className="w-full bg-gray-900 text-white">
       <div className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-10">
-        <Button onClick={() => publicApi.mutate()} loading={publicApi.isPending ? "true" : "false"}>
+        <Button onClick={() => publicApi.mutate()} isLoading={publicApi.isPending}>
           Test Public Api
         </Button>
 
@@ -32,7 +32,7 @@ export default function Test() {
           )}
         </div>
 
-        <Button onClick={() => protectedApi.mutate()} loading={protectedApi.isPending ? "true" : "false"}>
+        <Button onClick={() => protectedApi.mutate()} isLoading={protectedApi.isPending}>
           Test Protected Api
         </Button>
 

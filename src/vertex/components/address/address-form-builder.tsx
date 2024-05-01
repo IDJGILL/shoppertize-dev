@@ -1,17 +1,17 @@
 import { Suspense } from "react"
 import { ErrorBoundary } from "react-error-boundary"
-import { AddressContextProvider } from "./address-context"
 import AppLoader from "../app/app-loader"
 import { queryAddressById } from "~/vertex/lib/server/server-queries"
+import { AddressFormContext } from "./address-form-context"
 
-interface AddressProviderProps {
+interface AddressFormBuilderProps {
+  addressId?: string
   error: React.ReactElement
   loader: React.ReactElement
   children: React.ReactNode
-  addressId?: string
 }
 
-export function AddressProvider({ ...props }: AddressProviderProps) {
+export function AddressFormBuilder({ ...props }: AddressFormBuilderProps) {
   const { addressId } = props
 
   return (
@@ -33,5 +33,5 @@ async function InitialDataFetcher({ ...props }: InitialCartDataFetcherProps) {
 
   const data = await queryAddressById(addressId ?? "")
 
-  return <AddressContextProvider data={data}>{props.children}</AddressContextProvider>
+  return <AddressFormContext initial={data}>{props.children}</AddressFormContext>
 }

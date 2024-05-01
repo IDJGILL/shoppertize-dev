@@ -169,8 +169,6 @@ export const addressDeleteAction = authAction(z.string(), async (input, ctx) => 
 export const courierPostcodeAction = publicAction($IndianPostcode, async (input, ctx) => {
   const data = await checkIndianPostcode(input.postcode)
 
-  console.log({ data })
-
   return ctx.response.success({
     data,
     revalidatePaths: ["/cart"],

@@ -1,39 +1,52 @@
 import { type PrimitiveAtom, useAtom } from "jotai"
 import { useEffect, useState } from "react"
-import { useUpdateEffect } from "react-use"
 
-export type CountdownApis = {
-  resetCountdown: (newDuration?: number) => void
+type CountDownOptions = {
+  seconds: number
+  autoStart: boolean
+  onComplete?: () => void
 }
 
-export function useCountDown(atom: PrimitiveAtom<number>) {
-  const [duration, durationSet] = useAtom(atom)
-  const [remaining, remainingSet] = useState(duration)
+export function useCountdown(props: CountDownOptions) {
+  const [autoStart, autoStartSet] = useState(props.autoStart)
+  const [remaining, remainingSet] = useState(props.seconds)
 
   useEffect(() => {
+    if (!autoStart) return
+
     const interval = setInterval(() => {
       remainingSet((prev) => prev - 1)
     }, 1000)
 
-    if (remaining === 0 || duration === 0) {
+    if (remaining === 0) {
       return clearInterval(interval)
     }
 
     return () => {
       clearInterval(interval)
     }
-  }, [duration, remaining])
+  }, [autoStart, remaining])
 
-  const reset = (newDuration = 0) => {
-    remainingSet(newDuration)
-    durationSet(newDuration)
+  const start = () => autoStartSet(true)
+
+  const restart = () => {
+    remainingSet(props.seconds)
+    autoStartSet(true)
   }
 
-  useUpdateEffect(() => remainingSet(duration), [duration])
+  const stop = () => autoStartSet(false)
+
+  const reset = () => {
+    remainingSet(props.seconds)
+    autoStartSet(false)
+  }
 
   const isCompleted = remaining === 0
 
   return {
+    start,
+    restart,
+    stop,
     reset,
     remaining,
     isCompleted,

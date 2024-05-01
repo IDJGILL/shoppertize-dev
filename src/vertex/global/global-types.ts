@@ -81,6 +81,15 @@ export type DataFields = {
   company: string | null
   authTokenExpiration: string
   refreshTokenExpiration: string
+  code: string
+  description: string
+  discountType: DiscountTypeEnum
+  amount: number
+  dateExpiry: string | null
+  emailRestrictions: string[] | null
+  usageLimit: number | null
+  usageLimitPerUser: number | null
+  usageCount: number
 }
 
 export type InputFields = {
@@ -152,6 +161,8 @@ export type RelationEnum = "AND" | "OR"
 type TaxStatusEnum = "NONE" | "SHIPPING" | "TAXABLE"
 
 export type ReviewStatusEnum = "APPROVE" | "HOLD" | "SPAM" | "TRASH"
+
+export type DiscountTypeEnum = "FIXED_CART" | "FIXED_PRODUCT" | "PERCENT"
 
 export type OrderStatusEnum =
   | "CANCELLED"

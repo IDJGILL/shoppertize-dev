@@ -118,8 +118,6 @@ export async function updateAddress(uid: string, input: Shipping, options: Shipp
     return acc
   }, [])
 
-  console.log("Address updated...")
-
   await checkIndianPostcode(input.postcode).catch(() => null)
 
   await redisUpdate<AddressSession>({

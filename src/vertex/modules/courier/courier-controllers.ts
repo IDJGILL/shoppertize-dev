@@ -14,9 +14,7 @@ export const checkIndianPostcode = async (postcode: string) => {
     })
   }
 
-  cookies().set("_postcode", JSON.stringify({ ...data, checkedAt: new Date().getTime() } satisfies Serviceability), {
-    maxAge: 864000,
-  })
+  cookies().set("_postcode", JSON.stringify(data), { maxAge: 864000 })
 
   return data
 }
@@ -28,11 +26,17 @@ export const getPostcodeServiceability = async () => {
 
   const data = JSON.parse(value) as Serviceability
 
-  const currentTime = new Date().getTime()
+  // const currentTime = new Date().getTime()
 
-  if (currentTime > data.checkedAt + 600000) {
-    return await checkIndianPostcode(data.postcode)
-  }
+  // Recheck after 10 minutes
+  // if (currentTime > data.checkedAt + 600000) {
+  //   console.log("Rechecking")
+  //   const a = await courierPostcodeAction({ postcode: data.postcode })
+
+  //   if (!a.data?.data) return null
+
+  //   return a.data?.data
+  // }
 
   return data
 }
