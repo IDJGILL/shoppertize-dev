@@ -10,7 +10,7 @@ import {
   type UpdateUserMetaDataGqlResponse,
 } from "./address-gql"
 import type { VerifyAddress, AddressSession } from "./address-types"
-import { redisCreate, redisGet } from "~/vertex/lib/redis/redis-utils"
+import { redisSet, redisGet } from "~/vertex/lib/redis/redis-utils"
 import otpless from "~/vertex/lib/otpless/otpless-config"
 import { nanoid } from "nanoid"
 import { wpClient } from "~/vertex/lib/wordpress/wordpress-client"
@@ -33,7 +33,7 @@ export async function sendAddressOtp(input: Shipping, action: VerifyAddress["act
 
   const response1 = await otpless.send(phoneNumber)
 
-  const response2 = await redisCreate<VerifyAddress>({
+  const response2 = await redisSet<VerifyAddress>({
     idPrefix: "@verify/address",
     payload: { action: action, address: { ...input, id: nanoid() }, token: response1.token },
     ttlSec: 5 * 60,
@@ -43,7 +43,7 @@ export async function sendAddressOtp(input: Shipping, action: VerifyAddress["act
 }
 
 export const getAddressOptions = async (uid: string) => {
-  const session = await redisGet<AddressSession>({ id: uid, idPrefix: "@session/address" })
+  const session = await redisGet<AddressSession>({ id: uid, idPrefix: "@session/address" }).catch(() => null)
 
   return (session?.options ?? []).sort((a, b) => (a.isSelected === b.isSelected ? 0 : a.isSelected ? -1 : 1))
 }

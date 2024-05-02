@@ -3,7 +3,7 @@ import { seedCoupons } from "./coupon/coupon-server-utils"
 
 export const testRouter = createTRPCRouter({
   public: publicProcedure.mutation(async () => {
-    return await seedCoupons()
+    await seedCoupons()
   }),
 
   protected: protectedProcedure.mutation(({ ctx }) => {

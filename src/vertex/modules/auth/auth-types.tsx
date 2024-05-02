@@ -2,21 +2,10 @@ import { type DefaultSession } from "next-auth"
 import { type DefaultJWT } from "next-auth/jwt"
 import type { RedisExtend } from "~/vertex/lib/redis/redis-types"
 
-export type AuthSession = {
+export type UserData = {
   uid: string
   name: string
   username: string
-  loggedInAt: string
-}
-
-export type AuthClientSession = {
-  user?: {
-    id: string
-    name: string
-    email: string
-  }
-  isLoading: boolean
-  isLoggedIn: boolean
 }
 
 export type Authentication = {
@@ -93,4 +82,14 @@ export type NextAuthSignInOutput = {
     authToken: string
     refreshToken: string
   }
+}
+
+export type AuthClientSession = {
+  user?: {
+    id: string
+    name: string
+    email: string
+  }
+  isLoading: boolean
+  isLoggedIn: boolean
 }

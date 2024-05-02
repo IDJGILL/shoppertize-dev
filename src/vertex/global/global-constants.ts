@@ -11,6 +11,7 @@ export const redisPrefixList = [
   "@verify/auth",
   "@verify/address",
   "@data/postcode",
+  "@data/coupons",
 ] as const
 
 export const courierTrackingStatusCodes = ["PP", "IT", "OFD", "DL"] as const

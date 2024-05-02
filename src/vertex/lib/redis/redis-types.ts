@@ -5,7 +5,7 @@ export type RedisExtend<T> = {
   ttlSec?: number
 } & T
 
-export type RedisCreateOpts<T> = {
+export type RedisSetOpts<T> = {
   id?: string
   idPrefix: RedisIDPrefix
   payload: T
@@ -34,4 +34,28 @@ export type RedisMergeOpts<T> = {
 export type RedisDeleteOpts = {
   id: string
   idPrefix: RedisIDPrefix
+}
+
+export type RedisHashSetOpts<T extends Record<string, unknown>[]> = {
+  id: RedisIDPrefix
+  payload: T
+  key: keyof T[number]
+}
+
+export type RedisHashGetOpts = {
+  id: RedisIDPrefix
+  key: string
+}
+
+export type RedisHashGetAllOpts = {
+  id: RedisIDPrefix
+}
+
+export type RedisHashDeleteOpts = {
+  id: RedisIDPrefix
+  keys: string[]
+}
+
+export type RedisHashDeleteAllOpts = {
+  id: RedisIDPrefix
 }

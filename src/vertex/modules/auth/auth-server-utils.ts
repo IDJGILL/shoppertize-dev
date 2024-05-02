@@ -11,17 +11,18 @@ import {
 import { cookies } from "next/headers"
 import { customAlphabet, nanoid } from "nanoid"
 import { config } from "~/vertex/global/global-config"
-import type { AuthSession, Authentication, CreateUserProps } from "./auth-types"
+import type { Authentication, CreateUserProps } from "./auth-types"
 import { identifyUsernameType } from "./auth-client-utils"
 import { wpClient } from "~/vertex/lib/wordpress/wordpress-client"
 import { ExtendedError } from "~/vertex/lib/utils/extended-error"
 import { wooClient } from "~/vertex/lib/wordpress/woocommerce-client"
-import { redisCreate, redisDelete, redisGet, redisMerge, redisUpdate } from "~/vertex/lib/redis/redis-utils"
+import { redisSet, redisDelete, redisGet, redisMerge, redisUpdate } from "~/vertex/lib/redis/redis-utils"
+import { redisClient } from "~/lib/redis/redis-client"
 
 // export async function createAuthSession(props: GetAuthTokensGqlOutput["login"]) {
-//   const uid = props.user.databaseId.toString()
+// const uid = props.user.databaseId.toString()
 
-//   await redisCreate<AuthSession>({
+//   await redisSet<AuthSession>({
 //     id: uid,
 //     idPrefix: "@session/auth",
 //     payload: {
@@ -85,7 +86,7 @@ export async function createAuthenticationSession(
 
   const username = createEmailId(props.username, props.countryCode)
 
-  const response = await redisCreate<Authentication>({
+  const response = await redisSet<Authentication>({
     idPrefix: "@verify/auth",
     payload: {
       ...props,
@@ -125,14 +126,12 @@ export function createVerificationSecret(props: Pick<Authentication, "verificati
 }
 
 export async function getAuthenticationSession(id: string) {
-  const session = await redisGet<Authentication>({ id, idPrefix: "@verify/auth" })
-
-  if (!session) {
+  const session = await redisGet<Authentication>({ id, idPrefix: "@verify/auth" }).catch(() => {
     throw new ExtendedError({
       code: "UNAUTHORIZED",
       message: "You are away for too long, Please try again.",
     })
-  }
+  })
 
   return session
 }

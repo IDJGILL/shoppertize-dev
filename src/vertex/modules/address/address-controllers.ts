@@ -3,7 +3,7 @@ import "server-only"
 import otpless from "~/vertex/lib/otpless/otpless-config"
 import { getAddressOptions, getAllowedCountries, sendAddressOtp } from "./address-server-utils"
 import type { AddressSession, VerifyAddress, VerifyAddressProps } from "./address-types"
-import { redisCreate, redisDelete, redisGet, redisUpdate } from "~/vertex/lib/redis/redis-utils"
+import { redisSet, redisDelete, redisGet, redisUpdate } from "~/vertex/lib/redis/redis-utils"
 import { type Shipping } from "./address-models"
 import { redisClient } from "~/lib/redis/redis-client"
 import { textTransform } from "~/vertex/lib/utils/transform-text"
@@ -45,9 +45,9 @@ export const addressHandler = async (uid: string, input: Shipping): Promise<stri
 export async function verifyAddress(props: VerifyAddressProps) {
   const prev = await getAddressOptions(props.uid)
 
-  const session = await redisGet<VerifyAddress>({ id: props.id, idPrefix: "@verify/address" })
-
-  if (!session) throw new ExtendedError({ code: "NOT_FOUND" })
+  const session = await redisGet<VerifyAddress>({ id: props.id, idPrefix: "@verify/address" }).catch(() => {
+    throw new ExtendedError({ code: "NOT_FOUND" })
+  })
 
   const response2 = await otpless.verify(session.token, props.otp)
 
@@ -81,7 +81,7 @@ export async function addAddress(uid: string, input: Shipping, options: Shipping
   }
 
   if (options.length === 0) {
-    return await redisCreate<AddressSession>({
+    return await redisSet<AddressSession>({
       id: uid,
       idPrefix: "@session/address",
       payload: { options: [{ ...input, isSelected: true, isDefault: true }] },

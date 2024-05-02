@@ -137,11 +137,9 @@ export const addressVerifyAction = authAction($AddressVerification, async (input
 })
 
 export const addressResendAction = authAction(z.string(), async (input) => {
-  const session = await redisGet<VerifyAddress>({ id: input, idPrefix: "@verify/address" })
-
-  if (!session) {
+  const session = await redisGet<VerifyAddress>({ id: input, idPrefix: "@verify/address" }).catch(() => {
     throw new ExtendedError({ code: "BAD_REQUEST", message: "Limit reached, please refresh the page and try again." })
-  }
+  })
 
   const data = await otpless.resend(session.token)
 
